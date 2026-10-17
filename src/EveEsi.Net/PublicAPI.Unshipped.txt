@@ -1,1 +1,6 @@
 #nullable enable
+EveEsi.Net.Services.EsiService<TSelf>
+EveEsi.Net.Services.EsiService<TSelf>.CreateEsiClient(string! operationId, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<EveEsi.Net.Abstractions.Results.EsiNoContent>!
+EveEsi.Net.Services.EsiService<TSelf>.CreateEsiClient<T>(string! operationId, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! responseType, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<T>!
+EveEsi.Net.Services.EsiService<TSelf>.EsiService(EveEsi.Net.Abstractions.Requests.IEsiClientFactory! factory) -> void
+EveEsi.Net.Services.EsiService<TSelf>.Use(EveEsi.Net.Abstractions.Middleware.IEsiMiddleware! middleware) -> TSelf!

@@ -65,8 +65,8 @@ EveEsi.Net.Abstractions.Middleware.IEsiMiddleware.InvokeAsync(EveEsi.Net.Abstrac
 EveEsi.Net.Abstractions.Middleware.IEsiMiddlewareTarget<TSelf>
 EveEsi.Net.Abstractions.Middleware.IEsiMiddlewareTarget<TSelf>.Use(EveEsi.Net.Abstractions.Middleware.IEsiMiddleware! middleware) -> TSelf
 EveEsi.Net.Abstractions.Requests.IEsiClientFactory
-EveEsi.Net.Abstractions.Requests.IEsiClientFactory.CreateEsiClient(EveEsi.Net.Abstractions.Routing.RouteDefinition! endpoint, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token, System.Collections.Generic.IReadOnlyList<EveEsi.Net.Abstractions.Middleware.IEsiMiddleware!>? serviceMiddleware) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<EveEsi.Net.Abstractions.Results.EsiNoContent>!
-EveEsi.Net.Abstractions.Requests.IEsiClientFactory.CreateEsiClient<T>(EveEsi.Net.Abstractions.Routing.RouteDefinition! endpoint, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! responseType, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token, System.Collections.Generic.IReadOnlyList<EveEsi.Net.Abstractions.Middleware.IEsiMiddleware!>? serviceMiddleware) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<T>!
+EveEsi.Net.Abstractions.Requests.IEsiClientFactory.CreateEsiClient(string! operationId, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token, System.Collections.Generic.IReadOnlyList<EveEsi.Net.Abstractions.Middleware.IEsiMiddleware!>? serviceMiddleware) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<EveEsi.Net.Abstractions.Results.EsiNoContent>!
+EveEsi.Net.Abstractions.Requests.IEsiClientFactory.CreateEsiClient<T>(string! operationId, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! responseType, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token, System.Collections.Generic.IReadOnlyList<EveEsi.Net.Abstractions.Middleware.IEsiMiddleware!>? serviceMiddleware) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<T>!
 EveEsi.Net.Abstractions.Requests.IEsiParameterValues
 EveEsi.Net.Abstractions.Requests.IEsiParameterValues.Set<T>(string! name, T? value) -> EveEsi.Net.Abstractions.Requests.IEsiParameterValues!
 EveEsi.Net.Abstractions.Requests.IEsiRequest<T>
@@ -110,10 +110,6 @@ EveEsi.Net.Abstractions.Results.EsiResult<T>.IsNotModified.get -> bool
 EveEsi.Net.Abstractions.Results.EsiResult<T>.IsSuccess.get -> bool
 EveEsi.Net.Abstractions.Results.EsiResult<T>.StatusCode.get -> System.Net.HttpStatusCode?
 EveEsi.Net.Abstractions.Results.EsiResult<T>.Value.get -> T?
-EveEsi.Net.Abstractions.Routing.BodyRequirement
-EveEsi.Net.Abstractions.Routing.BodyRequirement.None = 0 -> EveEsi.Net.Abstractions.Routing.BodyRequirement
-EveEsi.Net.Abstractions.Routing.BodyRequirement.Optional = 1 -> EveEsi.Net.Abstractions.Routing.BodyRequirement
-EveEsi.Net.Abstractions.Routing.BodyRequirement.Required = 2 -> EveEsi.Net.Abstractions.Routing.BodyRequirement
 EveEsi.Net.Abstractions.Routing.CursorPage
 EveEsi.Net.Abstractions.Routing.CursorPage.After.get -> string?
 EveEsi.Net.Abstractions.Routing.CursorPage.After.init -> void
@@ -123,10 +119,6 @@ EveEsi.Net.Abstractions.Routing.CursorPage.CursorPage() -> void
 EveEsi.Net.Abstractions.Routing.CursorPage.CursorPage(string? Before = null, string? After = null, long? Limit = null) -> void
 EveEsi.Net.Abstractions.Routing.CursorPage.Limit.get -> long?
 EveEsi.Net.Abstractions.Routing.CursorPage.Limit.init -> void
-EveEsi.Net.Abstractions.Routing.PaginationStyle
-EveEsi.Net.Abstractions.Routing.PaginationStyle.Cursor = 2 -> EveEsi.Net.Abstractions.Routing.PaginationStyle
-EveEsi.Net.Abstractions.Routing.PaginationStyle.None = 0 -> EveEsi.Net.Abstractions.Routing.PaginationStyle
-EveEsi.Net.Abstractions.Routing.PaginationStyle.Page = 1 -> EveEsi.Net.Abstractions.Routing.PaginationStyle
 EveEsi.Net.Abstractions.Routing.RateLimitPolicy
 EveEsi.Net.Abstractions.Routing.RateLimitPolicy.Group.get -> string!
 EveEsi.Net.Abstractions.Routing.RateLimitPolicy.Group.init -> void
@@ -149,20 +141,14 @@ EveEsi.Net.Abstractions.Routing.RouteCacheMode.NotCached = 3 -> EveEsi.Net.Abstr
 EveEsi.Net.Abstractions.Routing.RouteCacheMode.TtlBased = 1 -> EveEsi.Net.Abstractions.Routing.RouteCacheMode
 EveEsi.Net.Abstractions.Routing.RouteCacheMode.Unspecified = 0 -> EveEsi.Net.Abstractions.Routing.RouteCacheMode
 EveEsi.Net.Abstractions.Routing.RouteDefinition
-EveEsi.Net.Abstractions.Routing.RouteDefinition.Body.get -> EveEsi.Net.Abstractions.Routing.BodyRequirement
 EveEsi.Net.Abstractions.Routing.RouteDefinition.Cache.get -> EveEsi.Net.Abstractions.Routing.RouteCacheHints?
 EveEsi.Net.Abstractions.Routing.RouteDefinition.Method.get -> System.Net.Http.HttpMethod!
 EveEsi.Net.Abstractions.Routing.RouteDefinition.OperationId.get -> string!
-EveEsi.Net.Abstractions.Routing.RouteDefinition.Pagination.get -> EveEsi.Net.Abstractions.Routing.PaginationStyle
 EveEsi.Net.Abstractions.Routing.RouteDefinition.PathTemplate.get -> string!
-EveEsi.Net.Abstractions.Routing.RouteDefinition.QueryParameters.get -> System.Collections.Generic.IReadOnlyList<string!>!
 EveEsi.Net.Abstractions.Routing.RouteDefinition.RateLimit.get -> EveEsi.Net.Abstractions.Routing.RateLimitPolicy?
-EveEsi.Net.Abstractions.Routing.RouteDefinition.RequiredQueryParameters.get -> System.Collections.Generic.IReadOnlyList<string!>!
-EveEsi.Net.Abstractions.Routing.RouteDefinition.RequiredRoles.get -> System.Collections.Generic.IReadOnlyList<string!>!
-EveEsi.Net.Abstractions.Routing.RouteDefinition.RequiredScopes.get -> System.Collections.Generic.IReadOnlyList<string!>!
 EveEsi.Net.Abstractions.Routing.RouteDefinition.RequiresAuthentication.get -> bool
-EveEsi.Net.Abstractions.Routing.RouteDefinition.RouteDefinition(string! operationId, System.Net.Http.HttpMethod! method, string! pathTemplate, System.Collections.Generic.IEnumerable<string!>? queryParameters = null, System.Collections.Generic.IEnumerable<string!>? requiredQueryParameters = null, EveEsi.Net.Abstractions.Routing.PaginationStyle pagination = EveEsi.Net.Abstractions.Routing.PaginationStyle.None, System.Collections.Generic.IEnumerable<string!>? requiredScopes = null, System.Collections.Generic.IEnumerable<string!>? requiredRoles = null, EveEsi.Net.Abstractions.Routing.RouteCacheHints? cache = null, EveEsi.Net.Abstractions.Routing.RateLimitPolicy? rateLimit = null, EveEsi.Net.Abstractions.Routing.BodyRequirement body = EveEsi.Net.Abstractions.Routing.BodyRequirement.None) -> void
-EveEsi.Net.Abstractions.Routing.RouteDefinition.RouteParameters.get -> System.Collections.Generic.IReadOnlyList<string!>!
+EveEsi.Net.Abstractions.Routing.RouteDefinition.RouteDefinition(string! operationId, System.Net.Http.HttpMethod! method, string! pathTemplate, string? scope = null, EveEsi.Net.Abstractions.Routing.RouteCacheHints? cache = null, EveEsi.Net.Abstractions.Routing.RateLimitPolicy? rateLimit = null) -> void
+EveEsi.Net.Abstractions.Routing.RouteDefinition.Scope.get -> string?
 override EveEsi.Net.Abstractions.Results.EsiResult<T>.ToString() -> string!
 override EveEsi.Net.Abstractions.Routing.RouteDefinition.ToString() -> string!
 static EveEsi.Net.Abstractions.Http.EsiResponseHeaders.Empty.get -> EveEsi.Net.Abstractions.Http.EsiResponseHeaders!

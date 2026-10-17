@@ -74,12 +74,13 @@ No reflection-based serialization and no Newtonsoft. Keeps the library trim and 
 
 ### 16. Services are request builders over `IEsiClientFactory`
 Service methods only build requests:
-`factory.CreateEsiClient<T>(Endpoints.<Section>.<Name>, EsiJsonContext.Default.T, p => { p.Route.Set(...); p.ApplyPagination(...); }, token, …)`
+`factory.CreateEsiClient<T>("<operationId>", EsiJsonContext.Default.T, p => { p.Route.Set(...); p.ApplyPagination(...); }, token, …)`
 returns an `IEsiRequest<T>`, which the caller can add middleware to and execute.
 *Why:* services stay thin and uniform (easy to generate). All request-building logic and validation lives
 in one place, the factory and parameter builder. Advanced users can call the factory directly with any endpoint.
 
 ### 17. Static `Endpoints` and `Parameter` catalogues, grouped by spec tag
+**Route storage superseded by #29** (services are still grouped by tag).
 Route definitions are static fields built once through `RouteBuilder`, grouped by the operation's spec **tag**
 (`Endpoints.Assets.CharacterAssets`, not `Endpoints.Character.Assets`). Services use the same grouping.
 *Considered:* grouping by URL segment. Rejected because most endpoints live under `/characters/{id}/`,
@@ -142,6 +143,7 @@ Contributions are accepted under the same license.
 *Why:* `HttpClient` refuses to send the same `HttpRequestMessage` twice, which would break `RetryMiddleware`.
 
 ### 26. Routes describe the endpoint only; services supply the types
+**Route fields narrowed by #29.**
 `RouteDefinition` is non-generic: method, path, parameters, scopes, roles, cache hints, rate limit, pagination and
 `BodyRequirement`. The service passes `JsonTypeInfo<T>` from `EsiJsonContext` to `CreateEsiClient<T>(...)`, and the
 body's type info to `p.Body(value, typeInfo)`. Endpoints with no response body use the non-generic
@@ -166,3 +168,13 @@ were machinery without a purpose; services already carry the types. Pairs are al
 `null` means no response was received (transport failure). Results are created through public
 `Success` / `NotModified` / `Failure` factories, so consumers can build them in their own tests.
 *Why:* a fake status such as `0` is easy to mistake for a real one.
+
+### 29. One route table keyed by operation ID; routes hold only method, path, scope, cache and rate limit
+All routes live in one generated static dictionary, `EsiRoutes.All` (`operationId` → `RouteDefinition`).
+Operation IDs exist as generated `const string`s grouped by tag (`Operation.Characters.CharacterInfo = "GetCharactersCharacterId"`);
+services pass the constant to `CreateEsiClient`, and the factory looks the route up (unknown ID → `ArgumentException`).
+`RouteDefinition` holds the operation ID, method, path template, an optional scope, cache hints and rate limit. Query
+parameter lists, pagination style, body requirement and roles are gone; `RouteBuilder` is gone.
+*Why:* parameters, pagination and body are already enforced by the generated service signatures, so describing them
+again on the route was duplication. A flat table keyed by the spec's own identifier is simpler to generate, review
+and look up than nested per-tag route objects; the per-tag constants keep names discoverable and typo-proof. `Client` gets the table through DI, since it can't reference `Routes`.

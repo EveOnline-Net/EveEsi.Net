@@ -19,7 +19,7 @@ openapi.json                 pinned ESI spec (do not read whole; query it)
 src/
   EveEsi.Net.Abstractions/   contracts shared by everything (hand-written)
   EveEsi.Net.Models/         DTOs, enums, unions, converters, JsonSerializerContext (generated + partials)
-  EveEsi.Net.Routes/         RouteBuilder (hand-written) + Endpoints and Parameter catalogues (generated)
+  EveEsi.Net.Routes/         Operation (operation ID constants), EsiRoutes table, Parameter catalogue (all generated)
   EveEsi.Net.Client/         client factory, request parameters, pipeline runner, HTTP execution (hand-written)
   EveEsi.Net.Middleware/     standard middleware + in-memory IEsiCacheStore (hand-written)
   EveEsi.Net/                section services ICharacters… (generated) + AddEveEsi() DI extensions
@@ -54,10 +54,10 @@ Caching.*     → Abstractions
 
 | Type | Purpose |
 |---|---|
-| `RouteDefinition` | Static, immutable description of one endpoint: operation ID, method, path template (route parameter names come from its placeholders), query parameter names and which are required, body requirement, required scopes, required roles, cache hints, rate-limit policy, pagination style. Says nothing about types. Validated on construction. |
+| `RouteDefinition` | Static, immutable description of one endpoint: operation ID, method, path template, scope (`string?`), cache hints, rate-limit policy. Nothing about parameters, pagination, body or types. All routes live in one generated dictionary keyed by operation ID. |
 | `IEsiParameterValues` | `Set(name, value)`, used for both `p.Route` and `p.Query`. Names are the generated `Parameter.*` string constants. `null` means "not sent". |
 | `CursorPage` | Cursor pagination input: `Before`, `After` (strings), `Limit` (`long?`). |
-| `IEsiClientFactory` | Creates a per-request `IEsiRequest<T>` from an endpoint, the response's `JsonTypeInfo<T>` (omitted for no-content endpoints, giving `IEsiRequest<EsiNoContent>`), a parameter configurator, an optional token and the calling service's middleware snapshot. |
+| `IEsiClientFactory` | Creates a per-request `IEsiRequest<T>` from an operation ID (looked up in the route table), the response's `JsonTypeInfo<T>` (omitted for no-content endpoints, giving `IEsiRequest<EsiNoContent>`), a parameter configurator, an optional token and the calling service's middleware snapshot. |
 | `IEsiRequestParameters` | What the configurator lambda receives: `Route`, `Query`, `Body`, `ApplyPagination(...)`. A `null` query value means "not sent". |
 | `IEsiRequest<T>` | The built, ready-to-run request: `.Use(...)`, `.ExecuteAsync(ct)`. The only public request type; the implementation is `internal sealed` in `EveEsi.Net.Client`. Service methods and the factory always return the interface. |
 | `EsiContext` | Mutable state passed through the pipeline: route, outgoing `EsiRequestMessage`, access token (`string?`, settable), `EsiResponse` (once there is one), `Items` bag, `CancellationToken`. |
@@ -79,7 +79,7 @@ an `IEsiRequest<T>` through `IEsiClientFactory`. It never sends anything or hold
 ```csharp
 public IEsiRequest<IReadOnlyList<CharacterAsset>> GetCharacterAssets(long characterId, string token, int? page = null)
     => CreateEsiClient<IReadOnlyList<CharacterAsset>>(
-        Endpoints.Assets.CharacterAssets,
+        Operation.Assets.CharacterAssets,                         // = "GetCharactersCharacterIdAssets"
         EsiJsonContext.Default.IReadOnlyListCharacterAsset,
         p =>
         {
@@ -89,14 +89,14 @@ public IEsiRequest<IReadOnlyList<CharacterAsset>> GetCharacterAssets(long charac
         token);
 
 public IEsiRequest<EsiNoContent> SetAutopilotWaypoint(long destinationId, bool addToBeginning, bool clearOtherWaypoints, string token)
-    => CreateEsiClient(Endpoints.UserInterface.AutopilotWaypoint, p =>   // no response body: no type info
+    => CreateEsiClient(Operation.UserInterface.AutopilotWaypoint, p =>   // no response body: no type info
     {
         p.Query.Set(Parameter.Query.DestinationId, destinationId);
         p.Query.Set(Parameter.Query.AddToBeginning, addToBeginning);
         p.Query.Set(Parameter.Query.ClearOtherWaypoints, clearOtherWaypoints);
     }, token);
 ```
-`CreateEsiClient` here is the `EsiService` base helper: it forwards to `IEsiClientFactory` with the service's
+`CreateEsiClient` here is the `EsiService<TSelf>` base helper: it forwards to `IEsiClientFactory` with the service's
 middleware snapshot.
 
 ### Building blocks
@@ -104,9 +104,12 @@ middleware snapshot.
   (`GetCharacter` → `IEsiRequest<CharacterInfo>`), the explicit `CreateEsiClient<CharacterInfo>(...)` and the
   `JsonTypeInfo<CharacterInfo>` from `EsiJsonContext` must agree, which the compiler checks. Endpoints without a
   response body use the non-generic `CreateEsiClient(...)`, which returns `IEsiRequest<EsiNoContent>`.
-- **`Endpoints.<Tag>.<Name>`**: static `RouteDefinition` fields, one nested class per spec **tag**
-  (`Endpoints.Assets`, `Endpoints.Character`, …), generated and built once through `RouteBuilder`.
-  Services follow the same grouping: one service per tag.
+- **`Operation.<Tag>.<Name>`**: generated `const string` operation IDs, one nested class per spec **tag**
+  (`Operation.Characters.CharacterInfo = "GetCharactersCharacterId"`). Services and the route table always use these
+  constants, never a string literal.
+- **`EsiRoutes.All`**: one generated static dictionary, operation ID → `RouteDefinition` (method, path template,
+  scope, cache hints, rate limit), keyed by the `Operation.*` constants. Services pass the constant; the factory looks
+  the route up. Services are grouped by tag like `Route`; the dictionary itself is flat.
 - **`Parameter.Route.<Name>` / `Parameter.Query.<Name>`**: `const string` wire names, generated once per
   distinct parameter in the spec (77 today). The same constant is the `Set` key, the `{placeholder}` in the route's
   path template and the entry in its query parameter list. Value types are enforced by the generated service
@@ -118,15 +121,16 @@ middleware snapshot.
 - **`token`**: `string?`. Required (non-nullable parameter on the service method) for secured endpoints;
   omitted for public ones.
 
-### Validation (programmer errors throw at build time, inside `CreateEsiClient`)
-- A required route parameter is missing, or a parameter doesn't belong to the endpoint → `ArgumentException`.
-- The pagination type doesn't match the route's `PaginationStyle` → `InvalidOperationException`.
-- The endpoint requires scopes and `token` is null or empty → `ArgumentException`.
-- A body is given to an endpoint without a body, or a required body is missing → `ArgumentException`.
+### Validation
+Which parameters, pagination and body an endpoint takes is enforced by the **generated service signatures**,
+not by the route. The factory only checks what the route knows (programmer errors, thrown inside `CreateEsiClient`):
+- The operation ID isn't in the route table → `ArgumentException`.
+- The endpoint has a scope and `token` is null or empty → `ArgumentException`.
+- A placeholder in the path template has no route value → `InvalidOperationException` when the URI is built.
 
 ### Lifetime and service-level middleware
 - Services are registered as **transient**.
-- Generated services derive from a hand-written `EsiService` base class that holds the instance's
+- Generated services derive from the hand-written `EsiService<TSelf>` base class (`EveEsi.Net.Services`) that holds the instance's
   service-level middleware (`characters.Use(...)`) and passes a snapshot of it to the factory with each
   `CreateEsiClient` call. That keeps the service level separate from, and outside, request-level middleware.
 - Shared headers (`If-None-Match`, `Accept-Language`, `X-Compatibility-Date`, `X-Tenant`, `If-Modified-Since`)
@@ -207,7 +211,7 @@ All opt-in. The core client sends a call without any of them.
 - `ETagMiddleware`: sends `If-None-Match` from the cache store; on `304`, returns the stored body.
 - `CacheMiddleware`: serves from `IEsiCacheStore` until expiry, using route cache hints and `Expires`/`Cache-Control`.
 - `ScopeCheckMiddleware`: decodes the access token's `scp` claim (without validating it) and compares it
-  against `RouteDefinition.RequiredScopes`. Fails before sending.
+  against `RouteDefinition.Scope`. Fails before sending.
 - `LanguageMiddleware`: sets `Accept-Language`.
 - `ErrorLimitMiddleware` / `RateLimitMiddleware`: read ESI error-limit and rate-limit headers and back off (route carries `x-rate-limit` group).
 - `RetryMiddleware`: retries transient failures (5xx, 420/429 with backoff).
@@ -228,7 +232,8 @@ ESI has two styles, and the library leaves the looping to the caller:
 - **Cursor-based** (`before` / `after` / `limit`, `Cursor` object in the body, 12 operations):
   `p.ApplyPagination(CursorPage? cursor)`; the next cursor is part of the response DTO.
 
-The route's `PaginationStyle` (`None` / `Page` / `Cursor`) is available to middleware and is checked by `ApplyPagination`.
+Which style an endpoint uses is decided by its generated service signature (`int? page` or `CursorPage? cursor`);
+the route doesn't record it.
 
 ## Result type
 
@@ -254,8 +259,8 @@ public sealed class EsiResult<T>
 
 ```
 service.GetX(args, token)
-  → factory.CreateEsiClient<T>(Endpoints.X.Y, EsiJsonContext.Default.T, p => {...}, token, serviceMiddleware)
-       run configurator, validate against the RouteDefinition  → IEsiRequest<T> (+ service middleware snapshot)
+  → factory.CreateEsiClient<T>("OperationId", EsiJsonContext.Default.T, p => {...}, token, serviceMiddleware)
+       look up EsiRoutes.All[operationId], check token vs scope, run configurator  → IEsiRequest<T> (+ service middleware snapshot)
   .Use(...)                       → adds request middleware
   .ExecuteAsync(ct)
      build EsiContext (URL from template + route values, query string, body, required headers, bearer token)

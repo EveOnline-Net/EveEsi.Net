@@ -13,7 +13,7 @@ var result = await assets                     // IAssets, resolved as a transien
 
 // Services are request builders. Internally each method is just:
 CreateEsiClient<IReadOnlyList<CharacterAsset>>(
-    Endpoints.Assets.CharacterAssets,                    // RouteDefinition: the endpoint only, no types
+    Operation.Assets.CharacterAssets,                    // const operation ID, key into the EsiRoutes table
     EsiJsonContext.Default.IReadOnlyListCharacterAsset,  // the service supplies the response type
     p =>
     {
