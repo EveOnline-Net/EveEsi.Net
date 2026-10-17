@@ -105,7 +105,7 @@ middleware snapshot.
   `JsonTypeInfo<CharacterInfo>` from `EsiJsonContext` must agree, which the compiler checks. Endpoints without a
   response body use the non-generic `CreateEsiClient(...)`, which returns `IEsiRequest<EsiNoContent>`.
 - **`Operation.<Tag>.<Name>`**: generated `const string` operation IDs, one nested class per spec **tag**
-  (`Operation.Characters.CharacterInfo = "GetCharactersCharacterId"`). Services and the route table always use these
+  (`Operation.Character.CharacterInfo = "GetCharactersDetail"`). Services and the route table always use these
   constants, never a string literal.
 - **`EsiRoutes.All`**: one generated static dictionary, operation ID → `RouteDefinition` (method, path template,
   scope, cache hints, rate limit), keyed by the `Operation.*` constants. Services pass the constant; the factory looks

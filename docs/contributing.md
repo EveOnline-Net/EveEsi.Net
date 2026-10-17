@@ -64,7 +64,7 @@ The spec isn't updated automatically. When ESI changes, anyone can open a spec P
 
 1. Branch `spec/<new-compat-date>` from `main`.
 2. Replace `openapi.json` with the new spec from ESI.
-3. Run the generator:
+3. Run the generator, then record the public API changes (see [generator.md](generator.md#running-it)):
    `dotnet run --project tools/EveEsi.Net.Generator -- --spec openapi.json --out src/`
 4. If generation fails, fix it in `generator.json` (names, enum members, overrides). Never by editing output.
 5. Build and test. Update `PublicAPI.Unshipped.txt` for the API changes.

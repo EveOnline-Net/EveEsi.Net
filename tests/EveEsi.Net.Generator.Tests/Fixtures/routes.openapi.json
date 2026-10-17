@@ -1,0 +1,82 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "fixture", "version": "2026-08-18" },
+  "components": {
+    "parameters": {
+      "CompatibilityDate": { "in": "header", "name": "X-Compatibility-Date", "required": true, "schema": { "enum": ["2026-08-18"], "type": "string" } },
+      "Tenant": { "in": "header", "name": "X-Tenant", "schema": { "type": "string" } }
+    }
+  },
+  "paths": {
+    "/characters/{character_id}/assets": {
+      "get": {
+        "operationId": "GetCharactersCharacterIdAssets",
+        "summary": "Get character assets",
+        "tags": ["Assets"],
+        "parameters": [
+          { "in": "path", "name": "character_id", "required": true, "schema": { "format": "int64", "type": "integer" } },
+          { "in": "query", "name": "page", "schema": { "format": "int32", "type": "integer" } },
+          { "$ref": "#/components/parameters/CompatibilityDate" },
+          { "$ref": "#/components/parameters/Tenant" }
+        ],
+        "security": [{ "OAuth2": ["esi-assets.read_assets.v1"] }],
+        "x-cache-age": 3600,
+        "x-server-cache-mode": "ttl-based",
+        "x-rate-limit": { "group": "char-asset", "max-tokens": 1800, "window-size": "15m" }
+      }
+    },
+    "/characters/{character_id}/contacts": {
+      "delete": {
+        "operationId": "DeleteCharactersCharacterIdContacts",
+        "summary": "Delete contacts",
+        "tags": ["Contacts"],
+        "parameters": [
+          { "in": "path", "name": "character_id", "required": true, "schema": { "format": "int64", "type": "integer" } },
+          { "in": "query", "name": "contact_ids", "required": true, "schema": { "type": "array", "items": { "format": "int64", "type": "integer" } } }
+        ],
+        "security": [{ "OAuth2": ["esi-characters.write_contacts.v1"] }]
+      }
+    },
+    "/characters/{character_id}/mail/labels/{label_id}": {
+      "delete": {
+        "operationId": "DeleteCharactersCharacterIdMailLabelsLabelId",
+        "summary": "Delete a mail label",
+        "tags": ["Mail"],
+        "parameters": [
+          { "in": "path", "name": "character_id", "required": true, "schema": { "format": "int64", "type": "integer" } },
+          { "in": "path", "name": "label_id", "required": true, "schema": { "format": "int64", "type": "integer" } }
+        ],
+        "security": [{ "OAuth2": ["esi-mail.organize_mail.v1"] }]
+      }
+    },
+    "/characters/{character_id}/access-lists": {
+      "get": {
+        "operationId": "GetCharactersAccessListsListing",
+        "summary": "List <Access> Lists & more",
+        "tags": ["Access List"],
+        "parameters": [
+          { "in": "path", "name": "character_id", "required": true, "schema": { "format": "int64", "type": "integer" } },
+          { "in": "query", "name": "before", "schema": { "type": "string" } },
+          { "in": "query", "name": "after", "schema": { "type": "string" } },
+          { "in": "query", "name": "limit", "schema": { "format": "int64", "type": "integer" } }
+        ],
+        "security": [{ "OAuth2": ["esi-access.read_lists.v1"] }],
+        "x-cache-mode": "event-based",
+        "x-server-cache-mode": "event-based",
+        "x-tombstone-ttl": 604800,
+        "x-pagination": "cursor"
+      }
+    },
+    "/status": {
+      "get": {
+        "operationId": "GetStatus",
+        "summary": "Retrieve the uptime and player counts",
+        "tags": ["Status"],
+        "parameters": [{ "in": "query", "name": "search", "schema": { "type": "string" } }],
+        "x-cache-age": 30,
+        "x-server-cache-mode": "ttl-based",
+        "x-rate-limit": { "group": "status", "max-tokens": 600, "window-size": "1h" }
+      }
+    }
+  }
+}
