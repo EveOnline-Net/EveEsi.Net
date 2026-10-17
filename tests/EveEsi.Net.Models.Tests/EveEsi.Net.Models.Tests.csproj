@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/EveEsi.Net.Models/EveEsi.Net.Models.csproj" />
+  </ItemGroup>
+
+</Project>

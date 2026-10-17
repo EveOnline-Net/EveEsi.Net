@@ -10,7 +10,7 @@
 ## Solution layout
 
 ```
-EveEsi.Net.sln
+EveEsi.Net.slnx
 Directory.Build.props        shared settings: TFMs, nullable, warnings-as-errors, AOT/trim flags, docs
 Directory.Packages.props     central package versions
 generator.json               generator config (naming, enums, unions, overrides)
