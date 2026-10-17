@@ -23,7 +23,8 @@ Full design: [docs/generator.md](../../docs/generator.md).
 - **Path/query params** → typed method params, camelCase (`character_id` → `characterId`), and a typed key in
   `Parameter.Route` / `Parameter.Query`. Pagination params (`page`, `before`, `after`, `limit`) are excluded;
   they become `int? page` / `CursorPage? cursor` and go through `ApplyPagination`.
-- **`requestBody`** → body parameter on the service method, `p.Body(value)`, and body type on the route.
+- **`requestBody`** → body parameter on the service method, `p.Body(value, EsiJsonContext.Default.X)`, and `BodyRequirement` on the route.
+- **Response schema** → `IEsiRequest<T>` + `JsonTypeInfo<T>` in the service. Routes carry no types. No response body → `EsiNoContent`.
 - **`security`** → required `string token` parameter + `RequiresScope(...)` on the route.
 - **`x-required-roles`** → `RequiresRole(...)`. **`x-cache-age` / `x-cache-mode`** → cache hints.
   **`x-rate-limit`** → `RateLimitGroup(...)`. **`X-Pages`** → `PaginationStyle.Page`. **`x-pagination: cursor`** → `PaginationStyle.Cursor`.

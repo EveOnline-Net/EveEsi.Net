@@ -12,11 +12,15 @@ var result = await assets                     // IAssets, resolved as a transien
     .ExecuteAsync(ct);                        // EsiResult<T>, never throws on HTTP errors
 
 // Services are request builders. Internally each method is just:
-factory.CreateEsiClient<IReadOnlyList<CharacterAsset>>(Endpoints.Assets.CharacterAssets, p =>
-{
-    p.Route.Set(Parameter.Route.CharacterId, characterId);
-    p.ApplyPagination(page);                  // int? page, or CursorPage? for cursor routes
-}, token);
+CreateEsiClient<IReadOnlyList<CharacterAsset>>(
+    Endpoints.Assets.CharacterAssets,                    // RouteDefinition: the endpoint only, no types
+    EsiJsonContext.Default.IReadOnlyListCharacterAsset,  // the service supplies the response type
+    p =>
+    {
+        p.Route.Set(Parameter.Route.CharacterId, characterId);
+        p.ApplyPagination(page);              // int? page, or CursorPage? for cursor routes
+    },
+    token);
 ```
 
 ## Core Tech Stack

@@ -11,7 +11,7 @@ paths:
 Full design: [docs/architecture.md](../../docs/architecture.md).
 
 ## Factory and request building
-- `IEsiClientFactory.CreateEsiClient<T>(endpoint, configure, token)` runs the configurator and **validates at
+- `IEsiClientFactory.CreateEsiClient<T>(endpoint, responseType, configure, token, serviceMiddleware)` runs the configurator and **validates at
   build time**: missing or foreign route parameters, pagination type vs `PaginationStyle`, missing token on a
   secured route, unexpected or missing body. These are programmer errors and throw.
 - Services never do validation or HTTP themselves. They only call the factory (through the `EsiService` base).
