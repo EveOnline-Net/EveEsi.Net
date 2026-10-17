@@ -1,1 +1,354 @@
 #nullable enable
+const EveEsi.Net.Routes.EsiSpec.CompatibilityDate = "2026-08-18" -> string!
+const EveEsi.Net.Routes.Operation.AccessList.GetCharactersAccessListsDetail = "GetCharactersAccessListsDetail" -> string!
+const EveEsi.Net.Routes.Operation.AccessList.GetCharactersAccessListsListing = "GetCharactersAccessListsListing" -> string!
+const EveEsi.Net.Routes.Operation.Activities.GetCharactersMercenaryTacticalOperationsDetail = "GetCharactersMercenaryTacticalOperationsDetail" -> string!
+const EveEsi.Net.Routes.Operation.Activities.GetCharactersMercenaryTacticalOperationsListing = "GetCharactersMercenaryTacticalOperationsListing" -> string!
+const EveEsi.Net.Routes.Operation.Activities.GetSkyhooksRaidable = "GetSkyhooksRaidable" -> string!
+const EveEsi.Net.Routes.Operation.Alliance.GetAlliances = "GetAlliances" -> string!
+const EveEsi.Net.Routes.Operation.Alliance.GetAlliancesAllianceId = "GetAlliancesAllianceId" -> string!
+const EveEsi.Net.Routes.Operation.Alliance.GetAlliancesAllianceIdCorporations = "GetAlliancesAllianceIdCorporations" -> string!
+const EveEsi.Net.Routes.Operation.Alliance.GetAlliancesAllianceIdIcons = "GetAlliancesAllianceIdIcons" -> string!
+const EveEsi.Net.Routes.Operation.Assets.GetCharactersCharacterIdAssets = "GetCharactersCharacterIdAssets" -> string!
+const EveEsi.Net.Routes.Operation.Assets.GetCorporationsCorporationIdAssets = "GetCorporationsCorporationIdAssets" -> string!
+const EveEsi.Net.Routes.Operation.Assets.PostCharactersCharacterIdAssetsLocations = "PostCharactersCharacterIdAssetsLocations" -> string!
+const EveEsi.Net.Routes.Operation.Assets.PostCharactersCharacterIdAssetsNames = "PostCharactersCharacterIdAssetsNames" -> string!
+const EveEsi.Net.Routes.Operation.Assets.PostCorporationsCorporationIdAssetsLocations = "PostCorporationsCorporationIdAssetsLocations" -> string!
+const EveEsi.Net.Routes.Operation.Assets.PostCorporationsCorporationIdAssetsNames = "PostCorporationsCorporationIdAssetsNames" -> string!
+const EveEsi.Net.Routes.Operation.Calendar.GetCharactersCharacterIdCalendar = "GetCharactersCharacterIdCalendar" -> string!
+const EveEsi.Net.Routes.Operation.Calendar.GetCharactersCharacterIdCalendarEventId = "GetCharactersCharacterIdCalendarEventId" -> string!
+const EveEsi.Net.Routes.Operation.Calendar.GetCharactersCharacterIdCalendarEventIdAttendees = "GetCharactersCharacterIdCalendarEventIdAttendees" -> string!
+const EveEsi.Net.Routes.Operation.Calendar.PutCharactersCharacterIdCalendarEventId = "PutCharactersCharacterIdCalendarEventId" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdAgentsResearch = "GetCharactersCharacterIdAgentsResearch" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdBlueprints = "GetCharactersCharacterIdBlueprints" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdCorporationhistory = "GetCharactersCharacterIdCorporationhistory" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdFatigue = "GetCharactersCharacterIdFatigue" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdMedals = "GetCharactersCharacterIdMedals" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdNotifications = "GetCharactersCharacterIdNotifications" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdNotificationsContacts = "GetCharactersCharacterIdNotificationsContacts" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdPortrait = "GetCharactersCharacterIdPortrait" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdRoles = "GetCharactersCharacterIdRoles" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdStandings = "GetCharactersCharacterIdStandings" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersCharacterIdTitles = "GetCharactersCharacterIdTitles" -> string!
+const EveEsi.Net.Routes.Operation.Character.GetCharactersDetail = "GetCharactersDetail" -> string!
+const EveEsi.Net.Routes.Operation.Character.PostCharactersAffiliation = "PostCharactersAffiliation" -> string!
+const EveEsi.Net.Routes.Operation.Character.PostCharactersCharacterIdCspa = "PostCharactersCharacterIdCspa" -> string!
+const EveEsi.Net.Routes.Operation.Clones.GetCharactersCharacterIdClones = "GetCharactersCharacterIdClones" -> string!
+const EveEsi.Net.Routes.Operation.Clones.GetCharactersCharacterIdImplants = "GetCharactersCharacterIdImplants" -> string!
+const EveEsi.Net.Routes.Operation.Contacts.DeleteCharactersCharacterIdContacts = "DeleteCharactersCharacterIdContacts" -> string!
+const EveEsi.Net.Routes.Operation.Contacts.GetAlliancesAllianceIdContacts = "GetAlliancesAllianceIdContacts" -> string!
+const EveEsi.Net.Routes.Operation.Contacts.GetAlliancesAllianceIdContactsLabels = "GetAlliancesAllianceIdContactsLabels" -> string!
+const EveEsi.Net.Routes.Operation.Contacts.GetCharactersCharacterIdContacts = "GetCharactersCharacterIdContacts" -> string!
+const EveEsi.Net.Routes.Operation.Contacts.GetCharactersCharacterIdContactsLabels = "GetCharactersCharacterIdContactsLabels" -> string!
+const EveEsi.Net.Routes.Operation.Contacts.GetCorporationsCorporationIdContacts = "GetCorporationsCorporationIdContacts" -> string!
+const EveEsi.Net.Routes.Operation.Contacts.GetCorporationsCorporationIdContactsLabels = "GetCorporationsCorporationIdContactsLabels" -> string!
+const EveEsi.Net.Routes.Operation.Contacts.PostCharactersCharacterIdContacts = "PostCharactersCharacterIdContacts" -> string!
+const EveEsi.Net.Routes.Operation.Contacts.PutCharactersCharacterIdContacts = "PutCharactersCharacterIdContacts" -> string!
+const EveEsi.Net.Routes.Operation.Contracts.GetCharactersCharacterIdContracts = "GetCharactersCharacterIdContracts" -> string!
+const EveEsi.Net.Routes.Operation.Contracts.GetCharactersCharacterIdContractsContractIdBids = "GetCharactersCharacterIdContractsContractIdBids" -> string!
+const EveEsi.Net.Routes.Operation.Contracts.GetCharactersCharacterIdContractsContractIdItems = "GetCharactersCharacterIdContractsContractIdItems" -> string!
+const EveEsi.Net.Routes.Operation.Contracts.GetContractsPublicBidsContractId = "GetContractsPublicBidsContractId" -> string!
+const EveEsi.Net.Routes.Operation.Contracts.GetContractsPublicItemsContractId = "GetContractsPublicItemsContractId" -> string!
+const EveEsi.Net.Routes.Operation.Contracts.GetContractsPublicRegionId = "GetContractsPublicRegionId" -> string!
+const EveEsi.Net.Routes.Operation.Contracts.GetCorporationsCorporationIdContracts = "GetCorporationsCorporationIdContracts" -> string!
+const EveEsi.Net.Routes.Operation.Contracts.GetCorporationsCorporationIdContractsContractIdBids = "GetCorporationsCorporationIdContractsContractIdBids" -> string!
+const EveEsi.Net.Routes.Operation.Contracts.GetCorporationsCorporationIdContractsContractIdItems = "GetCorporationsCorporationIdContractsContractIdItems" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationId = "GetCorporationsCorporationId" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdAlliancehistory = "GetCorporationsCorporationIdAlliancehistory" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdBlueprints = "GetCorporationsCorporationIdBlueprints" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdContainersLogs = "GetCorporationsCorporationIdContainersLogs" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdDivisions = "GetCorporationsCorporationIdDivisions" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdFacilities = "GetCorporationsCorporationIdFacilities" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdIcons = "GetCorporationsCorporationIdIcons" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdMedals = "GetCorporationsCorporationIdMedals" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdMedalsIssued = "GetCorporationsCorporationIdMedalsIssued" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdMembers = "GetCorporationsCorporationIdMembers" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdMembersLimit = "GetCorporationsCorporationIdMembersLimit" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdMembersTitles = "GetCorporationsCorporationIdMembersTitles" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdMembertracking = "GetCorporationsCorporationIdMembertracking" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdRoles = "GetCorporationsCorporationIdRoles" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdRolesHistory = "GetCorporationsCorporationIdRolesHistory" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdShareholders = "GetCorporationsCorporationIdShareholders" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdStandings = "GetCorporationsCorporationIdStandings" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdStarbases = "GetCorporationsCorporationIdStarbases" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdStarbasesStarbaseId = "GetCorporationsCorporationIdStarbasesStarbaseId" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdStructures = "GetCorporationsCorporationIdStructures" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsCorporationIdTitles = "GetCorporationsCorporationIdTitles" -> string!
+const EveEsi.Net.Routes.Operation.Corporation.GetCorporationsNpccorps = "GetCorporationsNpccorps" -> string!
+const EveEsi.Net.Routes.Operation.CorporationProjects.GetCorporationsProjectsContribution = "GetCorporationsProjectsContribution" -> string!
+const EveEsi.Net.Routes.Operation.CorporationProjects.GetCorporationsProjectsContributors = "GetCorporationsProjectsContributors" -> string!
+const EveEsi.Net.Routes.Operation.CorporationProjects.GetCorporationsProjectsDetail = "GetCorporationsProjectsDetail" -> string!
+const EveEsi.Net.Routes.Operation.CorporationProjects.GetCorporationsProjectsListing = "GetCorporationsProjectsListing" -> string!
+const EveEsi.Net.Routes.Operation.Cosmetics.GetCharactersCosmeticsSkinr = "GetCharactersCosmeticsSkinr" -> string!
+const EveEsi.Net.Routes.Operation.Cosmetics.GetCharactersCosmeticsSkinrComponents = "GetCharactersCosmeticsSkinrComponents" -> string!
+const EveEsi.Net.Routes.Operation.Cosmetics.GetCosmeticsSkinr = "GetCosmeticsSkinr" -> string!
+const EveEsi.Net.Routes.Operation.Dogma.GetDogmaAttributes = "GetDogmaAttributes" -> string!
+const EveEsi.Net.Routes.Operation.Dogma.GetDogmaAttributesAttributeId = "GetDogmaAttributesAttributeId" -> string!
+const EveEsi.Net.Routes.Operation.Dogma.GetDogmaDynamicItemsTypeIdItemId = "GetDogmaDynamicItemsTypeIdItemId" -> string!
+const EveEsi.Net.Routes.Operation.Dogma.GetDogmaEffects = "GetDogmaEffects" -> string!
+const EveEsi.Net.Routes.Operation.Dogma.GetDogmaEffectsEffectId = "GetDogmaEffectsEffectId" -> string!
+const EveEsi.Net.Routes.Operation.FactionWarfare.GetCharactersCharacterIdFwStats = "GetCharactersCharacterIdFwStats" -> string!
+const EveEsi.Net.Routes.Operation.FactionWarfare.GetCorporationsCorporationIdFwStats = "GetCorporationsCorporationIdFwStats" -> string!
+const EveEsi.Net.Routes.Operation.FactionWarfare.GetFwLeaderboards = "GetFwLeaderboards" -> string!
+const EveEsi.Net.Routes.Operation.FactionWarfare.GetFwLeaderboardsCharacters = "GetFwLeaderboardsCharacters" -> string!
+const EveEsi.Net.Routes.Operation.FactionWarfare.GetFwLeaderboardsCorporations = "GetFwLeaderboardsCorporations" -> string!
+const EveEsi.Net.Routes.Operation.FactionWarfare.GetFwStats = "GetFwStats" -> string!
+const EveEsi.Net.Routes.Operation.FactionWarfare.GetFwSystems = "GetFwSystems" -> string!
+const EveEsi.Net.Routes.Operation.FactionWarfare.GetFwWars = "GetFwWars" -> string!
+const EveEsi.Net.Routes.Operation.Fittings.DeleteCharactersCharacterIdFittingsFittingId = "DeleteCharactersCharacterIdFittingsFittingId" -> string!
+const EveEsi.Net.Routes.Operation.Fittings.GetCharactersCharacterIdFittings = "GetCharactersCharacterIdFittings" -> string!
+const EveEsi.Net.Routes.Operation.Fittings.PostCharactersCharacterIdFittings = "PostCharactersCharacterIdFittings" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.DeleteFleetsFleetIdMembersMemberId = "DeleteFleetsFleetIdMembersMemberId" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.DeleteFleetsFleetIdSquadsSquadId = "DeleteFleetsFleetIdSquadsSquadId" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.DeleteFleetsFleetIdWingsWingId = "DeleteFleetsFleetIdWingsWingId" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.GetCharactersCharacterIdFleet = "GetCharactersCharacterIdFleet" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.GetFleetsFleetId = "GetFleetsFleetId" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.GetFleetsFleetIdMembers = "GetFleetsFleetIdMembers" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.GetFleetsFleetIdWings = "GetFleetsFleetIdWings" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.PostFleetsFleetIdMembers = "PostFleetsFleetIdMembers" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.PostFleetsFleetIdWings = "PostFleetsFleetIdWings" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.PostFleetsFleetIdWingsWingIdSquads = "PostFleetsFleetIdWingsWingIdSquads" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.PutFleetsFleetId = "PutFleetsFleetId" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.PutFleetsFleetIdMembersMemberId = "PutFleetsFleetIdMembersMemberId" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.PutFleetsFleetIdSquadsSquadId = "PutFleetsFleetIdSquadsSquadId" -> string!
+const EveEsi.Net.Routes.Operation.Fleets.PutFleetsFleetIdWingsWingId = "PutFleetsFleetIdWingsWingId" -> string!
+const EveEsi.Net.Routes.Operation.FreelanceJobs.GetCharactersFreelanceJobsListing = "GetCharactersFreelanceJobsListing" -> string!
+const EveEsi.Net.Routes.Operation.FreelanceJobs.GetCharactersFreelanceJobsParticipation = "GetCharactersFreelanceJobsParticipation" -> string!
+const EveEsi.Net.Routes.Operation.FreelanceJobs.GetCorporationsFreelanceJobsListing = "GetCorporationsFreelanceJobsListing" -> string!
+const EveEsi.Net.Routes.Operation.FreelanceJobs.GetCorporationsFreelanceJobsParticipants = "GetCorporationsFreelanceJobsParticipants" -> string!
+const EveEsi.Net.Routes.Operation.FreelanceJobs.GetFreelanceJobsDetail = "GetFreelanceJobsDetail" -> string!
+const EveEsi.Net.Routes.Operation.FreelanceJobs.GetFreelanceJobsListing = "GetFreelanceJobsListing" -> string!
+const EveEsi.Net.Routes.Operation.Incursions.GetIncursions = "GetIncursions" -> string!
+const EveEsi.Net.Routes.Operation.Industry.GetCharactersCharacterIdIndustryJobs = "GetCharactersCharacterIdIndustryJobs" -> string!
+const EveEsi.Net.Routes.Operation.Industry.GetCharactersCharacterIdMining = "GetCharactersCharacterIdMining" -> string!
+const EveEsi.Net.Routes.Operation.Industry.GetCorporationCorporationIdMiningExtractions = "GetCorporationCorporationIdMiningExtractions" -> string!
+const EveEsi.Net.Routes.Operation.Industry.GetCorporationCorporationIdMiningObservers = "GetCorporationCorporationIdMiningObservers" -> string!
+const EveEsi.Net.Routes.Operation.Industry.GetCorporationCorporationIdMiningObserversObserverId = "GetCorporationCorporationIdMiningObserversObserverId" -> string!
+const EveEsi.Net.Routes.Operation.Industry.GetCorporationsCorporationIdIndustryJobs = "GetCorporationsCorporationIdIndustryJobs" -> string!
+const EveEsi.Net.Routes.Operation.Industry.GetIndustryFacilities = "GetIndustryFacilities" -> string!
+const EveEsi.Net.Routes.Operation.Industry.GetIndustrySystems = "GetIndustrySystems" -> string!
+const EveEsi.Net.Routes.Operation.Insurance.GetInsurancePrices = "GetInsurancePrices" -> string!
+const EveEsi.Net.Routes.Operation.Killmails.GetCharactersCharacterIdKillmailsRecent = "GetCharactersCharacterIdKillmailsRecent" -> string!
+const EveEsi.Net.Routes.Operation.Killmails.GetCorporationsCorporationIdKillmailsRecent = "GetCorporationsCorporationIdKillmailsRecent" -> string!
+const EveEsi.Net.Routes.Operation.Killmails.GetKillmailsKillmailIdKillmailHash = "GetKillmailsKillmailIdKillmailHash" -> string!
+const EveEsi.Net.Routes.Operation.Location.GetCharactersCharacterIdLocation = "GetCharactersCharacterIdLocation" -> string!
+const EveEsi.Net.Routes.Operation.Location.GetCharactersCharacterIdOnline = "GetCharactersCharacterIdOnline" -> string!
+const EveEsi.Net.Routes.Operation.Location.GetCharactersCharacterIdShip = "GetCharactersCharacterIdShip" -> string!
+const EveEsi.Net.Routes.Operation.Loyalty.GetCharactersCharacterIdLoyaltyPoints = "GetCharactersCharacterIdLoyaltyPoints" -> string!
+const EveEsi.Net.Routes.Operation.Loyalty.GetLoyaltyStoresCorporationIdOffers = "GetLoyaltyStoresCorporationIdOffers" -> string!
+const EveEsi.Net.Routes.Operation.Mail.DeleteCharactersCharacterIdMailLabelsLabelId = "DeleteCharactersCharacterIdMailLabelsLabelId" -> string!
+const EveEsi.Net.Routes.Operation.Mail.DeleteCharactersCharacterIdMailMailId = "DeleteCharactersCharacterIdMailMailId" -> string!
+const EveEsi.Net.Routes.Operation.Mail.GetCharactersCharacterIdMail = "GetCharactersCharacterIdMail" -> string!
+const EveEsi.Net.Routes.Operation.Mail.GetCharactersCharacterIdMailLabels = "GetCharactersCharacterIdMailLabels" -> string!
+const EveEsi.Net.Routes.Operation.Mail.GetCharactersCharacterIdMailLists = "GetCharactersCharacterIdMailLists" -> string!
+const EveEsi.Net.Routes.Operation.Mail.GetCharactersCharacterIdMailMailId = "GetCharactersCharacterIdMailMailId" -> string!
+const EveEsi.Net.Routes.Operation.Mail.PostCharactersCharacterIdMail = "PostCharactersCharacterIdMail" -> string!
+const EveEsi.Net.Routes.Operation.Mail.PostCharactersCharacterIdMailLabels = "PostCharactersCharacterIdMailLabels" -> string!
+const EveEsi.Net.Routes.Operation.Mail.PutCharactersCharacterIdMailMailId = "PutCharactersCharacterIdMailMailId" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetCharactersCharacterIdOrders = "GetCharactersCharacterIdOrders" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetCharactersCharacterIdOrdersHistory = "GetCharactersCharacterIdOrdersHistory" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetCorporationsCorporationIdOrders = "GetCorporationsCorporationIdOrders" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetCorporationsCorporationIdOrdersHistory = "GetCorporationsCorporationIdOrdersHistory" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetMarketsGroups = "GetMarketsGroups" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetMarketsGroupsMarketGroupId = "GetMarketsGroupsMarketGroupId" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetMarketsPrices = "GetMarketsPrices" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetMarketsRegionIdHistory = "GetMarketsRegionIdHistory" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetMarketsRegionIdOrders = "GetMarketsRegionIdOrders" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetMarketsRegionIdTypes = "GetMarketsRegionIdTypes" -> string!
+const EveEsi.Net.Routes.Operation.Market.GetMarketsStructuresStructureId = "GetMarketsStructuresStructureId" -> string!
+const EveEsi.Net.Routes.Operation.Meta.GetMetaChangelog = "GetMetaChangelog" -> string!
+const EveEsi.Net.Routes.Operation.Meta.GetMetaCompatibilityDates = "GetMetaCompatibilityDates" -> string!
+const EveEsi.Net.Routes.Operation.Meta.GetMetaName = "GetMetaName" -> string!
+const EveEsi.Net.Routes.Operation.Meta.GetMetaStatus = "GetMetaStatus" -> string!
+const EveEsi.Net.Routes.Operation.MilitaryCampaigns.GetCharactersMilitaryCampaignsObjectivesListing = "GetCharactersMilitaryCampaignsObjectivesListing" -> string!
+const EveEsi.Net.Routes.Operation.MilitaryCampaigns.GetCharactersMilitaryCampaignsObjectivesParticipation = "GetCharactersMilitaryCampaignsObjectivesParticipation" -> string!
+const EveEsi.Net.Routes.Operation.MilitaryCampaigns.GetMilitaryCampaignsDetail = "GetMilitaryCampaignsDetail" -> string!
+const EveEsi.Net.Routes.Operation.MilitaryCampaigns.GetMilitaryCampaignsListing = "GetMilitaryCampaignsListing" -> string!
+const EveEsi.Net.Routes.Operation.MilitaryCampaigns.GetMilitaryCampaignsObjectivesDetail = "GetMilitaryCampaignsObjectivesDetail" -> string!
+const EveEsi.Net.Routes.Operation.MilitaryCampaigns.GetMilitaryCampaignsObjectivesListing = "GetMilitaryCampaignsObjectivesListing" -> string!
+const EveEsi.Net.Routes.Operation.ParagonHub.GetCharactersParagonHubSkinr = "GetCharactersParagonHubSkinr" -> string!
+const EveEsi.Net.Routes.Operation.ParagonHub.GetParagonHubSkinr = "GetParagonHubSkinr" -> string!
+const EveEsi.Net.Routes.Operation.ParagonHub.GetParagonHubSkinrAlliances = "GetParagonHubSkinrAlliances" -> string!
+const EveEsi.Net.Routes.Operation.ParagonHub.GetParagonHubSkinrCharacters = "GetParagonHubSkinrCharacters" -> string!
+const EveEsi.Net.Routes.Operation.ParagonHub.GetParagonHubSkinrCorporations = "GetParagonHubSkinrCorporations" -> string!
+const EveEsi.Net.Routes.Operation.PlanetaryInteraction.GetCharactersCharacterIdPlanets = "GetCharactersCharacterIdPlanets" -> string!
+const EveEsi.Net.Routes.Operation.PlanetaryInteraction.GetCharactersCharacterIdPlanetsPlanetId = "GetCharactersCharacterIdPlanetsPlanetId" -> string!
+const EveEsi.Net.Routes.Operation.PlanetaryInteraction.GetCorporationsCorporationIdCustomsOffices = "GetCorporationsCorporationIdCustomsOffices" -> string!
+const EveEsi.Net.Routes.Operation.PlanetaryInteraction.GetUniverseSchematicsSchematicId = "GetUniverseSchematicsSchematicId" -> string!
+const EveEsi.Net.Routes.Operation.Routes.PostRoute = "PostRoute" -> string!
+const EveEsi.Net.Routes.Operation.Search.GetCharactersCharacterIdSearch = "GetCharactersCharacterIdSearch" -> string!
+const EveEsi.Net.Routes.Operation.Skills.GetCharactersCharacterIdAttributes = "GetCharactersCharacterIdAttributes" -> string!
+const EveEsi.Net.Routes.Operation.Skills.GetCharactersCharacterIdSkillqueue = "GetCharactersCharacterIdSkillqueue" -> string!
+const EveEsi.Net.Routes.Operation.Skills.GetCharactersCharacterIdSkills = "GetCharactersCharacterIdSkills" -> string!
+const EveEsi.Net.Routes.Operation.Sovereignty.GetSovereigntyCampaigns = "GetSovereigntyCampaigns" -> string!
+const EveEsi.Net.Routes.Operation.Sovereignty.GetSovereigntySystems = "GetSovereigntySystems" -> string!
+const EveEsi.Net.Routes.Operation.Status.GetStatus = "GetStatus" -> string!
+const EveEsi.Net.Routes.Operation.Structures.GetCharactersStructuresMercenaryDensDetail = "GetCharactersStructuresMercenaryDensDetail" -> string!
+const EveEsi.Net.Routes.Operation.Structures.GetCharactersStructuresMercenaryDensListing = "GetCharactersStructuresMercenaryDensListing" -> string!
+const EveEsi.Net.Routes.Operation.Structures.GetCorporationsStructuresSkyhooksDetail = "GetCorporationsStructuresSkyhooksDetail" -> string!
+const EveEsi.Net.Routes.Operation.Structures.GetCorporationsStructuresSkyhooksListing = "GetCorporationsStructuresSkyhooksListing" -> string!
+const EveEsi.Net.Routes.Operation.Structures.GetCorporationsStructuresSovereigntyHubsDetail = "GetCorporationsStructuresSovereigntyHubsDetail" -> string!
+const EveEsi.Net.Routes.Operation.Structures.GetCorporationsStructuresSovereigntyHubsListing = "GetCorporationsStructuresSovereigntyHubsListing" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseAncestries = "GetUniverseAncestries" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseAsteroidBeltsAsteroidBeltId = "GetUniverseAsteroidBeltsAsteroidBeltId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseBloodlines = "GetUniverseBloodlines" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseCategories = "GetUniverseCategories" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseCategoriesCategoryId = "GetUniverseCategoriesCategoryId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseConstellations = "GetUniverseConstellations" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseConstellationsConstellationId = "GetUniverseConstellationsConstellationId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseFactions = "GetUniverseFactions" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseGraphics = "GetUniverseGraphics" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseGraphicsGraphicId = "GetUniverseGraphicsGraphicId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseGroups = "GetUniverseGroups" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseGroupsGroupId = "GetUniverseGroupsGroupId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseMoonsMoonId = "GetUniverseMoonsMoonId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniversePlanetsPlanetId = "GetUniversePlanetsPlanetId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseRaces = "GetUniverseRaces" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseRegions = "GetUniverseRegions" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseRegionsRegionId = "GetUniverseRegionsRegionId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseStargatesStargateId = "GetUniverseStargatesStargateId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseStarsStarId = "GetUniverseStarsStarId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseStationsStationId = "GetUniverseStationsStationId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseStructures = "GetUniverseStructures" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseStructuresStructureId = "GetUniverseStructuresStructureId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseSystemJumps = "GetUniverseSystemJumps" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseSystemKills = "GetUniverseSystemKills" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseSystems = "GetUniverseSystems" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseSystemsSystemId = "GetUniverseSystemsSystemId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseTypes = "GetUniverseTypes" -> string!
+const EveEsi.Net.Routes.Operation.Universe.GetUniverseTypesTypeId = "GetUniverseTypesTypeId" -> string!
+const EveEsi.Net.Routes.Operation.Universe.PostUniverseIds = "PostUniverseIds" -> string!
+const EveEsi.Net.Routes.Operation.Universe.PostUniverseNames = "PostUniverseNames" -> string!
+const EveEsi.Net.Routes.Operation.UserInterface.PostUiAutopilotWaypoint = "PostUiAutopilotWaypoint" -> string!
+const EveEsi.Net.Routes.Operation.UserInterface.PostUiOpenwindowContract = "PostUiOpenwindowContract" -> string!
+const EveEsi.Net.Routes.Operation.UserInterface.PostUiOpenwindowInformation = "PostUiOpenwindowInformation" -> string!
+const EveEsi.Net.Routes.Operation.UserInterface.PostUiOpenwindowMarketdetails = "PostUiOpenwindowMarketdetails" -> string!
+const EveEsi.Net.Routes.Operation.UserInterface.PostUiOpenwindowNewmail = "PostUiOpenwindowNewmail" -> string!
+const EveEsi.Net.Routes.Operation.Wallet.GetCharactersCharacterIdWallet = "GetCharactersCharacterIdWallet" -> string!
+const EveEsi.Net.Routes.Operation.Wallet.GetCharactersCharacterIdWalletJournal = "GetCharactersCharacterIdWalletJournal" -> string!
+const EveEsi.Net.Routes.Operation.Wallet.GetCharactersCharacterIdWalletTransactions = "GetCharactersCharacterIdWalletTransactions" -> string!
+const EveEsi.Net.Routes.Operation.Wallet.GetCorporationsCorporationIdWallets = "GetCorporationsCorporationIdWallets" -> string!
+const EveEsi.Net.Routes.Operation.Wallet.GetCorporationsCorporationIdWalletsDivisionJournal = "GetCorporationsCorporationIdWalletsDivisionJournal" -> string!
+const EveEsi.Net.Routes.Operation.Wallet.GetCorporationsCorporationIdWalletsDivisionTransactions = "GetCorporationsCorporationIdWalletsDivisionTransactions" -> string!
+const EveEsi.Net.Routes.Operation.Wars.GetWars = "GetWars" -> string!
+const EveEsi.Net.Routes.Operation.Wars.GetWarsWarId = "GetWarsWarId" -> string!
+const EveEsi.Net.Routes.Operation.Wars.GetWarsWarIdKillmails = "GetWarsWarIdKillmails" -> string!
+const EveEsi.Net.Routes.Parameter.Query.AddToBeginning = "add_to_beginning" -> string!
+const EveEsi.Net.Routes.Parameter.Query.Categories = "categories" -> string!
+const EveEsi.Net.Routes.Parameter.Query.ClearOtherWaypoints = "clear_other_waypoints" -> string!
+const EveEsi.Net.Routes.Parameter.Query.ContactIds = "contact_ids" -> string!
+const EveEsi.Net.Routes.Parameter.Query.ContractId = "contract_id" -> string!
+const EveEsi.Net.Routes.Parameter.Query.CorporationId = "corporation_id" -> string!
+const EveEsi.Net.Routes.Parameter.Query.DestinationId = "destination_id" -> string!
+const EveEsi.Net.Routes.Parameter.Query.Filter = "filter" -> string!
+const EveEsi.Net.Routes.Parameter.Query.FromEvent = "from_event" -> string!
+const EveEsi.Net.Routes.Parameter.Query.FromId = "from_id" -> string!
+const EveEsi.Net.Routes.Parameter.Query.IncludeCompleted = "include_completed" -> string!
+const EveEsi.Net.Routes.Parameter.Query.LabelIds = "label_ids" -> string!
+const EveEsi.Net.Routes.Parameter.Query.Labels = "labels" -> string!
+const EveEsi.Net.Routes.Parameter.Query.LastMailId = "last_mail_id" -> string!
+const EveEsi.Net.Routes.Parameter.Query.MaxWarId = "max_war_id" -> string!
+const EveEsi.Net.Routes.Parameter.Query.OrderType = "order_type" -> string!
+const EveEsi.Net.Routes.Parameter.Query.Search = "search" -> string!
+const EveEsi.Net.Routes.Parameter.Query.Standing = "standing" -> string!
+const EveEsi.Net.Routes.Parameter.Query.State = "state" -> string!
+const EveEsi.Net.Routes.Parameter.Query.Strict = "strict" -> string!
+const EveEsi.Net.Routes.Parameter.Query.SystemId = "system_id" -> string!
+const EveEsi.Net.Routes.Parameter.Query.TargetId = "target_id" -> string!
+const EveEsi.Net.Routes.Parameter.Query.TypeId = "type_id" -> string!
+const EveEsi.Net.Routes.Parameter.Query.Watched = "watched" -> string!
+const EveEsi.Net.Routes.Parameter.Route.AccessListId = "access_list_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.AllianceId = "alliance_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.AsteroidBeltId = "asteroid_belt_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.AttributeId = "attribute_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.CampaignId = "campaign_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.CategoryId = "category_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.CharacterId = "character_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.ConstellationId = "constellation_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.ContractId = "contract_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.CorporationId = "corporation_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.DestinationSystemId = "destination_system_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.Division = "division" -> string!
+const EveEsi.Net.Routes.Parameter.Route.EffectId = "effect_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.EventId = "event_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.FittingId = "fitting_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.FleetId = "fleet_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.GraphicId = "graphic_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.GroupId = "group_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.ItemId = "item_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.JobId = "job_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.KillmailHash = "killmail_hash" -> string!
+const EveEsi.Net.Routes.Parameter.Route.KillmailId = "killmail_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.LabelId = "label_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.MailId = "mail_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.MarketGroupId = "market_group_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.MemberId = "member_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.MercenaryDenId = "mercenary_den_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.MoonId = "moon_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.ObjectiveId = "objective_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.ObserverId = "observer_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.OperationId = "operation_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.OriginSystemId = "origin_system_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.PlanetId = "planet_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.ProjectId = "project_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.RegionId = "region_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.SchematicId = "schematic_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.SkinrId = "skinr_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.SkyhookId = "skyhook_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.SovereigntyHubId = "sovereignty_hub_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.SquadId = "squad_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.StarbaseId = "starbase_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.StargateId = "stargate_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.StarId = "star_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.StationId = "station_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.StructureId = "structure_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.SystemId = "system_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.TypeId = "type_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.WarId = "war_id" -> string!
+const EveEsi.Net.Routes.Parameter.Route.WingId = "wing_id" -> string!
+EveEsi.Net.Routes.EsiRoutes
+EveEsi.Net.Routes.EsiSpec
+EveEsi.Net.Routes.Operation
+EveEsi.Net.Routes.Operation.AccessList
+EveEsi.Net.Routes.Operation.Activities
+EveEsi.Net.Routes.Operation.Alliance
+EveEsi.Net.Routes.Operation.Assets
+EveEsi.Net.Routes.Operation.Calendar
+EveEsi.Net.Routes.Operation.Character
+EveEsi.Net.Routes.Operation.Clones
+EveEsi.Net.Routes.Operation.Contacts
+EveEsi.Net.Routes.Operation.Contracts
+EveEsi.Net.Routes.Operation.Corporation
+EveEsi.Net.Routes.Operation.CorporationProjects
+EveEsi.Net.Routes.Operation.Cosmetics
+EveEsi.Net.Routes.Operation.Dogma
+EveEsi.Net.Routes.Operation.FactionWarfare
+EveEsi.Net.Routes.Operation.Fittings
+EveEsi.Net.Routes.Operation.Fleets
+EveEsi.Net.Routes.Operation.FreelanceJobs
+EveEsi.Net.Routes.Operation.Incursions
+EveEsi.Net.Routes.Operation.Industry
+EveEsi.Net.Routes.Operation.Insurance
+EveEsi.Net.Routes.Operation.Killmails
+EveEsi.Net.Routes.Operation.Location
+EveEsi.Net.Routes.Operation.Loyalty
+EveEsi.Net.Routes.Operation.Mail
+EveEsi.Net.Routes.Operation.Market
+EveEsi.Net.Routes.Operation.Meta
+EveEsi.Net.Routes.Operation.MilitaryCampaigns
+EveEsi.Net.Routes.Operation.ParagonHub
+EveEsi.Net.Routes.Operation.PlanetaryInteraction
+EveEsi.Net.Routes.Operation.Routes
+EveEsi.Net.Routes.Operation.Search
+EveEsi.Net.Routes.Operation.Skills
+EveEsi.Net.Routes.Operation.Sovereignty
+EveEsi.Net.Routes.Operation.Status
+EveEsi.Net.Routes.Operation.Structures
+EveEsi.Net.Routes.Operation.Universe
+EveEsi.Net.Routes.Operation.UserInterface
+EveEsi.Net.Routes.Operation.Wallet
+EveEsi.Net.Routes.Operation.Wars
+EveEsi.Net.Routes.Parameter
+EveEsi.Net.Routes.Parameter.Query
+EveEsi.Net.Routes.Parameter.Route
+static EveEsi.Net.Routes.EsiRoutes.All.get -> System.Collections.Generic.IReadOnlyDictionary<string!, EveEsi.Net.Abstractions.Routing.RouteDefinition!>!

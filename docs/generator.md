@@ -145,33 +145,51 @@ public static partial class Operation
     {
         public const string CharacterAssets = "GetCharactersCharacterIdAssets";
     }
-    public static partial class Characters
+    public static partial class Character
     {
-        public const string CharacterInfo = "GetCharactersCharacterId";
+        public const string CharacterInfo = "GetCharactersDetail";
     }
 }
 ```
 - The value is the spec's `operationId`, unchanged. The **name** comes from the `operationConstants` section of `generator.json`
-  (`"GetCharactersCharacterId": "CharacterInfo"`), falling back to a convention (the operation ID without its HTTP
-  verb and redundant tag words). Unmapped names are reported like other names.
+  (`"GetCharactersDetail": "CharacterInfo"`). Unmapped operations use the operation ID itself as the name (verb
+  included, since GET and POST on one path would otherwise collide). The generator prints how many are unmapped.
+- Two operations mapping to the same name in one tag class, a mapped name that isn't an identifier, or a mapping for an
+  operation ID that no longer exists all fail generation.
 - A tag's class name matches its service (`Operation.Characters` ↔ `ICharacters`).
 
 ## Route table
-One `EsiRoutes.g.cs` in `EveEsi.Net.Routes/Generated/`: a single static dictionary from operation ID to
-`RouteDefinition`, built once and keyed by the `Operation.*` constants:
+`EsiRoutes.All` is a single static dictionary from operation ID to `RouteDefinition`, keyed by the `Operation.*`
+constants. It's generated **split by tag** so each file stays small and a spec change only touches the tags it affects:
+
+- `EsiRoutes.g.cs`: the aggregator. It calls each tag's registration method explicitly; there is no reflection or
+  assembly scanning (trim and AOT safe), so adding a tag is just another generated line.
+- `EsiRoutes.<Tag>.g.cs`: one private `Register<Tag>` method per tag, adding that tag's routes (ordered by operation ID).
+  `routes.Add` throws on a duplicate key.
 
 ```csharp
-public static partial class EsiRoutes
+// EsiRoutes.g.cs
+public static IReadOnlyDictionary<string, RouteDefinition> All { get; } = Build();
+
+private static FrozenDictionary<string, RouteDefinition> Build()
 {
-    public static IReadOnlyDictionary<string, RouteDefinition> All { get; } = new Dictionary<string, RouteDefinition>
-    {
-        [Operation.Assets.CharacterAssets] = new(
-            Operation.Assets.CharacterAssets, HttpMethod.Get, $"/characters/{{{Parameter.Route.CharacterId}}}/assets",
-            scope: "esi-assets.read_assets.v1",
-            cache: new RouteCacheHints(TimeSpan.FromSeconds(3600), RouteCacheMode.TtlBased),
-            rateLimit: new RateLimitPolicy("char-asset", 1800, TimeSpan.FromMinutes(15))),
-        // … one entry per operation, ordered by operationId
-    }.ToFrozenDictionary(StringComparer.Ordinal);
+    var routes = new Dictionary<string, RouteDefinition>(StringComparer.Ordinal);
+    RegisterAccessList(routes);
+    RegisterAssets(routes);
+    // … one line per tag
+    return routes.ToFrozenDictionary(StringComparer.Ordinal);
+}
+
+// EsiRoutes.Assets.g.cs
+private static void RegisterAssets(Dictionary<string, RouteDefinition> routes)
+{
+    routes.Add(Operation.Assets.GetCharactersCharacterIdAssets, new(
+        Operation.Assets.GetCharactersCharacterIdAssets,
+        HttpMethod.Get,
+        $"/characters/{{{Parameter.Route.CharacterId}}}/assets",
+        scope: "esi-assets.read_assets.v1",
+        cache: new RouteCacheHints(TimeSpan.FromSeconds(3600), RouteCacheMode.TtlBased),
+        rateLimit: new RateLimitPolicy("char-asset", 1800, TimeSpan.FromMinutes(15))));
 }
 ```
 Mapped from the spec: `operationId` → `Operation.*` constant, used as key and `OperationId`, method + path → `Method` / `PathTemplate`,
@@ -223,8 +241,26 @@ then optional query parameters, then the pagination parameter (`int? page` or `C
 - Every DTO, enum, union and request-body type is registered in the source-generated `EsiJsonContext`.
 - XML doc comments come from the spec's `summary` / `description`.
 
+## Running it
+```
+dotnet run --project tools/EveEsi.Net.Generator -- --spec openapi.json --out src/
+dotnet format analyzers src/EveEsi.Net.Routes/EveEsi.Net.Routes.csproj --diagnostics RS0016 --severity info --include-generated
+```
+- The first command writes `*.g.cs` and deletes stale `*.g.cs` in the directories it owns. Exit codes: `0` success,
+  `1` bad arguments or missing files, `2` generation failed (the message says what to map in `generator.json`).
+- The second records new public API in `PublicAPI.Unshipped.txt`. The analyzer's fix skips generated code unless
+  `--include-generated` is passed. Repeat it for each project with generated code.
+
+## Tests
+`tests/EveEsi.Net.Generator.Tests` runs the generator on small fixture specs (`Fixtures/`) and compares the output
+with committed snapshots (`Snapshots/`, excluded from compilation). After an intended output change, regenerate the
+snapshots with `UPDATE_SNAPSHOTS=1 dotnet test tests/EveEsi.Net.Generator.Tests` and review the diff. Every failure
+mode has its own test. `EveEsi.Net.Routes.Tests` checks the committed real output (keys match operation IDs, every
+placeholder is a known route parameter).
+
 ## Updating to a new spec
 1. Replace `openapi.json`.
-2. Run the generator. Fix any failures by updating `generator.json` (names, enum members, overrides).
+2. Run the generator and the public API step above. Fix any failures by updating `generator.json` (names, enum
+   members, overrides).
 3. Review the diff: new endpoints, changed fields, removed routes.
 4. Run tests, then commit spec + config + output together.

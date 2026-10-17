@@ -171,7 +171,7 @@ were machinery without a purpose; services already carry the types. Pairs are al
 
 ### 29. One route table keyed by operation ID; routes hold only method, path, scope, cache and rate limit
 All routes live in one generated static dictionary, `EsiRoutes.All` (`operationId` → `RouteDefinition`).
-Operation IDs exist as generated `const string`s grouped by tag (`Operation.Characters.CharacterInfo = "GetCharactersCharacterId"`);
+Operation IDs exist as generated `const string`s grouped by tag (`Operation.Character.CharacterInfo = "GetCharactersDetail"`);
 services pass the constant to `CreateEsiClient`, and the factory looks the route up (unknown ID → `ArgumentException`).
 `RouteDefinition` holds the operation ID, method, path template, an optional scope, cache hints and rate limit. Query
 parameter lists, pagination style, body requirement and roles are gone; `RouteBuilder` is gone.

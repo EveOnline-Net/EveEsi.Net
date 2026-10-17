@@ -4,4 +4,11 @@
     <ProjectReference Include="../../tools/EveEsi.Net.Generator/EveEsi.Net.Generator.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Expected generator output: compared as text, never compiled here. -->
+    <Compile Remove="Snapshots/**" />
+    <None Include="Snapshots/**" />
+    <None Include="Fixtures/**" />
+  </ItemGroup>
+
 </Project>

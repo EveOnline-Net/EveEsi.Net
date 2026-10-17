@@ -20,7 +20,7 @@ Full design: [docs/generator.md](../../docs/generator.md).
 
 ## Spec → code mapping
 - **Tag** → service (`I<Tag>`) and `Operation.<Tag>` class. **`operationId`** → `const string` in `Operation.<Tag>.<Name>`
-  (e.g. `Operation.Characters.CharacterInfo = "GetCharactersCharacterId"`), the key in the single `EsiRoutes.All` table.
+  (e.g. `Operation.Character.CharacterInfo = "GetCharactersDetail"`), the key in the single `EsiRoutes.All` table.
   Services pass the constant, never a string literal.
 - **Path/query params** → typed method params, camelCase (`character_id` → `characterId`), and a `const string` name in
   `Parameter.Route` / `Parameter.Query` (also used as the template placeholder and in `.Query(...)` on the route). Pagination params (`page`, `before`, `after`, `limit`) are excluded;

@@ -47,7 +47,8 @@ Query it with targeted scripts or grep (by path, `operationId`, or schema name).
 - Build: `dotnet build`
 - Test: `dotnet test`
 - Format: `dotnet format`
-- Regenerate code from spec: `dotnet run --project tools/EveEsi.Net.Generator -- --spec openapi.json --out src/`
+- Regenerate code from spec: `dotnet run --project tools/EveEsi.Net.Generator -- --spec openapi.json --out src/`,
+  then record API: `dotnet format analyzers <project> --diagnostics RS0016 --severity info --include-generated`
 
 ## Hard rules
 - Never hand-edit `*.g.cs` files. Change the generator or `generator.json`, then regenerate.
