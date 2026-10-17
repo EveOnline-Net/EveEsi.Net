@@ -11,4 +11,12 @@
     <None Include="Fixtures/**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- CI builds map source paths to /_/ (deterministic builds), so [CallerFilePath] can't locate these files. -->
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>ProjectDirectory</_Parameter1>
+      <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+using System.Reflection;
 using EveEsi.Net.Generator.Emit;
 
 namespace EveEsi.Net.Generator.Tests;
@@ -9,7 +9,9 @@ namespace EveEsi.Net.Generator.Tests;
 /// </summary>
 internal static class Snapshot
 {
-    public static string TestDirectory([CallerFilePath] string path = "") => Path.GetDirectoryName(path)!;
+    public static string TestDirectory() =>
+        typeof(Snapshot).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
+            .Single(a => a.Key == "ProjectDirectory").Value!;
 
     public static string Fixture(string name) => File.ReadAllText(Path.Combine(TestDirectory(), "Fixtures", name));
 
