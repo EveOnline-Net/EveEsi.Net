@@ -18,7 +18,8 @@ paths:
 - **Pipeline ordering:** test that the levels run global → service → request, and that the service
   snapshot is taken when the request is created.
 - **Factory validation:** one test per build-time check (unknown operation ID, missing token on a route with a
-  scope, missing route value when the URI is built).
+  scope, missing or unknown route value).
+- **Cancellation:** pass `TestContext.Current.CancellationToken` to async calls (xUnit1051 is an error).
 - **Converters:** round-trip tests with real ESI JSON samples in `TestData/`. Required for each union shape and for
   enum edge cases (unknown value → `Unknown`, unconvertible members such as hex colours or digits).
 - **ID width:** converter and DTO tests include IDs above `int.MaxValue` (e.g. `1_000_000_000_000`).

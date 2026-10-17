@@ -181,7 +181,9 @@ Parameters, pagination (`X-Pages`, `x-pagination`), `requestBody` and `x-require
 parameters, pagination and body are expressed in the service signature; roles aren't used yet.
 Routes carry no types: response and body types are emitted into the **service** (below).
 Shared header parameters (`IfNoneMatch`, `AcceptLanguage`, `CompatibilityDate`, `Tenant`, `IfModifiedSince`)
-are **not** emitted as route parameters. The compatibility date becomes a generated constant the client sends.
+are **not** emitted as route parameters. The compatibility date becomes a generated constant,
+`EsiSpec.CompatibilityDate` in `EveEsi.Net.Routes/Generated/EsiSpec.g.cs`, which `AddEveEsi()` sends as
+`X-Compatibility-Date`. It is not a user option.
 
 ## Services
 One `I<Section>` + `<Section>` per section in `EveEsi.Net/Generated/`. Services are request builders that

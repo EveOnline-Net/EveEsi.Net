@@ -178,3 +178,13 @@ parameter lists, pagination style, body requirement and roles are gone; `RouteBu
 *Why:* parameters, pagination and body are already enforced by the generated service signatures, so describing them
 again on the route was duplication. A flat table keyed by the spec's own identifier is simpler to generate, review
 and look up than nested per-tag route objects; the per-tag constants keep names discoverable and typo-proof. `Client` gets the table through DI, since it can't reference `Routes`.
+
+### 30. Registration owns the HTTP setup; the consumer identifies their app; the compatibility date is fixed
+`AddEveEsi(o => …)` requires `ApplicationName` and `Contact` and builds the `User-Agent` from them plus the library's
+product token (`MyApp/1.2 (admin@example.com) EveEsi.Net/0.1.0`). It configures the typed client's `HttpClient`
+(`BaseAddress`, `User-Agent`, `X-Compatibility-Date`, `X-Tenant`) through `AddHttpClient<EsiHttpClient>`. Nothing else
+sets these headers; `EsiHttpClient` only sends. `X-Compatibility-Date` is the generated `EsiSpec.CompatibilityDate`
+and isn't configurable.
+*Why:* the user agent is the consumer's application, not the library; CCP needs to reach whoever runs it. A library
+version is generated from one spec, so sending any other compatibility date would mismatch the generated types.
+Keeping header setup in registration leaves the HTTP client a plain sender and fails fast on missing identity.
