@@ -59,6 +59,7 @@ and those read badly. `generator.json` maps them:
 ```json
 {
   "operations": { "GetCharactersCharacterIdAssets": "GetCharacterAssets" },
+  "operationConstants": { "GetCharactersCharacterIdAssets": "CharacterAssets" },
   "schemas":    { "CharactersCharacterIdAssetsGetItem": "CharacterAsset" },
   "enums":      { "WalletRefType": { "match": ["<schema path>", "<schema path>"], "members": { } } },
   "unions":     { "CharactersParagonHubSkinrItem/properties/price": "ParagonPrice" },
@@ -133,41 +134,63 @@ public static partial class Parameter
   `p.Query.Set(Parameter.Query.OrderType, OrderTypeConverter.ToWire(orderType))`.
 - Pagination parameters (`page`, `before`, `after`, `limit`) are **not** in the catalogue. `ApplyPagination` handles them.
 
-## Endpoints
-One `Endpoints.<Section>.g.cs` per section in `EveEsi.Net.Routes/Generated/`, built once with `RouteBuilder`
-into static fields:
+## Operation IDs
+`EveEsi.Net.Routes/Generated/Operation.g.cs` is a catalogue of operation IDs as `const string`s, one nested class per
+spec **tag**, so nothing refers to an operation by a raw string:
 
 ```csharp
-public static partial class Endpoints
+public static partial class Operation
 {
     public static partial class Assets
     {
-        public static readonly RouteDefinition CharacterAssets =
-            RouteBuilder.Get("GetCharactersCharacterIdAssets", $"/characters/{{{Parameter.Route.CharacterId}}}/assets")
-                .Pagination(PaginationStyle.Page)
-                .RequiresScope("esi-assets.read_assets.v1")
-                .Cache(TimeSpan.FromSeconds(3600), RouteCacheMode.TtlBased)  // x-cache-age, x-server-cache-mode
-                .RateLimit("char-asset", 1800, TimeSpan.FromMinutes(15))      // x-rate-limit
-                .Build();
+        public const string CharacterAssets = "GetCharactersCharacterIdAssets";
+    }
+    public static partial class Characters
+    {
+        public const string CharacterInfo = "GetCharactersCharacterId";
     }
 }
 ```
-Mapped from the spec: `operationId` → `OperationId`, `security` → scopes, `x-required-roles` → roles,
-`x-cache-age` / `x-server-cache-mode` / `x-cache-mode` / `x-tombstone-ttl` → cache hints,
-`x-rate-limit` (`group`, `max-tokens`, `window-size`) → rate-limit policy, `requestBody` → `.Body(BodyRequirement.Required)`,
-`X-Pages` header → `Page`, `x-pagination: cursor` → `Cursor`.
+- The value is the spec's `operationId`, unchanged. The **name** comes from the `operationConstants` section of `generator.json`
+  (`"GetCharactersCharacterId": "CharacterInfo"`), falling back to a convention (the operation ID without its HTTP
+  verb and redundant tag words). Unmapped names are reported like other names.
+- A tag's class name matches its service (`Operation.Characters` ↔ `ICharacters`).
+
+## Route table
+One `EsiRoutes.g.cs` in `EveEsi.Net.Routes/Generated/`: a single static dictionary from operation ID to
+`RouteDefinition`, built once and keyed by the `Operation.*` constants:
+
+```csharp
+public static partial class EsiRoutes
+{
+    public static IReadOnlyDictionary<string, RouteDefinition> All { get; } = new Dictionary<string, RouteDefinition>
+    {
+        [Operation.Assets.CharacterAssets] = new(
+            Operation.Assets.CharacterAssets, HttpMethod.Get, $"/characters/{{{Parameter.Route.CharacterId}}}/assets",
+            scope: "esi-assets.read_assets.v1",
+            cache: new RouteCacheHints(TimeSpan.FromSeconds(3600), RouteCacheMode.TtlBased),
+            rateLimit: new RateLimitPolicy("char-asset", 1800, TimeSpan.FromMinutes(15))),
+        // … one entry per operation, ordered by operationId
+    }.ToFrozenDictionary(StringComparer.Ordinal);
+}
+```
+Mapped from the spec: `operationId` → `Operation.*` constant, used as key and `OperationId`, method + path → `Method` / `PathTemplate`,
+`security` → `scope`, `x-cache-age` / `x-server-cache-mode` / `x-cache-mode` / `x-tombstone-ttl` → `cache`,
+`x-rate-limit` (`group`, `max-tokens`, `window-size`) → `rateLimit`.
+Parameters, pagination (`X-Pages`, `x-pagination`), `requestBody` and `x-required-roles` are **not** on the route:
+parameters, pagination and body are expressed in the service signature; roles aren't used yet.
 Routes carry no types: response and body types are emitted into the **service** (below).
 Shared header parameters (`IfNoneMatch`, `AcceptLanguage`, `CompatibilityDate`, `Tenant`, `IfModifiedSince`)
 are **not** emitted as route parameters. The compatibility date becomes a generated constant the client sends.
 
 ## Services
 One `I<Section>` + `<Section>` per section in `EveEsi.Net/Generated/`. Services are request builders that
-derive from `EsiService`. Each operation becomes a method that calls the factory and returns `IEsiRequest<T>`:
+derive from `EsiService<I<Tag>>`. Each operation becomes a method that calls the factory and returns `IEsiRequest<T>`:
 
 ```csharp
 public IEsiRequest<IReadOnlyList<CharacterAsset>> GetCharacterAssets(long characterId, string token, int? page = null)
     => CreateEsiClient<IReadOnlyList<CharacterAsset>>(
-        Endpoints.Assets.CharacterAssets,
+        Operation.Assets.CharacterAssets,
         EsiJsonContext.Default.IReadOnlyListCharacterAsset,
         p =>
         {
@@ -179,7 +202,8 @@ public IEsiRequest<IReadOnlyList<CharacterAsset>> GetCharacterAssets(long charac
 Signature order: route parameters, required query parameters, body, `string token` (secured only),
 then optional query parameters, then the pagination parameter (`int? page` or `CursorPage? cursor`).
 
-- **Grouping:** one service, one `Endpoints.<Tag>` class and one file per spec tag. Never group by URL segment.
+- **Grouping:** one service and one file per spec tag. Never group by URL segment. Each method passes its
+  operation ID as the `Operation.<Tag>.<Name>` constant, never a string literal.
 - **Middleware:** each interface is emitted as `I<Tag> : IEsiService<I<Tag>>`, so it gets both `Use` overloads
   (instance and async callback) and `Use` returns `I<Tag>`.
 - **Response type:** the method's return type `IEsiRequest<T>`, the explicit generic in `CreateEsiClient<T>(...)` and

@@ -19,15 +19,18 @@ Full design: [docs/generator.md](../../docs/generator.md).
 - The spec is pinned to one compatibility date (`components/parameters/CompatibilityDate`). Don't hand-edit it.
 
 ## Spec → code mapping
-- **Tag** → service (`I<Tag>`) and endpoint class (`Endpoints.<Tag>`).
-- **Path/query params** → typed method params, camelCase (`character_id` → `characterId`), and a typed key in
-  `Parameter.Route` / `Parameter.Query`. Pagination params (`page`, `before`, `after`, `limit`) are excluded;
+- **Tag** → service (`I<Tag>`) and `Operation.<Tag>` class. **`operationId`** → `const string` in `Operation.<Tag>.<Name>`
+  (e.g. `Operation.Characters.CharacterInfo = "GetCharactersCharacterId"`), the key in the single `EsiRoutes.All` table.
+  Services pass the constant, never a string literal.
+- **Path/query params** → typed method params, camelCase (`character_id` → `characterId`), and a `const string` name in
+  `Parameter.Route` / `Parameter.Query` (also used as the template placeholder and in `.Query(...)` on the route). Pagination params (`page`, `before`, `after`, `limit`) are excluded;
   they become `int? page` / `CursorPage? cursor` and go through `ApplyPagination`.
-- **`requestBody`** → body parameter on the service method, `p.Body(value, EsiJsonContext.Default.X)`, and `BodyRequirement` on the route.
+- **`requestBody`** → body parameter on the service method and `p.Body(value, EsiJsonContext.Default.X)`. Not on the route.
 - **Response schema** → `IEsiRequest<T>` + `JsonTypeInfo<T>` in the service. Routes carry no types. No response body → `EsiNoContent`.
-- **`security`** → required `string token` parameter + `RequiresScope(...)` on the route.
-- **`x-required-roles`** → `RequiresRole(...)`. **`x-cache-age` / `x-cache-mode`** → cache hints.
-  **`x-rate-limit`** → `RateLimitGroup(...)`. **`X-Pages`** → `PaginationStyle.Page`. **`x-pagination: cursor`** → `PaginationStyle.Cursor`.
+- **`security`** → required `string token` parameter + `scope` on the route.
+- **`x-cache-age` / `x-server-cache-mode` / `x-tombstone-ttl`** → `cache` on the route. **`x-rate-limit`** → `rateLimit`.
+  **`X-Pages`** → `int? page` on the service; **`x-pagination: cursor`** → `CursorPage? cursor`. Neither is on the route.
+  **`x-required-roles`** is not mapped yet.
 - **Shared header params** (`IfNoneMatch`, `IfModifiedSince`, `AcceptLanguage`, `CompatibilityDate`, `Tenant`)
   never become method or route parameters.
 - **`default` response** (`Error` schema) → `EsiError` on a failed result. It's never a return type.

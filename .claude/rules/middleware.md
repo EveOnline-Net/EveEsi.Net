@@ -11,10 +11,11 @@ paths:
 Full design: [docs/architecture.md](../../docs/architecture.md).
 
 ## Factory and request building
-- `IEsiClientFactory.CreateEsiClient<T>(endpoint, responseType, configure, token, serviceMiddleware)` runs the configurator and **validates at
-  build time**: missing or foreign route parameters, pagination type vs `PaginationStyle`, missing token on a
-  secured route, unexpected or missing body. These are programmer errors and throw.
-- Services never do validation or HTTP themselves. They only call the factory (through the `EsiService` base).
+- `IEsiClientFactory.CreateEsiClient<T>(operationId, responseType, configure, token, serviceMiddleware)` (operation ID
+  from the `Operation.<Tag>.<Name>` constants) looks the
+  route up in the `EsiRoutes` table and runs the configurator. It throws on an unknown operation ID and on a missing
+  token for a route with a scope. Parameters, pagination and body are enforced by the generated service signatures.
+- Services never do validation or HTTP themselves. They only call the factory (through the `EsiService<TSelf>` base).
 - Tokens are `string?`. Middleware that needs claims decodes the JWT payload (base64url, no validation).
 
 ## Pipeline
@@ -40,7 +41,7 @@ Full design: [docs/architecture.md](../../docs/architecture.md).
 - To short-circuit, set `context.Response` and return without calling `next`.
 - Call `next` at most once, except in `RetryMiddleware`.
 - Honour `context.CancellationToken`.
-- Read endpoint facts (scopes, roles, cache hints, rate-limit group, pagination) from `context.Route`.
+- Read endpoint facts (operation ID, scope, cache hints, rate limit) from `context.Route`.
   Never parse the path to work them out.
 - Standard middleware is opt-in and can't be required by the core client.
 
