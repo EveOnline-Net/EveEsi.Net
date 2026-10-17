@@ -1,0 +1,34 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="generator.json" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/EveEsi.Net.Abstractions/EveEsi.Net.Abstractions.csproj" />
+    <Project Path="src/EveEsi.Net.Caching.Distributed/EveEsi.Net.Caching.Distributed.csproj" />
+    <Project Path="src/EveEsi.Net.Caching.Redis/EveEsi.Net.Caching.Redis.csproj" />
+    <Project Path="src/EveEsi.Net.Client/EveEsi.Net.Client.csproj" />
+    <Project Path="src/EveEsi.Net.Middleware/EveEsi.Net.Middleware.csproj" />
+    <Project Path="src/EveEsi.Net.Models/EveEsi.Net.Models.csproj" />
+    <Project Path="src/EveEsi.Net.Routes/EveEsi.Net.Routes.csproj" />
+    <Project Path="src/EveEsi.Net/EveEsi.Net.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/EveEsi.Net.Abstractions.Tests/EveEsi.Net.Abstractions.Tests.csproj" />
+    <Project Path="tests/EveEsi.Net.Caching.Distributed.Tests/EveEsi.Net.Caching.Distributed.Tests.csproj" />
+    <Project Path="tests/EveEsi.Net.Caching.Redis.Tests/EveEsi.Net.Caching.Redis.Tests.csproj" />
+    <Project Path="tests/EveEsi.Net.Client.Tests/EveEsi.Net.Client.Tests.csproj" />
+    <Project Path="tests/EveEsi.Net.Generator.Tests/EveEsi.Net.Generator.Tests.csproj" />
+    <Project Path="tests/EveEsi.Net.Middleware.Tests/EveEsi.Net.Middleware.Tests.csproj" />
+    <Project Path="tests/EveEsi.Net.Models.Tests/EveEsi.Net.Models.Tests.csproj" />
+    <Project Path="tests/EveEsi.Net.Routes.Tests/EveEsi.Net.Routes.Tests.csproj" />
+    <Project Path="tests/EveEsi.Net.Tests/EveEsi.Net.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/EveEsi.Net.Generator/EveEsi.Net.Generator.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Standard opt-in middleware for EveEsi.Net: ETags, caching, scope checks, language, rate limits, retries.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../EveEsi.Net.Abstractions/EveEsi.Net.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

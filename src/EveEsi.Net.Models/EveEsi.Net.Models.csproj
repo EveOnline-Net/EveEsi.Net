@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>ESI data transfer objects, enums, unions and the source-generated JSON context for EveEsi.Net.</Description>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../tools/EveEsi.Net.Generator/EveEsi.Net.Generator.csproj" />
+  </ItemGroup>
+
+</Project>

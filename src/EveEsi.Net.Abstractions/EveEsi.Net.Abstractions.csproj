@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Contracts for EveEsi.Net: route definitions, middleware, requests, results and cache store abstractions.</Description>
+  </PropertyGroup>
+
+</Project>
