@@ -126,7 +126,9 @@ Which parameters, pagination and body an endpoint takes is enforced by the **gen
 not by the route. The factory only checks what the route knows (programmer errors, thrown inside `CreateEsiClient`):
 - The operation ID isn't in the route table → `ArgumentException`.
 - The endpoint has a scope and `token` is null or empty → `ArgumentException`.
-- A placeholder in the path template has no route value → `InvalidOperationException` when the URI is built.
+- A placeholder in the path template has no route value, or a route value is set for a name the template doesn't
+  have, or a route value is a list → `ArgumentException`.
+- `ApplyPagination(page)` with `page < 1` → `ArgumentOutOfRangeException`.
 
 ### Lifetime and service-level middleware
 - Services are registered as **transient**.
@@ -218,12 +220,48 @@ All opt-in. The core client sends a call without any of them.
 
 The in-memory `IEsiCacheStore` ships here. Other stores ship as `EveEsi.Net.Caching.*` packages.
 
-### What is *not* middleware
-The client itself always sets the headers the API requires:
-- `X-Compatibility-Date`: from the pinned spec (generated constant).
-- `X-Tenant`: from `EsiClientOptions.Tenant`, default `tranquility`.
-- `Authorization: Bearer <token>`: when a token was passed.
-- `User-Agent`: from `EsiClientOptions.UserAgent`. CCP asks for contact info here.
+### What is *not* middleware: service registration
+The consumer registers the library once, identifying **their** application. The consumer is the user agent, not the library:
+
+```csharp
+services.AddEveEsi(o =>
+{
+    o.ApplicationName = "MyApp/1.2";            // required
+    o.Contact = "admin@example.com";            // required: email, website, EVE character or Discord
+    o.Use<ETagMiddleware>();                    // global middleware (optional)
+});
+```
+
+`AddEveEsi()` configures the typed client's `HttpClient` through `AddHttpClient<EsiHttpClient>(...)`. That is the only
+place the ESI headers are set; no service or client constructor touches them:
+- `BaseAddress`: `https://esi.evetech.net/` (`EsiOptions.BaseAddress` to override).
+- `User-Agent`: built from the consumer's values plus the library's own product token:
+  `MyApp/1.2 (admin@example.com) EveEsi.Net/0.1.0`. CCP asks for this so they can contact the app's operator.
+- `X-Compatibility-Date`: **not configurable**. A generated constant, `EsiSpec.CompatibilityDate`, taken from the spec
+  the library was generated from. A library version speaks exactly one compatibility date.
+- `X-Tenant`: `EsiOptions.Tenant`, default `tranquility`.
+
+A missing `ApplicationName` or `Contact` fails inside `AddEveEsi()` (`InvalidOperationException`), at startup rather
+than on the first call.
+
+`Authorization: Bearer <token>` is the one per-request header the client adds itself, from `context.AccessToken` at
+send time. Default headers apply only when the request doesn't set the same header, so middleware **can** override
+them via `context.Request.Headers` (e.g. a different `X-Tenant` for one call).
+
+### Client internals (EveEsi.Net.Client)
+`EveEsi.Net.Client` has no public types. The factory, request, pipeline, decoder, route table and typed HTTP client are
+`internal sealed`; `EveEsi.Net` wires them up through `InternalsVisibleTo`.
+- **`EsiHttpClient`** is a typed client (`AddHttpClient<EsiHttpClient>`). It is the end of every pipeline: it builds a
+  fresh `HttpRequestMessage` from the `EsiContext` (relative URI, middleware headers, body, bearer token), sends it and
+  stores the raw `EsiResponse` on the context. It configures nothing itself.
+- **Lifetimes:** typed clients are transient, so the factory that holds one is registered **transient** too (like the
+  services). Requests hold it only for their own short life, so the handler still rotates.
+
+Outcomes:
+- 2xx → value decoded with the service's `JsonTypeInfo<T>` (or `EsiNoContent`); empty, `null` or invalid JSON → `Deserialization`.
+- 304 → `NotModified`. Other statuses → `Http`, with ESI's `{"error", "details"}` body parsed (non-JSON bodies kept as `RawBody`).
+- `HttpRequestException`, `IOException` and `HttpClient` timeouts → `Transport`. Only the caller's own cancellation throws.
+- A middleware that neither calls `next` nor sets `context.Response` → `InvalidOperationException` (a bug, not a result).
 
 ## Pagination
 ESI has two styles, and the library leaves the looping to the caller:

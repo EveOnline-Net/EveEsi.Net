@@ -12,7 +12,12 @@ Typed, middleware-driven .NET client for [EVE Online's ESI API](https://esi.evet
 - Targets `net8.0`, `net9.0` and `net10.0`. Trim and AOT compatible.
 
 ```csharp
-services.AddEveEsi(o => o.Use<ETagMiddleware>());
+services.AddEveEsi(o =>
+{
+    o.ApplicationName = "MyApp/1.2";       // your app, sent in the User-Agent
+    o.Contact = "admin@example.com";       // how CCP can reach you
+    o.Use<ETagMiddleware>();
+});
 
 var result = await assets
     .GetCharacterAssets(characterId, token)
