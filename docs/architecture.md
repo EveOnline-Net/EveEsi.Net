@@ -54,10 +54,10 @@ Caching.*     → Abstractions
 
 | Type | Purpose |
 |---|---|
-| `RouteDefinition` / `RouteDefinition<TResponse>` | Static, immutable description of one endpoint: operation ID, method, path template (route parameter names come from its placeholders), query parameter names and which are required, body type info, required scopes, required roles, cache hints, rate-limit policy, pagination style, response type info. Carries the source-generated `JsonTypeInfo` for body and response, so `Client` can (de)serialize without referencing `Models`. Validated on construction. |
+| `RouteDefinition` | Static, immutable description of one endpoint: operation ID, method, path template (route parameter names come from its placeholders), query parameter names and which are required, body requirement, required scopes, required roles, cache hints, rate-limit policy, pagination style. Says nothing about types. Validated on construction. |
 | `IEsiParameterValues` | `Set(name, value)`, used for both `p.Route` and `p.Query`. Names are the generated `Parameter.*` string constants. `null` means "not sent". |
 | `CursorPage` | Cursor pagination input: `Before`, `After` (strings), `Limit` (`long?`). |
-| `IEsiClientFactory` | Creates a per-request `IEsiRequest<T>` from an endpoint, a parameter configurator, an optional token and the calling service's middleware snapshot. |
+| `IEsiClientFactory` | Creates a per-request `IEsiRequest<T>` from an endpoint, the response's `JsonTypeInfo<T>` (omitted for no-content endpoints, giving `IEsiRequest<EsiNoContent>`), a parameter configurator, an optional token and the calling service's middleware snapshot. |
 | `IEsiRequestParameters` | What the configurator lambda receives: `Route`, `Query`, `Body`, `ApplyPagination(...)`. A `null` query value means "not sent". |
 | `IEsiRequest<T>` | The built, ready-to-run request: `.Use(...)`, `.ExecuteAsync(ct)`. The only public request type; the implementation is `internal sealed` in `EveEsi.Net.Client`. Service methods and the factory always return the interface. |
 | `EsiContext` | Mutable state passed through the pipeline: route, outgoing `EsiRequestMessage`, access token (`string?`, settable), `EsiResponse` (once there is one), `Items` bag, `CancellationToken`. |
@@ -78,26 +78,33 @@ an `IEsiRequest<T>` through `IEsiClientFactory`. It never sends anything or hold
 
 ```csharp
 public IEsiRequest<IReadOnlyList<CharacterAsset>> GetCharacterAssets(long characterId, string token, int? page = null)
-    => factory.CreateEsiClient<IReadOnlyList<CharacterAsset>>(Endpoints.Assets.CharacterAssets, p =>
-    {
-        p.Route.Set(Parameter.Route.CharacterId, characterId);
-        p.ApplyPagination(page);
-    }, token);
+    => CreateEsiClient<IReadOnlyList<CharacterAsset>>(
+        Endpoints.Assets.CharacterAssets,
+        EsiJsonContext.Default.IReadOnlyListCharacterAsset,
+        p =>
+        {
+            p.Route.Set(Parameter.Route.CharacterId, characterId);
+            p.ApplyPagination(page);
+        },
+        token);
 
-public IEsiRequest<SkinrListings> GetParagonHubSkinr(long characterId, string token, CursorPage? cursor = null)
-    => factory.CreateEsiClient<SkinrListings>(Endpoints.ParagonHub.CharacterSkinr, p =>
+public IEsiRequest<EsiNoContent> SetAutopilotWaypoint(long destinationId, bool addToBeginning, bool clearOtherWaypoints, string token)
+    => CreateEsiClient(Endpoints.UserInterface.AutopilotWaypoint, p =>   // no response body: no type info
     {
-        p.Route.Set(Parameter.Route.CharacterId, characterId);
-        p.ApplyPagination(cursor);
+        p.Query.Set(Parameter.Query.DestinationId, destinationId);
+        p.Query.Set(Parameter.Query.AddToBeginning, addToBeginning);
+        p.Query.Set(Parameter.Query.ClearOtherWaypoints, clearOtherWaypoints);
     }, token);
 ```
+`CreateEsiClient` here is the `EsiService` base helper: it forwards to `IEsiClientFactory` with the service's
+middleware snapshot.
 
 ### Building blocks
-- **Response type `T`**: set by the service method's return type (`GetCharacter` → `IEsiRequest<CharacterInfo>`)
-  and passed **explicitly** to the factory: `CreateEsiClient<CharacterInfo>(...)`. The factory signature is
-  `CreateEsiClient<T>(RouteDefinition<T> endpoint, …)`, so the compiler still rejects an endpoint whose response
-  type doesn't match.
-- **`Endpoints.<Tag>.<Name>`**: static `RouteDefinition<T>` fields, one nested class per spec **tag**
+- **Response type `T`**: set by the service, not the route. The service method's return type
+  (`GetCharacter` → `IEsiRequest<CharacterInfo>`), the explicit `CreateEsiClient<CharacterInfo>(...)` and the
+  `JsonTypeInfo<CharacterInfo>` from `EsiJsonContext` must agree, which the compiler checks. Endpoints without a
+  response body use the non-generic `CreateEsiClient(...)`, which returns `IEsiRequest<EsiNoContent>`.
+- **`Endpoints.<Tag>.<Name>`**: static `RouteDefinition` fields, one nested class per spec **tag**
   (`Endpoints.Assets`, `Endpoints.Character`, …), generated and built once through `RouteBuilder`.
   Services follow the same grouping: one service per tag.
 - **`Parameter.Route.<Name>` / `Parameter.Query.<Name>`**: `const string` wire names, generated once per
@@ -107,7 +114,7 @@ public IEsiRequest<SkinrListings> GetParagonHubSkinr(long characterId, string to
   ESI IDs are 64-bit.
 - **`p.ApplyPagination(int? page)`**: page-based routes. **`p.ApplyPagination(CursorPage? cursor)`**: cursor routes.
   `null` means "no pagination parameter sent".
-- **`p.Body(value)`**: request body for the 22 POST/PUT operations, serialized with `EsiJsonContext`.
+- **`p.Body(value, EsiJsonContext.Default.X)`**: request body for the 22 POST/PUT operations, serialized with the type info the service passes. The route only says whether a body is allowed or required.
 - **`token`**: `string?`. Required (non-nullable parameter on the service method) for secured endpoints;
   omitted for public ones.
 
@@ -247,11 +254,11 @@ public sealed class EsiResult<T>
 
 ```
 service.GetX(args, token)
-  → factory.CreateEsiClient<T>(Endpoints.X.Y, p => {...}, token)
+  → factory.CreateEsiClient<T>(Endpoints.X.Y, EsiJsonContext.Default.T, p => {...}, token, serviceMiddleware)
        run configurator, validate against the RouteDefinition  → IEsiRequest<T> (+ service middleware snapshot)
   .Use(...)                       → adds request middleware
   .ExecuteAsync(ct)
      build EsiContext (URL from template + route values, query string, body, required headers, bearer token)
      run pipeline: global → service → request → [HTTP send: fresh HttpRequestMessage from context.Request]
-     context.Response (raw)  →  deserialize with RouteDefinition<T>.ResponseTypeInfo  →  EsiResult<T>
+     context.Response (raw)  →  deserialize with the JsonTypeInfo<T> the service passed  →  EsiResult<T>
 ```

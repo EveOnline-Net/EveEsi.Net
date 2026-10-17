@@ -12,7 +12,7 @@ namespace EveEsi.Net.Abstractions.Requests;
 public interface IEsiRequest<T> : IEsiMiddlewareTarget<IEsiRequest<T>>
 {
     /// <summary>The endpoint this request calls.</summary>
-    RouteDefinition<T> Route { get; }
+    RouteDefinition Route { get; }
 
     /// <summary>
     /// Sends the request through the pipeline (global → service → request middleware → HTTP) and decodes the response.

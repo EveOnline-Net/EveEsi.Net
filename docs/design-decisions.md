@@ -74,7 +74,7 @@ No reflection-based serialization and no Newtonsoft. Keeps the library trim and 
 
 ### 16. Services are request builders over `IEsiClientFactory`
 Service methods only build requests:
-`factory.CreateEsiClient<T>(Endpoints.<Section>.<Name>, p => { p.Route.Set(...); p.ApplyPagination(...); }, token)`
+`factory.CreateEsiClient<T>(Endpoints.<Section>.<Name>, EsiJsonContext.Default.T, p => { p.Route.Set(...); p.ApplyPagination(...); }, token, …)`
 returns an `IEsiRequest<T>`, which the caller can add middleware to and execute.
 *Why:* services stay thin and uniform (easy to generate). All request-building logic and validation lives
 in one place, the factory and parameter builder. Advanced users can call the factory directly with any endpoint.
@@ -88,7 +88,7 @@ which would make `ICharacters` very large.
 Services return `IEsiRequest<T>`. The concrete request type is internal; consumers only ever see the interface.
 
 The response type `T` is written explicitly in `CreateEsiClient<T>(...)` and matches the service method's
-return type. The factory takes `RouteDefinition<T>`, so a mismatch doesn't compile.
+return type and the `JsonTypeInfo<T>` the service passes; the compiler checks those agree. Routes carry no types (see #26).
 Parameter names are generated string constants (see #27); value types are enforced by the service signatures. Pagination has its own `ApplyPagination(int?)` / `ApplyPagination(CursorPage?)` overloads,
 checked against the route's pagination style.
 
@@ -141,10 +141,14 @@ Contributions are accepted under the same license.
 `X-Tenant`, `User-Agent`) at that point. `EsiContext.AccessToken` is settable, so a refresh middleware can swap it.
 *Why:* `HttpClient` refuses to send the same `HttpRequestMessage` twice, which would break `RetryMiddleware`.
 
-### 26. Routes carry their source-generated `JsonTypeInfo`
-`RouteDefinition<T>` holds `JsonTypeInfo<T>` for the response and `JsonTypeInfo` for the body, set by the generated
-`Endpoints` from `EsiJsonContext`. Endpoints with no response body use `T = EsiNoContent` and no type info.
-*Why:* `Client` must not reference `Models`, yet has to (de)serialize AOT-safely. The route is the one thing both sides share.
+### 26. Routes describe the endpoint only; services supply the types
+`RouteDefinition` is non-generic: method, path, parameters, scopes, roles, cache hints, rate limit, pagination and
+`BodyRequirement`. The service passes `JsonTypeInfo<T>` from `EsiJsonContext` to `CreateEsiClient<T>(...)`, and the
+body's type info to `p.Body(value, typeInfo)`. Endpoints with no response body use the non-generic
+`CreateEsiClient(...)`, which returns `IEsiRequest<EsiNoContent>`.
+*Why:* a route is endpoint metadata; what the bytes decode to is the caller's concern. `Client` still never references
+`Models`, because the type info arrives from the service. The compile-time check moves from route ↔ `T` to
+type info ↔ `T`; both come from the same spec operation in generated code.
 
 ### 27. Route and query values are string key/value pairs; parameter names are string constants
 `EsiRequestMessage` holds `RouteValues` and `Query` as `KeyValuePair<string, string>` lists (a query name repeats per

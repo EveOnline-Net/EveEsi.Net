@@ -1,31 +1,43 @@
 using System.Collections.ObjectModel;
-using System.Text.Json.Serialization.Metadata;
 using System.Text.RegularExpressions;
 
 namespace EveEsi.Net.Abstractions.Routing;
 
 /// <summary>
-/// Static, immutable description of one ESI endpoint. Middleware reads endpoint facts (scopes, roles, cache hints,
-/// rate-limit group, pagination) from here, never from the path.
+/// Static, immutable description of one ESI endpoint: method, path, parameters, scopes, roles, cache hints,
+/// rate limit, pagination and body requirement. Middleware reads endpoint facts from here, never from the path.
 /// </summary>
-/// <remarks>Endpoints are generated once into the <c>Endpoints</c> catalogue. See <see cref="RouteDefinition{T}"/>.</remarks>
-public abstract partial class RouteDefinition
+/// <remarks>
+/// Endpoints are generated once into the <c>Endpoints</c> catalogue. The route says nothing about types: the service
+/// that builds the request supplies the response and body type info.
+/// </remarks>
+public sealed partial class RouteDefinition
 {
-    // Only RouteDefinition<T> may derive, so every route carries its response type.
-    private protected RouteDefinition(
+    /// <summary>Creates a route definition. Generated code uses <c>RouteBuilder</c> rather than calling this directly.</summary>
+    /// <param name="operationId">The spec's <c>operationId</c>.</param>
+    /// <param name="method">The HTTP method.</param>
+    /// <param name="pathTemplate">The path template. Its <c>{placeholders}</c> are the route parameters.</param>
+    /// <param name="queryParameters">Query parameter names, excluding pagination and shared headers.</param>
+    /// <param name="requiredQueryParameters">The query parameters that must be sent.</param>
+    /// <param name="pagination">How the endpoint pages its results.</param>
+    /// <param name="requiredScopes">SSO scopes the token must carry; empty for public endpoints.</param>
+    /// <param name="requiredRoles">Corporation roles, any one of which is required.</param>
+    /// <param name="cache">Cache facts from the spec.</param>
+    /// <param name="rateLimit">The rate-limit bucket.</param>
+    /// <param name="body">Whether the endpoint takes a request body.</param>
+    /// <exception cref="ArgumentException">The definition is inconsistent.</exception>
+    public RouteDefinition(
         string operationId,
         HttpMethod method,
         string pathTemplate,
-        IEnumerable<string>? queryParameters,
-        IEnumerable<string>? requiredQueryParameters,
-        PaginationStyle pagination,
-        IEnumerable<string>? requiredScopes,
-        IEnumerable<string>? requiredRoles,
-        RouteCacheHints? cache,
-        RateLimitPolicy? rateLimit,
-        JsonTypeInfo? bodyTypeInfo,
-        bool isBodyRequired,
-        Type responseType)
+        IEnumerable<string>? queryParameters = null,
+        IEnumerable<string>? requiredQueryParameters = null,
+        PaginationStyle pagination = PaginationStyle.None,
+        IEnumerable<string>? requiredScopes = null,
+        IEnumerable<string>? requiredRoles = null,
+        RouteCacheHints? cache = null,
+        RateLimitPolicy? rateLimit = null,
+        BodyRequirement body = BodyRequirement.None)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(operationId);
         ArgumentNullException.ThrowIfNull(method);
@@ -52,11 +64,6 @@ public abstract partial class RouteDefinition
                 nameof(requiredQueryParameters));
         }
 
-        if (bodyTypeInfo is null && isBodyRequired)
-        {
-            throw new ArgumentException("A required body needs a body type.", nameof(isBodyRequired));
-        }
-
         OperationId = operationId;
         Method = method;
         PathTemplate = pathTemplate;
@@ -68,9 +75,7 @@ public abstract partial class RouteDefinition
         RequiredRoles = new ReadOnlyCollection<string>((requiredRoles ?? []).ToArray());
         Cache = cache;
         RateLimit = rateLimit;
-        BodyTypeInfo = bodyTypeInfo;
-        IsBodyRequired = isBodyRequired;
-        ResponseType = responseType;
+        Body = body;
     }
 
     /// <summary>The spec's <c>operationId</c>, e.g. <c>GetCharactersCharacterIdAssets</c>. Useful for logs and metrics.</summary>
@@ -106,14 +111,8 @@ public abstract partial class RouteDefinition
     /// <summary>The rate-limit bucket, if the endpoint is rate limited.</summary>
     public RateLimitPolicy? RateLimit { get; }
 
-    /// <summary>Serialization metadata for the request body, or <see langword="null"/> if the endpoint takes none.</summary>
-    public JsonTypeInfo? BodyTypeInfo { get; }
-
-    /// <summary>Whether a request body must be supplied.</summary>
-    public bool IsBodyRequired { get; }
-
-    /// <summary>The CLR type the response body deserializes to (<c>EsiNoContent</c> when there is none).</summary>
-    public Type ResponseType { get; }
+    /// <summary>Whether the endpoint takes a request body.</summary>
+    public BodyRequirement Body { get; }
 
     /// <summary>Whether the endpoint needs an SSO access token.</summary>
     public bool RequiresAuthentication => RequiredScopes.Count > 0;

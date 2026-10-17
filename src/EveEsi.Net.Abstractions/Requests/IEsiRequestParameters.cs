@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization.Metadata;
 using EveEsi.Net.Abstractions.Routing;
 
 namespace EveEsi.Net.Abstractions.Requests;
@@ -11,11 +12,12 @@ public interface IEsiRequestParameters
     /// <summary>Query parameter values.</summary>
     IEsiParameterValues Query { get; }
 
-    /// <summary>Sets the request body. It's serialized with the endpoint's source-generated type info.</summary>
-    /// <typeparam name="TBody">The body type. Must match the endpoint's body type.</typeparam>
+    /// <summary>Sets the request body.</summary>
+    /// <typeparam name="TBody">The body type.</typeparam>
     /// <param name="value">The body.</param>
-    /// <exception cref="ArgumentException">The endpoint takes no body, or <typeparamref name="TBody"/> doesn't match it.</exception>
-    void Body<TBody>(TBody value);
+    /// <param name="bodyType">Serialization metadata for the body, from the source-generated JSON context.</param>
+    /// <exception cref="ArgumentException">The endpoint takes no body.</exception>
+    void Body<TBody>(TBody value, JsonTypeInfo<TBody> bodyType);
 
     /// <summary>Sets the page of a page-based endpoint. <see langword="null"/> sends no <c>page</c> parameter.</summary>
     /// <exception cref="InvalidOperationException">The endpoint isn't page-based.</exception>

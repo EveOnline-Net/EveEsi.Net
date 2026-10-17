@@ -142,20 +142,21 @@ public static partial class Endpoints
 {
     public static partial class Assets
     {
-        public static readonly RouteDefinition<IReadOnlyList<CharacterAsset>> CharacterAssets =
+        public static readonly RouteDefinition CharacterAssets =
             RouteBuilder.Get("GetCharactersCharacterIdAssets", $"/characters/{{{Parameter.Route.CharacterId}}}/assets")
                 .Pagination(PaginationStyle.Page)
                 .RequiresScope("esi-assets.read_assets.v1")
                 .Cache(TimeSpan.FromSeconds(3600), RouteCacheMode.TtlBased)  // x-cache-age, x-server-cache-mode
                 .RateLimit("char-asset", 1800, TimeSpan.FromMinutes(15))      // x-rate-limit
-                .Returns(EsiJsonContext.Default.IReadOnlyListCharacterAsset);  // JsonTypeInfo<T> fixes T
+                .Build();
     }
 }
 ```
 Mapped from the spec: `operationId` → `OperationId`, `security` → scopes, `x-required-roles` → roles,
 `x-cache-age` / `x-server-cache-mode` / `x-cache-mode` / `x-tombstone-ttl` → cache hints,
-`x-rate-limit` (`group`, `max-tokens`, `window-size`) → rate-limit policy, `requestBody` → `.Body(typeInfo, required)`,
-a 204 or bodiless success response → `.ReturnsNoContent()` (`RouteDefinition<EsiNoContent>`), `X-Pages` header → `Page`, `x-pagination: cursor` → `Cursor`.
+`x-rate-limit` (`group`, `max-tokens`, `window-size`) → rate-limit policy, `requestBody` → `.Body(BodyRequirement.Required)`,
+`X-Pages` header → `Page`, `x-pagination: cursor` → `Cursor`.
+Routes carry no types: response and body types are emitted into the **service** (below).
 Shared header parameters (`IfNoneMatch`, `AcceptLanguage`, `CompatibilityDate`, `Tenant`, `IfModifiedSince`)
 are **not** emitted as route parameters. The compatibility date becomes a generated constant the client sends.
 
@@ -165,11 +166,15 @@ derive from `EsiService`. Each operation becomes a method that calls the factory
 
 ```csharp
 public IEsiRequest<IReadOnlyList<CharacterAsset>> GetCharacterAssets(long characterId, string token, int? page = null)
-    => CreateEsiClient<IReadOnlyList<CharacterAsset>>(Endpoints.Assets.CharacterAssets, p =>
-    {
-        p.Route.Set(Parameter.Route.CharacterId, characterId);
-        p.ApplyPagination(page);
-    }, token);
+    => CreateEsiClient<IReadOnlyList<CharacterAsset>>(
+        Endpoints.Assets.CharacterAssets,
+        EsiJsonContext.Default.IReadOnlyListCharacterAsset,
+        p =>
+        {
+            p.Route.Set(Parameter.Route.CharacterId, characterId);
+            p.ApplyPagination(page);
+        },
+        token);
 ```
 Signature order: route parameters, required query parameters, body, `string token` (secured only),
 then optional query parameters, then the pagination parameter (`int? page` or `CursorPage? cursor`).
@@ -177,8 +182,11 @@ then optional query parameters, then the pagination parameter (`int? page` or `C
 - **Grouping:** one service, one `Endpoints.<Tag>` class and one file per spec tag. Never group by URL segment.
 - **Middleware:** each interface is emitted as `I<Tag> : IEsiService<I<Tag>>`, so it gets both `Use` overloads
   (instance and async callback) and `Use` returns `I<Tag>`.
-- **Response type:** the method's return type `IEsiRequest<T>` and the explicit generic in `CreateEsiClient<T>(...)`
-  are emitted from the same resolved response type. Always write `T` explicitly; never rely on inference.
+- **Response type:** the method's return type `IEsiRequest<T>`, the explicit generic in `CreateEsiClient<T>(...)` and
+  the `EsiJsonContext.Default.<T>` type info are emitted from the same resolved response type. Always write `T`
+  explicitly; never rely on inference. A 204 or bodiless success response gives `IEsiRequest<EsiNoContent>` and the
+  non-generic `CreateEsiClient(...)`.
+- **Body:** `p.Body(body, EsiJsonContext.Default.<TBody>)`.
 
 ## Hand-written extensions
 - Every generated type is `partial`. Put additions in a non-`.g.cs` file alongside it.
