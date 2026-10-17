@@ -54,17 +54,19 @@ Caching.*     → Abstractions
 
 | Type | Purpose |
 |---|---|
-| `RouteDefinition` / `RouteDefinition<TResponse>` | Static, immutable description of one endpoint: method, path template, route/query parameters, body type, required scopes, required roles, cache hints, rate-limit group, pagination style, response type. |
-| `RouteParameter<T>` / `QueryParameter<T>` | Typed parameter keys (wire name + CLR type). Generated into the `Parameter` catalogue. |
+| `RouteDefinition` / `RouteDefinition<TResponse>` | Static, immutable description of one endpoint: operation ID, method, path template (route parameter names come from its placeholders), query parameter names and which are required, body type info, required scopes, required roles, cache hints, rate-limit policy, pagination style, response type info. Carries the source-generated `JsonTypeInfo` for body and response, so `Client` can (de)serialize without referencing `Models`. Validated on construction. |
+| `IEsiParameterValues` | `Set(name, value)`, used for both `p.Route` and `p.Query`. Names are the generated `Parameter.*` string constants. `null` means "not sent". |
 | `CursorPage` | Cursor pagination input: `Before`, `After` (strings), `Limit` (`long?`). |
-| `IEsiClientFactory` | Creates a per-request `IEsiRequest<T>` from an endpoint, a parameter configurator and an optional token. |
-| `IEsiRequestParameters` | What the configurator lambda receives: `Route`, `Query`, `Body`, `ApplyPagination(...)`. |
+| `IEsiClientFactory` | Creates a per-request `IEsiRequest<T>` from an endpoint, a parameter configurator, an optional token and the calling service's middleware snapshot. |
+| `IEsiRequestParameters` | What the configurator lambda receives: `Route`, `Query`, `Body`, `ApplyPagination(...)`. A `null` query value means "not sent". |
 | `IEsiRequest<T>` | The built, ready-to-run request: `.Use(...)`, `.ExecuteAsync(ct)`. The only public request type; the implementation is `internal sealed` in `EveEsi.Net.Client`. Service methods and the factory always return the interface. |
-| `EsiContext` | Mutable state passed through the pipeline: route, resolved parameters, outgoing `HttpRequestMessage`, access token (`string?`), `EsiResponse` (once there is one), `Items` bag, `CancellationToken`. |
-| `EsiResponse` | **Raw** response: status, headers, body bytes. Middleware sees and can replace this. Deserialization happens after the pipeline. |
+| `EsiContext` | Mutable state passed through the pipeline: route, outgoing `EsiRequestMessage`, access token (`string?`, settable), `EsiResponse` (once there is one), `Items` bag, `CancellationToken`. |
+| `EsiRequestMessage` | The outgoing request middleware edits: method, path template, route values and query values as string key/value pairs (a query name repeats per array item), headers, body bytes. `ToRelativeUri()` builds the escaped path + query. The client builds a fresh `HttpRequestMessage` from it on every send, so retries are safe. |
+| `EsiResponse` | **Raw** response: status, `EsiResponseHeaders`, body bytes. Middleware sees and can replace this. Deserialization happens after the pipeline. |
+| `EsiResponseHeaders` | Immutable, case-insensitive headers with typed access to ETag, Expires, Last-Modified, max-age, X-Pages, error-limit, rate-limit, Retry-After and request ID. |
 | `IEsiMiddleware`, `EsiNext` | Middleware contract (below). |
-| `IEsiCacheStore` | Required abstraction for caching middleware: get/set raw `EsiResponse` entries by key with expiry. |
-| `EsiResult<T>` | What callers get back (below). |
+| `IEsiCacheStore` / `EsiCacheEntry` | Required abstraction for caching middleware: get/set/remove raw `EsiResponse` entries by key, with a freshness expiry and an optional retention time (for ETag revalidation). |
+| `EsiResult<T>` / `EsiError` / `EsiNoContent` | What callers get back (below). `EsiNoContent` is `T` for endpoints that return no body (204). |
 
 **Access tokens are plain `string`s.** The consumer gets them from EVE SSO and passes them in. There is
 no token wrapper type. Middleware that needs claims (e.g. scopes) decodes the JWT payload itself.
@@ -98,10 +100,11 @@ public IEsiRequest<SkinrListings> GetParagonHubSkinr(long characterId, string to
 - **`Endpoints.<Tag>.<Name>`**: static `RouteDefinition<T>` fields, one nested class per spec **tag**
   (`Endpoints.Assets`, `Endpoints.Character`, …), generated and built once through `RouteBuilder`.
   Services follow the same grouping: one service per tag.
-- **`Parameter.Route.<Name>` / `Parameter.Query.<Name>`**: static, typed parameter keys, generated once per
-  distinct parameter in the spec (77 today). `p.Route.Set(Parameter.Route.CharacterId, "x")` doesn't compile,
-  because `CharacterId` is `RouteParameter<long>`. ESI IDs are 64-bit; types always follow the spec's
-  `format` (see [generator.md](generator.md#numeric-and-id-types-the-specs-format-is-the-only-source-of-truth)).
+- **`Parameter.Route.<Name>` / `Parameter.Query.<Name>`**: `const string` wire names, generated once per
+  distinct parameter in the spec (77 today). The same constant is the `Set` key, the `{placeholder}` in the route's
+  path template and the entry in its query parameter list. Value types are enforced by the generated service
+  signatures, which follow the spec's `format` (see [generator.md](generator.md#numeric-and-id-types-the-specs-format-is-the-only-source-of-truth));
+  ESI IDs are 64-bit.
 - **`p.ApplyPagination(int? page)`**: page-based routes. **`p.ApplyPagination(CursorPage? cursor)`**: cursor routes.
   `null` means "no pagination parameter sent".
 - **`p.Body(value)`**: request body for the 22 POST/PUT operations, serialized with `EsiJsonContext`.
@@ -227,14 +230,16 @@ public sealed class EsiResult<T>
 {
     public bool IsSuccess { get; }
     public bool IsNotModified { get; }     // 304 that no middleware resolved
-    public HttpStatusCode StatusCode { get; }
+    public HttpStatusCode? StatusCode { get; } // null when no response was received (transport failure)
     public T? Value { get; }
     public EsiError? Error { get; }        // ESI error body, or transport/deserialization failure
     public EsiResponseHeaders Headers { get; }  // ETag, Expires, Last-Modified, X-Pages, error/rate-limit, raw access
 }
 ```
 - HTTP error statuses → `IsSuccess == false` with `Error`. **No exceptions.**
-- Network/transport failures → failed result, `Error.Kind = Transport`, with the exception attached.
+- Network/transport failures → failed result, `Error.Kind = Transport`, `StatusCode == null`, with the exception attached.
+- Successful responses that can't be decoded → failed result, `Error.Kind = Deserialization`.
+- Created through `EsiResult<T>.Success / NotModified / Failure`, so consumers can build results in their own tests.
 - Exceptions are thrown only for cancellation (`OperationCanceledException`) and programmer errors
   (the build-time validation above).
 
@@ -247,6 +252,6 @@ service.GetX(args, token)
   .Use(...)                       → adds request middleware
   .ExecuteAsync(ct)
      build EsiContext (URL from template + route values, query string, body, required headers, bearer token)
-     run pipeline: global → service → request → [HTTP send via HttpClient]
-     context.Response (raw)  →  deserialize with EsiJsonContext  →  EsiResult<T>
+     run pipeline: global → service → request → [HTTP send: fresh HttpRequestMessage from context.Request]
+     context.Response (raw)  →  deserialize with RouteDefinition<T>.ResponseTypeInfo  →  EsiResult<T>
 ```

@@ -106,7 +106,7 @@ public abstract partial record ParagonPrice
   and a hand-written type and converter in `EveEsi.Net.Models/Custom/`.
 
 ## Parameters
-`EveEsi.Net.Routes/Generated/Parameter.g.cs` is a catalogue of typed parameter keys, one per distinct
+`EveEsi.Net.Routes/Generated/Parameter.g.cs` is a catalogue of wire-name constants, one per distinct
 (location, wire name) in the spec (77 today):
 
 ```csharp
@@ -114,19 +114,24 @@ public static partial class Parameter
 {
     public static partial class Route
     {
-        public static readonly RouteParameter<long> CharacterId = new("character_id");
-        public static readonly RouteParameter<long> CorporationId = new("corporation_id");
-        public static readonly RouteParameter<Guid> ProjectId = new("project_id");
+        public const string CharacterId = "character_id";
+        public const string CorporationId = "corporation_id";
+        public const string ProjectId = "project_id";
     }
     public static partial class Query
     {
-        public static readonly QueryParameter<long> TypeId = new("type_id");
+        public const string TypeId = "type_id";
+        public const string ContactIds = "contact_ids";
+        public const string OrderType = "order_type";
     }
 }
 ```
+- The same constant is the `Set` key, the `{placeholder}` in path templates and the entry in a route's query list.
+- Value types live in the **service method signature** (from the spec's `format`). The client converts values to
+  strings (invariant culture); arrays become one `name=value` pair per item.
+- **Enums** are converted by the service with the generated converter before they're set:
+  `p.Query.Set(Parameter.Query.OrderType, OrderTypeConverter.ToWire(orderType))`.
 - Pagination parameters (`page`, `before`, `after`, `limit`) are **not** in the catalogue. `ApplyPagination` handles them.
-- Same location and name but different types across operations is a conflict and fails generation;
-  resolve it in `generator.json`.
 
 ## Endpoints
 One `Endpoints.<Section>.g.cs` per section in `EveEsi.Net.Routes/Generated/`, built once with `RouteBuilder`
@@ -138,18 +143,19 @@ public static partial class Endpoints
     public static partial class Assets
     {
         public static readonly RouteDefinition<IReadOnlyList<CharacterAsset>> CharacterAssets =
-            RouteBuilder.Get("/characters/{character_id}/assets")
-                .Route(Parameter.Route.CharacterId)
+            RouteBuilder.Get("GetCharactersCharacterIdAssets", $"/characters/{{{Parameter.Route.CharacterId}}}/assets")
                 .Pagination(PaginationStyle.Page)
                 .RequiresScope("esi-assets.read_assets.v1")
-                .CacheFor(TimeSpan.FromSeconds(3600))     // x-cache-age
-                .RateLimitGroup("char-asset")             // x-rate-limit
-                .Returns<IReadOnlyList<CharacterAsset>>();
+                .Cache(TimeSpan.FromSeconds(3600), RouteCacheMode.TtlBased)  // x-cache-age, x-server-cache-mode
+                .RateLimit("char-asset", 1800, TimeSpan.FromMinutes(15))      // x-rate-limit
+                .Returns(EsiJsonContext.Default.IReadOnlyListCharacterAsset);  // JsonTypeInfo<T> fixes T
     }
 }
 ```
-Mapped from the spec: `security` → scopes, `x-required-roles` → roles, `x-cache-age` / `x-cache-mode` → cache hints,
-`x-rate-limit` → rate-limit group, `X-Pages` header → `Page`, `x-pagination: cursor` → `Cursor`.
+Mapped from the spec: `operationId` → `OperationId`, `security` → scopes, `x-required-roles` → roles,
+`x-cache-age` / `x-server-cache-mode` / `x-cache-mode` / `x-tombstone-ttl` → cache hints,
+`x-rate-limit` (`group`, `max-tokens`, `window-size`) → rate-limit policy, `requestBody` → `.Body(typeInfo, required)`,
+a 204 or bodiless success response → `.ReturnsNoContent()` (`RouteDefinition<EsiNoContent>`), `X-Pages` header → `Page`, `x-pagination: cursor` → `Cursor`.
 Shared header parameters (`IfNoneMatch`, `AcceptLanguage`, `CompatibilityDate`, `Tenant`, `IfModifiedSince`)
 are **not** emitted as route parameters. The compatibility date becomes a generated constant the client sends.
 

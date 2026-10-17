@@ -89,8 +89,7 @@ Services return `IEsiRequest<T>`. The concrete request type is internal; consume
 
 The response type `T` is written explicitly in `CreateEsiClient<T>(...)` and matches the service method's
 return type. The factory takes `RouteDefinition<T>`, so a mismatch doesn't compile.
-Parameters are typed static keys (`RouteParameter<T>`, `QueryParameter<T>`), so a wrongly typed value
-doesn't compile. Pagination has its own `ApplyPagination(int?)` / `ApplyPagination(CursorPage?)` overloads,
+Parameter names are generated string constants (see #27); value types are enforced by the service signatures. Pagination has its own `ApplyPagination(int?)` / `ApplyPagination(CursorPage?)` overloads,
 checked against the route's pagination style.
 
 ### 18. C# types follow the spec's `format` exactly. IDs are `long`.
@@ -135,3 +134,31 @@ Most EVE third-party apps are open source anyway.
 closed apps could use it), and PolyForm Noncommercial (not open source, and would discourage contributors).
 *Note:* server-side use without distribution isn't covered by the GPL (that would need AGPL).
 Contributions are accepted under the same license.
+
+### 25. Middleware edits an `EsiRequestMessage`, not an `HttpRequestMessage`
+`EsiContext.Request` is our own mutable request (method, URI, headers, body bytes). The client builds a fresh
+`HttpRequestMessage` from it on every send and applies the headers it owns (`Authorization`, `X-Compatibility-Date`,
+`X-Tenant`, `User-Agent`) at that point. `EsiContext.AccessToken` is settable, so a refresh middleware can swap it.
+*Why:* `HttpClient` refuses to send the same `HttpRequestMessage` twice, which would break `RetryMiddleware`.
+
+### 26. Routes carry their source-generated `JsonTypeInfo`
+`RouteDefinition<T>` holds `JsonTypeInfo<T>` for the response and `JsonTypeInfo` for the body, set by the generated
+`Endpoints` from `EsiJsonContext`. Endpoints with no response body use `T = EsiNoContent` and no type info.
+*Why:* `Client` must not reference `Models`, yet has to (de)serialize AOT-safely. The route is the one thing both sides share.
+
+### 27. Route and query values are string key/value pairs; parameter names are string constants
+`EsiRequestMessage` holds `RouteValues` and `Query` as `KeyValuePair<string, string>` lists (a query name repeats per
+array item) and builds the URI from them. Parameter names are generated `const string`s (`Parameter.Route.CharacterId = "character_id"`), used as the
+`Set` key, as the placeholder in path templates and in the route's query parameter list. `p.Route` and `p.Query` share
+one interface, `IEsiParameterValues`. A wrong name or a value of the wrong type compiles in a hand-written
+`CreateEsiClient` call; unknown names are rejected when the request is built, and generated services are typed from
+the spec. The client converts values to strings. Enum parameters are keyed as `string` and converted
+by the generated service. `RouteDefinition` lists query parameter names and which are required; route parameter
+names come from the path template.
+*Why:* everything goes on the wire as a string, so typed key objects, formatters, locations and parameter equality
+were machinery without a purpose; services already carry the types. Pairs are also what middleware wants to read and edit.
+
+### 28. `EsiResult<T>.StatusCode` is nullable
+`null` means no response was received (transport failure). Results are created through public
+`Success` / `NotModified` / `Failure` factories, so consumers can build them in their own tests.
+*Why:* a fake status such as `0` is easy to mistake for a real one.
