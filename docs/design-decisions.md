@@ -68,6 +68,9 @@ Each union gets an `Unknown` variant.
 In-memory store ships in `EveEsi.Net.Middleware`. Adapters with third-party dependencies ship as
 `EveEsi.Net.Caching.Distributed`, `EveEsi.Net.Caching.Redis`, …
 *Why:* the core package doesn't pull in Redis or other infrastructure dependencies.
+*Update:* register the in-memory store with `services.AddEsiInMemoryCacheStore()`, or the file store with
+`services.AddEsiFileCacheStore(directory)`. The file store has no dependencies, so it ships in `EveEsi.Net.Middleware` too. Nothing registers a store
+implicitly; caching middleware without one fails to resolve.
 
 ### 15. System.Text.Json with a source-generated context only
 No reflection-based serialization and no Newtonsoft. Keeps the library trim and AOT compatible.
@@ -223,3 +226,14 @@ transport detail. Only where two operations share a path does the name say which
 *Why:* one `generator.json` entry names both the constant and the method, so they can't drift apart. Consumers depend
 on the interface, which can be mocked, so the implementation can change freely. A `null` default lets ESI apply its own
 default, which can change without a library release. `TryAdd` lets an app or a test replace one service.
+
+### 35. Cache and ETag middleware share one entry, keyed by the token's subject
+`CacheMiddleware` and `ETagMiddleware` read and write the same `IEsiCacheStore` entry, keyed by `EsiCacheKey`. On
+secured routes the key holds a hash of the access token's `sub` claim, not of the token. A 304 is turned back into the
+stored 200, and the freshness lifetime is `max-age`, else `Expires − Date`, else the spec's `x-cache-age`.
+*Why:* access tokens rotate every 20 minutes, so a token-based key would throw the cache away on every refresh, while
+the subject (the character) is what decides what the response contains. Measuring `Expires` against ESI's own `Date`
+keeps a skewed local clock from stretching or shrinking lifetimes. Returning the stored value on 304 means callers
+never need to handle "not modified" when ETag middleware is on.
+*Trade-off:* the subject is read without validating the token. That's only a cache partition; ESI still authorizes the
+call whenever it's actually sent.

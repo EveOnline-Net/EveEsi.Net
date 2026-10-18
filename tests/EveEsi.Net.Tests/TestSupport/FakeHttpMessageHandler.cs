@@ -1,11 +1,35 @@
 using System.Net;
+using System.Text;
 
 namespace EveEsi.Net.Tests.TestSupport;
 
-/// <summary>Answers every request with 204 and records what was sent.</summary>
+/// <summary>Answers with queued responses (204 once they run out) and records what was sent.</summary>
 internal sealed class FakeHttpMessageHandler : HttpMessageHandler
 {
+    private readonly Queue<Func<HttpResponseMessage>> _responses = new();
+
     public List<SentRequest> Requests { get; } = [];
+
+    public FakeHttpMessageHandler Respond(HttpStatusCode status, string? json = null, params (string Name, string Value)[] headers)
+    {
+        _responses.Enqueue(() =>
+        {
+            var response = new HttpResponseMessage(status)
+            {
+                Content = json is null ? new ByteArrayContent([]) : new StringContent(json, Encoding.UTF8, "application/json"),
+            };
+            foreach (var (name, value) in headers)
+            {
+                if (!response.Headers.TryAddWithoutValidation(name, value))
+                {
+                    response.Content.Headers.TryAddWithoutValidation(name, value);
+                }
+            }
+
+            return response;
+        });
+        return this;
+    }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -18,7 +42,9 @@ internal sealed class FakeHttpMessageHandler : HttpMessageHandler
             StringComparer.OrdinalIgnoreCase);
 
         Requests.Add(new SentRequest(request.Method, request.RequestUri!, request.Headers.Authorization?.ToString(), body, headers));
-        return new HttpResponseMessage(HttpStatusCode.NoContent) { Content = new ByteArrayContent([]) };
+        return _responses.TryDequeue(out var next)
+            ? next()
+            : new HttpResponseMessage(HttpStatusCode.NoContent) { Content = new ByteArrayContent([]) };
     }
 }
 

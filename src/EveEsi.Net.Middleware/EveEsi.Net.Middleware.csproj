@@ -8,4 +8,9 @@
     <ProjectReference Include="../EveEsi.Net.Abstractions/EveEsi.Net.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- For AddEsiInMemoryCacheStore(). -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
 </Project>

@@ -1,1 +1,41 @@
 #nullable enable
+EveEsi.Net.Middleware.Caching.CacheMiddleware
+EveEsi.Net.Middleware.Caching.CacheMiddleware.CacheMiddleware(EveEsi.Net.Abstractions.Caching.IEsiCacheStore! store, System.TimeProvider? timeProvider = null) -> void
+EveEsi.Net.Middleware.Caching.CacheMiddleware.InvokeAsync(EveEsi.Net.Abstractions.Middleware.EsiContext! context, EveEsi.Net.Abstractions.Middleware.EsiNext! next) -> System.Threading.Tasks.ValueTask
+EveEsi.Net.Middleware.Caching.EsiCacheKey
+EveEsi.Net.Middleware.Caching.ETagMiddleware
+EveEsi.Net.Middleware.Caching.ETagMiddleware.ETagMiddleware(EveEsi.Net.Abstractions.Caching.IEsiCacheStore! store, System.TimeProvider? timeProvider = null) -> void
+EveEsi.Net.Middleware.Caching.ETagMiddleware.InvokeAsync(EveEsi.Net.Abstractions.Middleware.EsiContext! context, EveEsi.Net.Abstractions.Middleware.EsiNext! next) -> System.Threading.Tasks.ValueTask
+EveEsi.Net.Middleware.Caching.FileEsiCacheStore
+EveEsi.Net.Middleware.Caching.FileEsiCacheStore.Count.get -> int
+EveEsi.Net.Middleware.Caching.FileEsiCacheStore.FileEsiCacheStore(EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions! options, System.TimeProvider? timeProvider = null) -> void
+EveEsi.Net.Middleware.Caching.FileEsiCacheStore.GetAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<EveEsi.Net.Abstractions.Caching.EsiCacheEntry?>
+EveEsi.Net.Middleware.Caching.FileEsiCacheStore.RemoveAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+EveEsi.Net.Middleware.Caching.FileEsiCacheStore.SetAsync(string! key, EveEsi.Net.Abstractions.Caching.EsiCacheEntry! entry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+EveEsi.Net.Middleware.Caching.FileEsiCacheStore.Sweep() -> void
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.DefaultRetention.get -> System.TimeSpan
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.DefaultRetention.set -> void
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.Directory.get -> string?
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.Directory.set -> void
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.FileEsiCacheStoreOptions() -> void
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.MaxEntries.get -> int
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.MaxEntries.set -> void
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.SweepInterval.get -> System.TimeSpan
+EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.SweepInterval.set -> void
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStore
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStore.Count.get -> int
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStore.GetAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<EveEsi.Net.Abstractions.Caching.EsiCacheEntry?>
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStore.InMemoryEsiCacheStore(EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions? options = null, System.TimeProvider? timeProvider = null) -> void
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStore.RemoveAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStore.SetAsync(string! key, EveEsi.Net.Abstractions.Caching.EsiCacheEntry! entry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions.DefaultRetention.get -> System.TimeSpan
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions.DefaultRetention.set -> void
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions.InMemoryEsiCacheStoreOptions() -> void
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions.MaxEntries.get -> int
+EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions.MaxEntries.set -> void
+Microsoft.Extensions.DependencyInjection.EsiCacheServiceCollectionExtensions
+static EveEsi.Net.Middleware.Caching.EsiCacheKey.Create(EveEsi.Net.Abstractions.Middleware.EsiContext! context) -> string!
+static Microsoft.Extensions.DependencyInjection.EsiCacheServiceCollectionExtensions.AddEsiFileCacheStore(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! directory, System.Action<EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Microsoft.Extensions.DependencyInjection.EsiCacheServiceCollectionExtensions.AddEsiInMemoryCacheStore(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

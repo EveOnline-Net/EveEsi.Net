@@ -35,6 +35,7 @@ EveEsi.Net.Abstractions.Http.EsiResponseHeaders.ErrorLimitRemain.get -> int?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.ErrorLimitReset.get -> System.TimeSpan?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.EsiResponseHeaders(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, System.Collections.Generic.IEnumerable<string!>!>>! headers) -> void
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.ETag.get -> string?
+EveEsi.Net.Abstractions.Http.EsiResponseHeaders.Date.get -> System.DateTimeOffset?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.Expires.get -> System.DateTimeOffset?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.GetEnumerator() -> System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string!, System.Collections.Generic.IReadOnlyList<string!>!>>!
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.GetValue(string! name) -> string?

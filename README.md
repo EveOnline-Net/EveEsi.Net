@@ -12,6 +12,7 @@ Typed, middleware-driven .NET client for [EVE Online's ESI API](https://esi.evet
 - Targets `net8.0`, `net9.0` and `net10.0`. Trim and AOT compatible.
 
 ```csharp
+services.AddEsiInMemoryCacheStore();       // where ETag and cache middleware keep responses
 services.AddEveEsi(o =>
 {
     o.ApplicationName = "MyApp/1.2";       // your app, sent in the User-Agent
@@ -38,7 +39,7 @@ if (result.IsSuccess)
 | `EveEsi.Net.Models` | DTOs, enums and unions. |
 | `EveEsi.Net.Routes` | `Operation` and `Parameter` catalogues and the route table. |
 | `EveEsi.Net.Client` | Request factory, pipeline and HTTP execution. |
-| `EveEsi.Net.Middleware` | Standard middleware and an in-memory cache store. |
+| `EveEsi.Net.Middleware` | Standard middleware, and in-memory and file cache stores. |
 | `EveEsi.Net.Caching.Distributed` | Cache store over `IDistributedCache`. |
 | `EveEsi.Net.Caching.Redis` | Cache store over StackExchange.Redis. |
 
