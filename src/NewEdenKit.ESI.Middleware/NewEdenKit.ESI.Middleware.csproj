@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Standard opt-in middleware for NewEdenKit.ESI: ETags, caching, scope checks, language, rate limits, retries.</Description>
+    <Description>Standard opt-in middleware for NewEdenKit.ESI: response caching and ETag revalidation (EnableCaching), with in-memory and file cache stores.</Description>
   </PropertyGroup>
 
   <ItemGroup>

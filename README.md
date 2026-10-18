@@ -2,7 +2,7 @@
 
 Typed, middleware-driven .NET client for [EVE Online's ESI API](https://esi.evetech.net).
 
-> **Status:** early development. Nothing is published to NuGet yet.
+> **Status:** preview. Packages are on NuGet as prereleases; the API may still change before 1.0.
 
 - **Every ESI endpoint**, generated from the pinned OpenAPI spec: one injectable service per ESI tag (`IAssets`,
   `ICharacter`, `IMarket`, …), one method per operation, typed models with 64-bit IDs.
@@ -58,8 +58,8 @@ and the usage guide. Each service method's XML docs give the ESI method, path an
 | `NewEdenKit.ESI.Abstractions` | Contracts for writing your own middleware or cache store. |
 | `NewEdenKit.ESI.Routes` | `Operation` and `Parameter` catalogues and the route table. |
 | `NewEdenKit.ESI.Client` | Request factory, pipeline and HTTP execution (internal). |
-| `NewEdenKit.ESI.Caching.Distributed` | Cache store over `IDistributedCache` (planned). |
-| `NewEdenKit.ESI.Caching.Redis` | Cache store over StackExchange.Redis (planned). |
+| `NewEdenKit.ESI.Caching.Distributed` | Cache store over `IDistributedCache` (planned, not published yet). |
+| `NewEdenKit.ESI.Caching.Redis` | Cache store over StackExchange.Redis (planned, not published yet). |
 
 ## Contributing
 
