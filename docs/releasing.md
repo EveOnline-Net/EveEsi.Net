@@ -66,7 +66,8 @@ and are never published.
 5. The `release` GitHub Actions workflow, triggered by `v*` tags, runs in the `nuget` environment. It **waits for a
    maintainer to approve the run** (Actions → the run → Review deployments), then:
    - builds and tests every target
-   - packs all packages with the version from the tag
+   - packs the two packages, `NewEdenKit.ESI` (with Models, Routes, Client and Middleware inside) and
+     `NewEdenKit.ESI.Abstractions`, with the version from the tag
    - publishes `.nupkg` + `.snupkg` to nuget.org using **NuGet Trusted Publishing** (OIDC, no stored API key). The
      nuget.org trusted-publishing policy must name `NewEdenKit/NewEdenKit.ESI`, `release.yml` and the `nuget`
      environment.

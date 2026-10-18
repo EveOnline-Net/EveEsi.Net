@@ -5,17 +5,47 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Published as its own package (contracts for extension packages): a normal package dependency. -->
     <ProjectReference Include="../NewEdenKit.ESI.Abstractions/NewEdenKit.ESI.Abstractions.csproj" />
-    <ProjectReference Include="../NewEdenKit.ESI.Models/NewEdenKit.ESI.Models.csproj" />
-    <ProjectReference Include="../NewEdenKit.ESI.Routes/NewEdenKit.ESI.Routes.csproj" />
-    <ProjectReference Include="../NewEdenKit.ESI.Client/NewEdenKit.ESI.Client.csproj" />
-    <ProjectReference Include="../NewEdenKit.ESI.Middleware/NewEdenKit.ESI.Middleware.csproj" />
+
+    <!-- Not published separately: their assemblies ship inside this package (see the pack targets below). -->
+    <ProjectReference Include="../NewEdenKit.ESI.Models/NewEdenKit.ESI.Models.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../NewEdenKit.ESI.Routes/NewEdenKit.ESI.Routes.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../NewEdenKit.ESI.Client/NewEdenKit.ESI.Client.csproj" PrivateAssets="all" />
+    <ProjectReference Include="../NewEdenKit.ESI.Middleware/NewEdenKit.ESI.Middleware.csproj" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Also cover the embedded assemblies' own dependencies. -->
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.Extensions.Options" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <!-- A pack without a build (the release workflow's) resolves the references below from existing outputs. -->
+    <BuildProjectReferences Condition="'$(NoBuild)' == 'true'">false</BuildProjectReferences>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeEmbeddedProjectsInPackage</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificDebugSymbolsInPackage>$(TargetsForTfmSpecificDebugSymbolsInPackage);IncludeEmbeddedProjectSymbolsInPackage</TargetsForTfmSpecificDebugSymbolsInPackage>
+  </PropertyGroup>
+
+  <!-- The PrivateAssets project references' assemblies, with the XML docs next to them, go into lib/<tfm>/. -->
+  <Target Name="IncludeEmbeddedProjectsInPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <_EmbeddedAssembly Include="@(ReferenceCopyLocalPaths)"
+                         Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' And '%(ReferenceCopyLocalPaths.PrivateAssets)' == 'all' And '%(Extension)' == '.dll'" />
+      <BuildOutputInPackage Include="@(_EmbeddedAssembly)" />
+      <BuildOutputInPackage Include="@(_EmbeddedAssembly->'%(RootDir)%(Directory)%(Filename).xml')" Condition="Exists('%(RootDir)%(Directory)%(Filename).xml')" />
+    </ItemGroup>
+  </Target>
+
+  <!-- ...and their PDBs into the symbol package (.snupkg). -->
+  <Target Name="IncludeEmbeddedProjectSymbolsInPackage" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <_EmbeddedSymbols Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)%(Filename).pdb')"
+                        Condition="'%(ReferenceCopyLocalPaths.ReferenceSourceTarget)' == 'ProjectReference' And '%(ReferenceCopyLocalPaths.PrivateAssets)' == 'all' And '%(Extension)' == '.dll'" />
+      <TfmSpecificDebugSymbolsFile Include="@(_EmbeddedSymbols)" Condition="Exists('%(Identity)')" TargetFramework="$(TargetFramework)" />
+    </ItemGroup>
+  </Target>
 
 </Project>

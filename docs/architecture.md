@@ -17,14 +17,18 @@ generator.json               generator config (naming, enums, unions, overrides)
 openapi.json                 pinned ESI spec (do not read whole; query it)
 
 src/
-  NewEdenKit.ESI.Abstractions/   contracts shared by everything (hand-written)
-  NewEdenKit.ESI.Models/         DTOs, enums, unions, converters, JsonSerializerContext (generated + partials)
-  NewEdenKit.ESI.Routes/         Operation (operation ID constants), EsiRoutes table, Parameter catalogue (all generated)
-  NewEdenKit.ESI.Client/         client factory, request parameters, pipeline runner, HTTP execution (hand-written)
-  NewEdenKit.ESI.Middleware/     standard middleware + in-memory IEsiCacheStore (hand-written)
-  NewEdenKit.ESI/                section services ICharacters… (generated) + AddEveEsi() DI extensions
-  NewEdenKit.ESI.Caching.Distributed/   IEsiCacheStore over IDistributedCache    (separate package)
-  NewEdenKit.ESI.Caching.Redis/         IEsiCacheStore over StackExchange.Redis  (separate package)
+  NewEdenKit.ESI.Abstractions/   contracts shared by everything (hand-written)              package
+  NewEdenKit.ESI.Models/         DTOs, enums, unions, converters, JsonSerializerContext      inside NewEdenKit.ESI
+  NewEdenKit.ESI.Routes/         Operation constants, EsiRoutes table, Parameter catalogue   inside NewEdenKit.ESI
+  NewEdenKit.ESI.Client/         client factory, request parameters, pipeline, HTTP          inside NewEdenKit.ESI
+  NewEdenKit.ESI.Middleware/     standard middleware + in-memory and file IEsiCacheStore     inside NewEdenKit.ESI
+  NewEdenKit.ESI/                services (generated) + AddEveEsi() / builders               package
+  NewEdenKit.ESI.Caching.Distributed/   IEsiCacheStore over IDistributedCache    (planned package, not packed yet)
+  NewEdenKit.ESI.Caching.Redis/         IEsiCacheStore over StackExchange.Redis  (planned package, not packed yet)
+
+Two packages ship: `NewEdenKit.ESI` and `NewEdenKit.ESI.Abstractions`. Models, Routes, Client and Middleware stay
+separate assemblies (and projects), but they're referenced with `PrivateAssets="all"` and their DLLs, XML docs and
+PDBs are packed into `NewEdenKit.ESI` (see its `.csproj`). A test project that uses them references them directly.
 
 tools/
   NewEdenKit.ESI.Generator/      spec → code console tool (not shipped)

@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Shipped inside the NewEdenKit.ESI package, not as a package of its own. -->
+    <IsPackable>false</IsPackable>
     <Description>ESI data transfer objects, enums, unions and the source-generated JSON context for NewEdenKit.ESI.</Description>
   </PropertyGroup>
 

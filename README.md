@@ -52,14 +52,11 @@ and the usage guide. Each service method's XML docs give the ESI method, path an
 
 | Package | Contents |
 |---|---|
-| `NewEdenKit.ESI` | Services and `AddEveEsi()`. Start here. |
-| `NewEdenKit.ESI.Middleware` | `EnableCaching()`, cache and ETag middleware, in-memory and file cache stores. |
-| `NewEdenKit.ESI.Models` | Response and request models, enums and unions. |
-| `NewEdenKit.ESI.Abstractions` | Contracts for writing your own middleware or cache store. |
-| `NewEdenKit.ESI.Routes` | `Operation` and `Parameter` catalogues and the route table. |
-| `NewEdenKit.ESI.Client` | Request factory, pipeline and HTTP execution (internal). |
-| `NewEdenKit.ESI.Caching.Distributed` | Cache store over `IDistributedCache` (planned, not published yet). |
-| `NewEdenKit.ESI.Caching.Redis` | Cache store over StackExchange.Redis (planned, not published yet). |
+| `NewEdenKit.ESI` | Everything you need: services, models, `AddEveEsi()`, `EnableCaching()` and the cache stores. Install this one. |
+| `NewEdenKit.ESI.Abstractions` | Contracts (results, middleware, cache store, builders). Comes with `NewEdenKit.ESI`; reference it alone only to write middleware or a cache store in a separate library. |
+
+`NewEdenKit.ESI.Caching.Distributed` (over `IDistributedCache`) and `NewEdenKit.ESI.Caching.Redis` (over
+StackExchange.Redis) are planned and not published yet.
 
 ## Contributing
 
