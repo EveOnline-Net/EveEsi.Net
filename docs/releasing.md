@@ -54,15 +54,19 @@ and are never published.
 1. Make sure `main` is green and contains everything for the release.
 2. Decide the version using the tables above. Check the PublicAPI diffs since the last tag.
 3. Move the entries from `PublicAPI.Unshipped.txt` into `PublicAPI.Shipped.txt` in every project (a `chore: prepare vX.Y.Z` PR).
-4. Tag and push:
+4. Tag and push (only the `maintainers` team can create `v*` tags; the "Protect release tags" ruleset blocks
+   everyone else):
    ```
    git tag vX.Y.Z
    git push origin vX.Y.Z
    ```
-5. The `release` GitHub Actions workflow, triggered by `v*` tags:
+5. The `release` GitHub Actions workflow, triggered by `v*` tags, runs in the `nuget` environment. It **waits for a
+   maintainer to approve the run** (Actions → the run → Review deployments), then:
    - builds and tests every target
    - packs all packages with the version from the tag
-   - publishes `.nupkg` + `.snupkg` to nuget.org using **NuGet Trusted Publishing** (OIDC, no stored API key)
+   - publishes `.nupkg` + `.snupkg` to nuget.org using **NuGet Trusted Publishing** (OIDC, no stored API key). The
+     nuget.org trusted-publishing policy must name `EveOnline-Net/EveEsi.Net`, `release.yml` and the `nuget`
+     environment.
    - creates a GitHub Release with generated notes (from squash-merged PR titles)
 6. After the release, set `PackageValidationBaselineVersion` to the new version (in `Directory.Build.props`).
 
@@ -72,7 +76,7 @@ The release notes always state the ESI compatibility date the release targets.
 All packable projects have, set in `Directory.Build.props`:
 - `PackageId` = project name, shared `Authors`
 - `PackageLicenseExpression` = `GPL-3.0-or-later` (full text in `LICENSE`)
-- `PackageProjectUrl` / `RepositoryUrl` = `https://github.com/SimplyUnnamed/EveEsi.Net`, `RepositoryType` = `git`
+- `PackageProjectUrl` / `RepositoryUrl` = `https://github.com/EveOnline-Net/EveEsi.Net`, `RepositoryType` = `git`
 - `PackageReadmeFile`, `PackageIcon`, `PackageTags` (`eve-online;esi;eve;api-client`)
 - SourceLink, `ContinuousIntegrationBuild` in CI, deterministic builds
 - `IncludeSymbols` + `SymbolPackageFormat=snupkg`
