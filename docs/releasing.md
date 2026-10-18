@@ -45,7 +45,10 @@ There are no automatic prereleases. When a preview is needed, tag `main` with a 
 git tag v0.4.0-preview.1
 git push origin v0.4.0-preview.1
 ```
-The same release workflow publishes it to nuget.org as a prerelease.
+The same release workflow publishes it to nuget.org as a prerelease. A preview leaves the public API files as they
+are: entries stay in `PublicAPI.Unshipped.txt` until a stable `vX.Y.Z` ships, since a preview's API may still change.
+Projects that aren't implemented yet set `<IsPackable>false</IsPackable>` so a release never publishes an empty
+package.
 
 Untagged CI builds get MinVer's height-based versions (e.g. `0.4.1-alpha.0.3`). They're build artefacts only
 and are never published.

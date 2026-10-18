@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Not implemented yet: keep it out of releases until it is. -->
+    <IsPackable>false</IsPackable>
     <Description>IEsiCacheStore for NewEdenKit.ESI backed by IDistributedCache.</Description>
   </PropertyGroup>
 
