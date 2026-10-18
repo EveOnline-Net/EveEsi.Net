@@ -16,8 +16,6 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
     <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.1" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="8.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
-    <PackageVersion Include="StackExchange.Redis" Version="2.8.58" />
   </ItemGroup>
 
   <!-- Testing -->

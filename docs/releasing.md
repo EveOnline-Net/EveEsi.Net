@@ -1,7 +1,7 @@
 # Releasing
 
 ## Principles
-- **One version for every package.** All `NewEdenKit.ESI*` packages (core and `Caching.*`) are always released
+- **One version for both packages.** `NewEdenKit.ESI` and `NewEdenKit.ESI.Abstractions` are always released
   together with the same version.
 - **Releases are driven by tags.** Pushing a `vX.Y.Z` tag on `main` is the release. Nothing else publishes to nuget.org.
 - **Versions come from git** via [MinVer](https://github.com/adamralph/minver). No version numbers are

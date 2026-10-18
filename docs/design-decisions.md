@@ -71,7 +71,7 @@ In-memory store ships in `NewEdenKit.ESI.Middleware`. Adapters with third-party 
 *Update:* the store is chosen inside `.EnableCaching(c => c.AddInMemoryCacheStore())` or
 `c.AddFileCacheStore(directory)` (#36, #37); without a choice it defaults to a file store. The file store has no
 dependencies, so it ships in `NewEdenKit.ESI.Middleware` too. Middleware added with `Use<CacheMiddleware>()` outside
-`EnableCaching` needs the app to register a store itself.
+`EnableCaching` needs the app to register a store itself. *Superseded* in part by #40: there are no adapter packages.
 
 ### 15. System.Text.Json with a source-generated context only
 No reflection-based serialization and no Newtonsoft. Keeps the library trim and AOT compatible.
@@ -278,5 +278,14 @@ DLLs, XML docs and PDBs into its own package. Unimplemented projects (`Caching.*
 *Why:* the inner libraries only exist to serve the main one; nobody should install `Routes` or `Client` on their
 own, and one package to install is simpler. Abstractions stays separate so extension packages (cache stores,
 middleware libraries) can depend on the contracts without the whole client (#36).
-*Supersedes* the per-library packages in #14; the `NewEdenKit.ESI.Caching.*` store packages are still planned,
-depending on Abstractions only.
+*Supersedes* the per-library packages in #14. The `NewEdenKit.ESI.Caching.*` store packages once planned here were
+dropped in #40.
+
+### 40. Cache storage beyond memory and files is the application's concern
+The library ships the in-memory and file stores and nothing else. The planned `NewEdenKit.ESI.Caching.Redis` and
+`NewEdenKit.ESI.Caching.Distributed` packages (#14, #39) are dropped and their placeholder projects removed.
+Applications that want Redis, a database or anything else implement `IEsiCacheStore` (three methods) and plug it in
+with `EnableCaching(c => c.UseStore(sp => …))`.
+*Why:* how a cache is hosted, connected, bounded and monitored depends on the application's infrastructure, and the
+contract is small enough to implement directly. Each adapter package would be a dependency to version, test against a
+real server and release in step with the client, for little gain over a few lines in the app.

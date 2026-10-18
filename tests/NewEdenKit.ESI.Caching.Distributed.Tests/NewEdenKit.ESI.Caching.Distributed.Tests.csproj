@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="../../src/NewEdenKit.ESI.Caching.Distributed/NewEdenKit.ESI.Caching.Distributed.csproj" />
-  </ItemGroup>
-
-</Project>

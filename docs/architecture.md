@@ -23,8 +23,6 @@ src/
   NewEdenKit.ESI.Client/         client factory, request parameters, pipeline, HTTP          inside NewEdenKit.ESI
   NewEdenKit.ESI.Middleware/     standard middleware + in-memory and file IEsiCacheStore     inside NewEdenKit.ESI
   NewEdenKit.ESI/                services (generated) + AddEveEsi() / builders               package
-  NewEdenKit.ESI.Caching.Distributed/   IEsiCacheStore over IDistributedCache    (planned package, not packed yet)
-  NewEdenKit.ESI.Caching.Redis/         IEsiCacheStore over StackExchange.Redis  (planned package, not packed yet)
 
 Two packages ship: `NewEdenKit.ESI` and `NewEdenKit.ESI.Abstractions`. Models, Routes, Client and Middleware stay
 separate assemblies (and projects), but they're referenced with `PrivateAssets="all"` and their DLLs, XML docs and
@@ -47,12 +45,12 @@ Routes        → Abstractions, Models
 Client        → Abstractions
 Middleware    → Abstractions
 NewEdenKit.ESI    → Abstractions, Models, Routes, Client, Middleware
-Caching.*     → Abstractions
 ```
 - Nothing references `NewEdenKit.ESI` (the top package) except tests and consumers.
 - `Client` and `Middleware` never reference `Models` or `Routes`. They work with `RouteDefinition`
   metadata and raw responses only.
-- Adapters with third-party dependencies (Redis, distributed cache, …) always go in their own `Caching.*` package.
+- No cache store with third-party dependencies (Redis, distributed cache, …) is part of the library. Applications
+  implement `IEsiCacheStore` against their own storage (decision #40).
 
 ## Key abstractions (NewEdenKit.ESI.Abstractions)
 
@@ -247,8 +245,8 @@ The in-memory `IEsiCacheStore` ships here (`c.AddInMemoryCacheStore(o => o.MaxEn
 without its own `RetainUntil` is kept). `FileEsiCacheStore` (`c.AddFileCacheStore("cache/esi")`) keeps entries in a local folder across
 restarts and between processes on one machine: one file per entry named by a hash of its key, written to a temporary
 file and renamed into place, with the file's last-write time set to when it may be dropped so sweeps (every
-`SweepInterval`, on writes) need only the folder listing. Unreadable files are misses. Stores with third-party
-dependencies ship as `NewEdenKit.ESI.Caching.*` packages. Both middleware take an
+`SweepInterval`, on writes) need only the folder listing. Unreadable files are misses. Any other storage is the application's
+own `IEsiCacheStore`, plugged in with `c.UseStore(…)`. Both middleware take an
 optional `TimeProvider`, resolved from DI when registered.
 
 ### What is *not* middleware: service registration
@@ -269,8 +267,7 @@ services.AddEveEsi(o =>
 registered in one chain. `EsiOptions` holds only configuration (identity, base address, tenant). The builder is the
 global middleware target (`Use(instance)`, `Use(callback)`, `Use<T>()`), and each package adds its own extensions to
 it: `NewEdenKit.ESI.Middleware` adds `EnableCaching`, whose `IEsiCacheBuilder` (also in Abstractions) takes
-`AddInMemoryCacheStore` / `AddFileCacheStore`; the `NewEdenKit.ESI.Caching.*` packages add their stores to that builder the
-same way, through `IEsiCacheBuilder.UseStore`. `ConfigureHttpClient` exposes the typed client's `IHttpClientBuilder` (named
+`AddInMemoryCacheStore` / `AddFileCacheStore`, or an application's own store through `IEsiCacheBuilder.UseStore`. `ConfigureHttpClient` exposes the typed client's `IHttpClientBuilder` (named
 `NewEdenKit.ESI`) for message handlers, a proxy or a timeout; ESI-aware behaviour (retries, caching, rate limits) belongs in
 middleware instead. Add everything before the service provider is built: the global middleware list is read when it's
 first resolved.
