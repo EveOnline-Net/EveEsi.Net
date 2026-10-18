@@ -1,7 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Contracts for EveEsi.Net: route definitions, middleware, requests, results and cache store abstractions.</Description>
+    <Description>Contracts for EveEsi.Net: route definitions, middleware, requests, results, cache store abstractions and the registration builder.</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- IEsiBuilder exposes IServiceCollection, so every package can add its own builder extensions. -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
 
 </Project>

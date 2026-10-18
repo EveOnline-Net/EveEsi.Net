@@ -35,7 +35,9 @@ EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions.DefaultRetention.set 
 EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions.InMemoryEsiCacheStoreOptions() -> void
 EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions.MaxEntries.get -> int
 EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions.MaxEntries.set -> void
-Microsoft.Extensions.DependencyInjection.EsiCacheServiceCollectionExtensions
+Microsoft.Extensions.DependencyInjection.EsiCacheBuilderExtensions
 static EveEsi.Net.Middleware.Caching.EsiCacheKey.Create(EveEsi.Net.Abstractions.Middleware.EsiContext! context) -> string!
-static Microsoft.Extensions.DependencyInjection.EsiCacheServiceCollectionExtensions.AddEsiFileCacheStore(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! directory, System.Action<EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
-static Microsoft.Extensions.DependencyInjection.EsiCacheServiceCollectionExtensions.AddEsiInMemoryCacheStore(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions.DefaultDirectory.get -> string!
+static Microsoft.Extensions.DependencyInjection.EsiCacheBuilderExtensions.AddFileCacheStore(this EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder! cache, string? directory = null, System.Action<EveEsi.Net.Middleware.Caching.FileEsiCacheStoreOptions!>? configure = null) -> EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder!
+static Microsoft.Extensions.DependencyInjection.EsiCacheBuilderExtensions.AddInMemoryCacheStore(this EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder! cache, System.Action<EveEsi.Net.Middleware.Caching.InMemoryEsiCacheStoreOptions!>? configure = null) -> EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder!
+static Microsoft.Extensions.DependencyInjection.EsiCacheBuilderExtensions.EnableCaching(this EveEsi.Net.Abstractions.Registration.IEsiBuilder! builder, System.Action<EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder!>? configure = null) -> EveEsi.Net.Abstractions.Registration.IEsiBuilder!

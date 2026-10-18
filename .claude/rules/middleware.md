@@ -25,7 +25,7 @@ Full design: [docs/architecture.md](../../docs/architecture.md).
 - `Client` and `Middleware` never reference `Models` or `Routes`. Use `RouteDefinition` metadata only.
 
 ## Registering middleware (`Use`)
-- Every level (global `EsiOptions`, service interfaces, `IEsiRequest<T>`) implements
+- Every level (global `IEsiBuilder` from `AddEveEsi()`, service interfaces, `IEsiRequest<T>`) implements
   `IEsiMiddlewareTarget<TSelf>` and so accepts **both** an `IEsiMiddleware` instance and an async callback
   `Func<EsiContext, EsiNext, ValueTask>`.
 - Each level implements only `Use(IEsiMiddleware)`. The callback overload is the single shared extension

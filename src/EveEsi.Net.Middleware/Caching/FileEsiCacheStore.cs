@@ -34,10 +34,10 @@ public sealed class FileEsiCacheStore : IEsiCacheStore
     private DateTimeOffset _nextSweep;
 
     /// <summary>Creates a store, and its folder if it doesn't exist.</summary>
-    /// <param name="options">The folder and limits.</param>
+    /// <param name="options">The folder (<see cref="FileEsiCacheStoreOptions.DefaultDirectory"/> when not set) and limits.</param>
     /// <param name="timeProvider">The clock; <see cref="TimeProvider.System"/> when <see langword="null"/>.</param>
     /// <exception cref="ArgumentNullException"><paramref name="options"/> is <see langword="null"/>.</exception>
-    /// <exception cref="ArgumentException">No folder is set.</exception>
+    /// <exception cref="ArgumentException">The folder is set but empty.</exception>
     /// <exception cref="ArgumentOutOfRangeException">A limit isn't positive.</exception>
     public FileEsiCacheStore(FileEsiCacheStoreOptions options, TimeProvider? timeProvider = null)
     {
@@ -45,7 +45,7 @@ public sealed class FileEsiCacheStore : IEsiCacheStore
         options.Validate();
         _options = options;
         _time = timeProvider ?? TimeProvider.System;
-        _directory = Path.GetFullPath(options.Directory!);
+        _directory = Path.GetFullPath(options.ResolvedDirectory);
         Directory.CreateDirectory(_directory);
         _nextSweep = _time.GetUtcNow() + options.SweepInterval;
     }

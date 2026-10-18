@@ -31,11 +31,11 @@ EveEsi.Net.Abstractions.Http.EsiResponseHeaders
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.CacheControl.get -> string?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.ContentLanguage.get -> string?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.Count.get -> int
+EveEsi.Net.Abstractions.Http.EsiResponseHeaders.Date.get -> System.DateTimeOffset?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.ErrorLimitRemain.get -> int?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.ErrorLimitReset.get -> System.TimeSpan?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.EsiResponseHeaders(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, System.Collections.Generic.IEnumerable<string!>!>>! headers) -> void
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.ETag.get -> string?
-EveEsi.Net.Abstractions.Http.EsiResponseHeaders.Date.get -> System.DateTimeOffset?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.Expires.get -> System.DateTimeOffset?
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.GetEnumerator() -> System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string!, System.Collections.Generic.IReadOnlyList<string!>!>>!
 EveEsi.Net.Abstractions.Http.EsiResponseHeaders.GetValue(string! name) -> string?
@@ -65,6 +65,14 @@ EveEsi.Net.Abstractions.Middleware.IEsiMiddleware
 EveEsi.Net.Abstractions.Middleware.IEsiMiddleware.InvokeAsync(EveEsi.Net.Abstractions.Middleware.EsiContext! context, EveEsi.Net.Abstractions.Middleware.EsiNext! next) -> System.Threading.Tasks.ValueTask
 EveEsi.Net.Abstractions.Middleware.IEsiMiddlewareTarget<TSelf>
 EveEsi.Net.Abstractions.Middleware.IEsiMiddlewareTarget<TSelf>.Use(EveEsi.Net.Abstractions.Middleware.IEsiMiddleware! middleware) -> TSelf
+EveEsi.Net.Abstractions.Registration.IEsiBuilder
+EveEsi.Net.Abstractions.Registration.IEsiBuilder.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+EveEsi.Net.Abstractions.Registration.IEsiBuilder.Use<TMiddleware>() -> EveEsi.Net.Abstractions.Registration.IEsiBuilder!
+EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder
+EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder.DisableETags() -> EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder!
+EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder.DisableResponseCache() -> EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder!
+EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder.UseStore(System.Func<System.IServiceProvider!, EveEsi.Net.Abstractions.Caching.IEsiCacheStore!>! factory) -> EveEsi.Net.Abstractions.Registration.IEsiCacheBuilder!
 EveEsi.Net.Abstractions.Requests.IEsiClientFactory
 EveEsi.Net.Abstractions.Requests.IEsiClientFactory.CreateEsiClient(string! operationId, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token, System.Collections.Generic.IReadOnlyList<EveEsi.Net.Abstractions.Middleware.IEsiMiddleware!>? serviceMiddleware) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<EveEsi.Net.Abstractions.Results.EsiNoContent>!
 EveEsi.Net.Abstractions.Requests.IEsiClientFactory.CreateEsiClient<T>(string! operationId, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! responseType, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token, System.Collections.Generic.IReadOnlyList<EveEsi.Net.Abstractions.Middleware.IEsiMiddleware!>? serviceMiddleware) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<T>!

@@ -187,7 +187,7 @@ public static class EsiMiddlewareTargetExtensions
 
 | Level | Target type | `Use` returns |
 |---|---|---|
-| Global | `EsiOptions` (in `AddEveEsi(o => …)`) | `EsiOptions` |
+| Global | `IEsiBuilder` (returned by `AddEveEsi(…)`) | `IEsiBuilder` |
 | Service | each service interface, e.g. `ICharacters : IEsiService<ICharacters>` | the service interface |
 | Request | `IEsiRequest<T>` | `IEsiRequest<T>` |
 
@@ -195,7 +195,7 @@ public static class EsiMiddlewareTargetExtensions
   (`characters.Use(...).GetCharacter(id)` still sees `ICharacters`).
 - The callback type is `Func<EsiContext, EsiNext, ValueTask>` only. A second `Task` overload would make
   `async` lambdas ambiguous (CS0121).
-- Global level only: `o.Use<TMiddleware>()` resolves the middleware from DI, so it can take injected
+- Global level only: `builder.Use<TMiddleware>()` resolves the middleware from DI, so it can take injected
   dependencies such as `IEsiCacheStore`. Service and request levels take instances or callbacks.
 - Null arguments throw `ArgumentNullException`.
 
@@ -203,7 +203,7 @@ public static class EsiMiddlewareTargetExtensions
 
 | Level | Where it is registered | Lifetime |
 |---|---|---|
-| **Global** | `services.AddEveEsi(o => o.Use(...))` or `o.Use<T>()` | Whole application. Applies to every call from every service. |
+| **Global** | `services.AddEveEsi(…).Use(...)` or `.Use<T>()` | Whole application. Applies to every call from every service. |
 | **Service** | `characters.Use(...)` on a resolved service instance | That instance. Services are **transient**, so a newly resolved `ICharacters` starts with no service-level middleware but still gets global middleware. |
 | **Request** | `client.Use(...)` on an `IEsiRequest<T>` | That one call. |
 
@@ -231,9 +231,16 @@ All opt-in. The core client sends a call without any of them.
 - `ErrorLimitMiddleware` / `RateLimitMiddleware`: read ESI error-limit and rate-limit headers and back off (route carries `x-rate-limit` group).
 - `RetryMiddleware`: retries transient failures (5xx, 420/429 with backoff).
 
-The in-memory `IEsiCacheStore` ships here (`services.AddEsiInMemoryCacheStore(o => o.MaxEntries = …)`): bounded by
+Turn both on with `.EnableCaching(c => …)` on the builder (below). It adds `CacheMiddleware` then `ETagMiddleware` at
+that point in the global chain (`c.DisableResponseCache()` / `c.DisableETags()` leave one out) and registers the store
+chosen in `c`. With no store chosen it uses a `FileEsiCacheStore` in `FileEsiCacheStoreOptions.DefaultDirectory`
+(`EveEsi.Net/<entry assembly>/cache` in the user's local application data). Choosing two stores, calling it twice or
+turning both middleware off fails at startup; an `IEsiCacheStore` the app registered itself wins. `Use<CacheMiddleware>()`
+still works for a custom order, with the app registering the store.
+
+The in-memory `IEsiCacheStore` ships here (`c.AddInMemoryCacheStore(o => o.MaxEntries = …)`): bounded by
 `MaxEntries` (expired entries go first, then those due soonest) and `DefaultRetention` (how long past expiry an entry
-without its own `RetainUntil` is kept). `FileEsiCacheStore` (`services.AddEsiFileCacheStore("cache/esi")`) keeps entries in a local folder across
+without its own `RetainUntil` is kept). `FileEsiCacheStore` (`c.AddFileCacheStore("cache/esi")`) keeps entries in a local folder across
 restarts and between processes on one machine: one file per entry named by a hash of its key, written to a temporary
 file and renamed into place, with the file's last-write time set to when it may be dropped so sweeps (every
 `SweepInterval`, on writes) need only the folder listing. Unreadable files are misses. Stores with third-party
@@ -245,12 +252,24 @@ The consumer registers the library once, identifying **their** application. The 
 
 ```csharp
 services.AddEveEsi(o =>
-{
-    o.ApplicationName = "MyApp/1.2";            // required
-    o.Contact = "admin@example.com";            // required: email, website, EVE character or Discord
-    o.Use<ETagMiddleware>();                    // global middleware (optional)
-});
+    {
+        o.ApplicationName = "MyApp/1.2";        // required
+        o.Contact = "admin@example.com";        // required: email, website, EVE character or Discord
+    })
+    .EnableCaching(c => c.AddFileCacheStore("cache/esi"))   // caching middleware + store (optional)
+    .Use<MyMiddleware>()                        // more global middleware, in order (optional)
+    .ConfigureHttpClient(http => http.AddHttpMessageHandler<LoggingHandler>());   // optional
 ```
+
+`AddEveEsi()` returns an **`IEsiBuilder`** (in Abstractions), so everything that belongs to the ESI client is
+registered in one chain. `EsiOptions` holds only configuration (identity, base address, tenant). The builder is the
+global middleware target (`Use(instance)`, `Use(callback)`, `Use<T>()`), and each package adds its own extensions to
+it: `EveEsi.Net.Middleware` adds `EnableCaching`, whose `IEsiCacheBuilder` (also in Abstractions) takes
+`AddInMemoryCacheStore` / `AddFileCacheStore`; the `EveEsi.Net.Caching.*` packages add their stores to that builder the
+same way, through `IEsiCacheBuilder.UseStore`. `ConfigureHttpClient` exposes the typed client's `IHttpClientBuilder` (named
+`EveEsi.Net`) for message handlers, a proxy or a timeout; ESI-aware behaviour (retries, caching, rate limits) belongs in
+middleware instead. Add everything before the service provider is built: the global middleware list is read when it's
+first resolved.
 
 `AddEveEsi()` configures the typed client's `HttpClient` through `AddHttpClient<EsiHttpClient>(...)`. That is the only
 place the ESI headers are set; no service or client constructor touches them:
@@ -272,14 +291,14 @@ fails at startup rather than on the first call (`InvalidOperationException`):
 - a second `AddEveEsi()` on the same collection.
 
 What it registers:
-- `AddHttpClient<EsiHttpClient>` with the address and headers above. Apps can add handlers (proxies, logging) through
-  `IHttpClientFactory` as usual.
-- The route table (`EsiRoutes.All`) and the global middleware as singletons. `o.Use<T>()` registers `T` as a singleton
+- `AddHttpClient<EsiHttpClient>("EveEsi.Net", …)` with the address and headers above.
+- The route table (`EsiRoutes.All`) and the global middleware as singletons. `.Use<T>()` registers `T` as a singleton
   (`TryAdd`, so an app's own registration wins) and resolves it when the global middleware is first needed.
 - `IEsiClientFactory` and every generated service as transient (`TryAdd`).
 
-`AddEveEsi` lives in the `Microsoft.Extensions.DependencyInjection` namespace, as `IServiceCollection` extensions
-conventionally do; `EsiOptions` is in `EveEsi.Net`.
+`AddEveEsi` and the builder extensions live in the `Microsoft.Extensions.DependencyInjection` namespace, as
+registration extensions conventionally do; `EsiOptions` is in `EveEsi.Net` and `IEsiBuilder` in
+`EveEsi.Net.Abstractions.Registration`.
 
 `Authorization: Bearer <token>` is the one per-request header the client adds itself, from `context.AccessToken` at
 send time. Default headers apply only when the request doesn't set the same header, so middleware **can** override

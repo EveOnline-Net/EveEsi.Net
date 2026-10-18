@@ -68,9 +68,10 @@ Each union gets an `Unknown` variant.
 In-memory store ships in `EveEsi.Net.Middleware`. Adapters with third-party dependencies ship as
 `EveEsi.Net.Caching.Distributed`, `EveEsi.Net.Caching.Redis`, …
 *Why:* the core package doesn't pull in Redis or other infrastructure dependencies.
-*Update:* register the in-memory store with `services.AddEsiInMemoryCacheStore()`, or the file store with
-`services.AddEsiFileCacheStore(directory)`. The file store has no dependencies, so it ships in `EveEsi.Net.Middleware` too. Nothing registers a store
-implicitly; caching middleware without one fails to resolve.
+*Update:* the store is chosen inside `.EnableCaching(c => c.AddInMemoryCacheStore())` or
+`c.AddFileCacheStore(directory)` (#36, #37); without a choice it defaults to a file store. The file store has no
+dependencies, so it ships in `EveEsi.Net.Middleware` too. Middleware added with `Use<CacheMiddleware>()` outside
+`EnableCaching` needs the app to register a store itself.
 
 ### 15. System.Text.Json with a source-generated context only
 No reflection-based serialization and no Newtonsoft. Keeps the library trim and AOT compatible.
@@ -107,7 +108,7 @@ silently or fail to deserialize at runtime, and changing it later breaks the pub
 Global, service and request levels all accept `Use(IEsiMiddleware)` and
 `Use(Func<EsiContext, EsiNext, ValueTask>)`. All levels implement `IEsiMiddlewareTarget<TSelf>`, which has a
 single `Use(IEsiMiddleware)` member. The callback overload is one shared extension method that wraps it in
-`DelegateMiddleware`. The global level also offers `Use<TMiddleware>()` for DI-resolved middleware.
+`DelegateMiddleware`. The global level (`IEsiBuilder`, see #36) also offers `Use<TMiddleware>()` for DI-resolved middleware.
 *Why:* one implementation means the overloads can't differ between levels.
 Only a `ValueTask` callback overload exists, because a parallel `Task` overload makes `async` lambdas ambiguous.
 
@@ -237,3 +238,24 @@ keeps a skewed local clock from stretching or shrinking lifetimes. Returning the
 never need to handle "not modified" when ETag middleware is on.
 *Trade-off:* the subject is read without validating the token. That's only a cache partition; ESI still authorizes the
 call whenever it's actually sent.
+
+### 36. Registration is a builder: `AddEveEsi()` returns `IEsiBuilder`
+`services.AddEveEsi(o => …)` returns an `IEsiBuilder` that carries the global middleware (`Use`, `Use<T>()`), caching
+(`EnableCaching`, see #37) and HTTP client
+settings (`ConfigureHttpClient`). `EsiOptions` is configuration only. `IEsiBuilder` lives in Abstractions, which now
+depends on `Microsoft.Extensions.DependencyInjection.Abstractions`. The `IServiceCollection` store extensions and
+`EsiOptions.Use` are gone: the builder is the one way to register.
+*Why:* with middleware and stores spread over several packages, one chain keeps everything that belongs to the ESI
+client together and discoverable, the way `IHttpClientBuilder` does for HTTP clients. Defining it in Abstractions lets
+every package extend it without referencing the main package.
+
+### 37. Caching is switched on with its own builder: `EnableCaching(c => …)`
+`.EnableCaching(c => c.AddFileCacheStore("cache/esi"))` adds `CacheMiddleware` and `ETagMiddleware` to the global chain
+and registers the store chosen on the `IEsiCacheBuilder` (Abstractions). Either middleware can be left out
+(`DisableResponseCache`, `DisableETags`). With no store chosen, a file store in a per-application folder under the
+user's local application data is used. Store packages extend `IEsiCacheBuilder` and call `UseStore`, which allows one
+store. Store methods are no longer on `IEsiBuilder`.
+*Why:* caching is one feature made of two middleware and a store that have to agree; one switch makes the common case a
+single line and keeps the store choice next to the thing that uses it. Defaulting to the file store means caching
+survives restarts out of the box. The folder is per application because the cache key doesn't include the configured
+tenant or base address, which are per application.
