@@ -30,14 +30,22 @@ public static class EveEsiServiceCollectionExtensions
     /// </exception>
     /// <remarks>
     /// The options are validated immediately, so a misconfiguration fails at startup rather than on the first call.
-    /// Services and the factory are transient; a service the application registered first is kept.
-    /// <code>
-    /// services.AddEveEsi(o =&gt; { o.ApplicationName = "MyApp/1.2"; o.Contact = "admin@example.com"; })
-    ///     .AddInMemoryCacheStore()
-    ///     .Use&lt;CacheMiddleware&gt;()
-    ///     .Use&lt;ETagMiddleware&gt;();
-    /// </code>
+    /// Services and the factory are transient; a service the application registered first is kept. See the usage guide:
+    /// https://github.com/EveOnline-Net/EveEsi.Net/blob/main/docs/usage.md
     /// </remarks>
+    /// <example>
+    /// <code>
+    /// services.AddEveEsi(o =&gt;
+    ///     {
+    ///         o.ApplicationName = "MyApp/1.2";   // your app, sent in the User-Agent
+    ///         o.Contact = "admin@example.com";   // how CCP can reach you
+    ///     })
+    ///     .EnableCaching();                      // optional: response cache + ETags (EveEsi.Net.Middleware)
+    ///
+    /// // Then inject a service and call it:
+    /// var result = await assets.GetCharactersCharacterIdAssets(characterId, accessToken, page: 1).ExecuteAsync(ct);
+    /// </code>
+    /// </example>
     public static IEsiBuilder AddEveEsi(this IServiceCollection services, Action<EsiOptions> configure)
     {
         ArgumentNullException.ThrowIfNull(services);

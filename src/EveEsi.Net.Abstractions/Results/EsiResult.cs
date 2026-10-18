@@ -9,6 +9,23 @@ namespace EveEsi.Net.Abstractions.Results;
 /// The outcome of an ESI call. HTTP errors and transport failures are failed results, never exceptions.
 /// </summary>
 /// <typeparam name="T">The response type.</typeparam>
+/// <example>
+/// <code>
+/// var result = await characters.GetCharactersDetail(characterId).ExecuteAsync(ct);
+/// if (result.IsSuccess)
+/// {
+///     Use(result.Value);                     // non-null when IsSuccess is true
+/// }
+/// else if (result.Error!.Kind == EsiErrorKind.Http)
+/// {
+///     // ESI answered with an error: result.StatusCode (e.g. 404), result.Error.Message
+/// }
+/// else
+/// {
+///     // Transport (no response) or Deserialization (unreadable body): result.Error.Exception
+/// }
+/// </code>
+/// </example>
 public sealed class EsiResult<T>
 {
     private EsiResult(HttpStatusCode? statusCode, T? value, EsiError? error, EsiResponseHeaders headers, bool isSuccess)

@@ -9,6 +9,14 @@ namespace EveEsi.Net.Abstractions.Requests;
 /// <see cref="ExecuteAsync"/>.
 /// </summary>
 /// <typeparam name="T">The response type.</typeparam>
+/// <example>
+/// <code>
+/// // Service methods build requests; nothing is sent until ExecuteAsync.
+/// var result = await status.GetStatus()
+///     .Use(async (context, next) =&gt; { context.Request.Headers["Accept-Language"] = "de"; await next(context); })
+///     .ExecuteAsync(ct);
+/// </code>
+/// </example>
 public interface IEsiRequest<T> : IEsiMiddlewareTarget<IEsiRequest<T>>
 {
     /// <summary>The endpoint this request calls.</summary>

@@ -23,10 +23,16 @@ public static class EsiCacheBuilderExtensions
     /// </exception>
     /// <remarks>
     /// An <see cref="IEsiCacheStore"/> the application registered itself is kept over the one chosen here.
-    /// <code>
-    /// services.AddEveEsi(o =&gt; …).EnableCaching(c =&gt; c.AddFileCacheStore("cache/esi"));
-    /// </code>
     /// </remarks>
+    /// <example>
+    /// <code>
+    /// services.AddEveEsi(o =&gt; { o.ApplicationName = "MyApp/1.2"; o.Contact = "admin@example.com"; })
+    ///     .EnableCaching();                                            // file store in the default folder
+    ///
+    /// // or choose the store and what runs:
+    ///     .EnableCaching(c =&gt; c.AddInMemoryCacheStore(o =&gt; o.MaxEntries = 50_000).DisableETags());
+    /// </code>
+    /// </example>
     public static IEsiBuilder EnableCaching(this IEsiBuilder builder, Action<IEsiCacheBuilder>? configure = null)
     {
         ArgumentNullException.ThrowIfNull(builder);

@@ -64,6 +64,20 @@ The reviewer also checks:
 - [ ] No hand edits to `*.g.cs`.
 - [ ] Tests added or updated for the change.
 - [ ] Docs updated if behaviour or design changed (`docs/`, decision log for new decisions).
+- [ ] If consumers would use the change differently, the usage guide is updated (see below).
+
+## Consumer docs (and AI assistants)
+`README.md` (also the NuGet package page), `docs/usage.md` and `llms.txt` are written for people and AI assistants
+**using** the library. Their code blocks are not written by hand:
+- Each block marked `<!-- snippet: name -->` is a copy of a `#region snippet: name` in
+  `tests/EveEsi.Net.Tests/Docs/UsageExamples.cs`, so every example compiles. `UsageGuideTests` fails when a block
+  and its region differ, and runs several examples against a fake ESI to check they do what the guide says.
+- To change an example, edit the region, then copy it into the docs with
+  `UPDATE_USAGE_GUIDE=1 dotnet test tests/EveEsi.Net.Tests -f net10.0 --filter Docs_Show` and review the diff.
+- A new snippet needs a region in `UsageExamples.cs` and a marker with an empty `csharp` block in the doc.
+- Links in `README.md` are absolute, because nuget.org shows it outside the repository.
+- Entry points (`AddEveEsi`, `EnableCaching`, `EsiResult<T>`, `IEsiRequest<T>`) carry `<example>` XML docs, which
+  assistants see in the IDE. Keep them in line with the guide.
 
 ## Updating the ESI spec (community welcome)
 
