@@ -165,3 +165,5 @@ static NewEdenKit.ESI.Abstractions.Middleware.EsiMiddlewareTargetExtensions.Use<
 static NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.Failure(NewEdenKit.ESI.Abstractions.Results.EsiError! error, System.Net.HttpStatusCode? statusCode = null, NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders? headers = null) -> NewEdenKit.ESI.Abstractions.Results.EsiResult<T>!
 static NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.NotModified(NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders! headers) -> NewEdenKit.ESI.Abstractions.Results.EsiResult<T>!
 static NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.Success(System.Net.HttpStatusCode statusCode, T value, NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders! headers) -> NewEdenKit.ESI.Abstractions.Results.EsiResult<T>!
+Microsoft.Extensions.DependencyInjection.EsiCacheStoreExtensions
+static Microsoft.Extensions.DependencyInjection.EsiCacheStoreExtensions.UseStore<TStore>(this NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder! cache) -> NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder!

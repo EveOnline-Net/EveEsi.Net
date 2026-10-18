@@ -220,7 +220,7 @@ raw token is never stored. Only GET requests are cached.
 
 ### Your own cache store
 To keep the cache anywhere else (Redis, a database, a cache shared by several instances), implement `IEsiCacheStore`
-and choose it with `UseStore`. A store only keeps raw entries; the middleware decides what is fresh and what to
+and choose it with `UseStore<TStore>()` (or `UseStore(sp => …)` to build it yourself). A store only keeps raw entries; the middleware decides what is fresh and what to
 revalidate. If your storage is unreachable, return `null` from `GetAsync` and skip the write, so calls go to ESI
 instead of failing.
 
@@ -231,7 +231,7 @@ services.AddEveEsi(o =>
         o.ApplicationName = "MyApp/1.2";
         o.Contact = "admin@example.com";
     })
-    .EnableCaching(c => c.UseStore(sp => new MyCacheStore()));   // registered as a singleton
+    .EnableCaching(c => c.UseStore<MyCacheStore>());   // a singleton; its constructor can take registered services
 ```
 
 <!-- snippet: custom-store -->

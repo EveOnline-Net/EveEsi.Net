@@ -246,7 +246,7 @@ without its own `RetainUntil` is kept). `FileEsiCacheStore` (`c.AddFileCacheStor
 restarts and between processes on one machine: one file per entry named by a hash of its key, written to a temporary
 file and renamed into place, with the file's last-write time set to when it may be dropped so sweeps (every
 `SweepInterval`, on writes) need only the folder listing. Unreadable files are misses. Any other storage is the application's
-own `IEsiCacheStore`, plugged in with `c.UseStore(…)`. Both middleware take an
+own `IEsiCacheStore`, plugged in with `c.UseStore<TStore>()` or `c.UseStore(sp => …)`. Both middleware take an
 optional `TimeProvider`, resolved from DI when registered.
 
 ### What is *not* middleware: service registration
