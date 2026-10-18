@@ -336,7 +336,7 @@ public IEsiRequest<IReadOnlyList<MarketsRegionIdOrdersGetItem>> GetMarketsRegion
   named like a library type the services see (`Operation`, `Parameter`, `EsiJsonContext`, `I<Tag>`, `<Tag>Service`,
   …); a clash fails generation.
 - **Registration:** `EsiServices.AddGeneratedServices(IServiceCollection)` is internal and calls
-  `TryAddTransient<I<Tag>, <Tag>Service>()` for every tag; `AddEveEsi()` will call it.
+  `TryAddTransient<I<Tag>, <Tag>Service>()` for every tag; `AddEveEsi()` calls it.
 
 ## Hand-written extensions
 - Every generated type is `partial`. Put additions in a non-`.g.cs` file alongside it.

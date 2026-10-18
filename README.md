@@ -36,7 +36,7 @@ if (result.IsSuccess)
 | `EveEsi.Net` | Services and `AddEveEsi()`. Start here. |
 | `EveEsi.Net.Abstractions` | Contracts: routes, middleware, requests, results, cache store. |
 | `EveEsi.Net.Models` | DTOs, enums and unions. |
-| `EveEsi.Net.Routes` | `Endpoints` and `Parameter` catalogues. |
+| `EveEsi.Net.Routes` | `Operation` and `Parameter` catalogues and the route table. |
 | `EveEsi.Net.Client` | Request factory, pipeline and HTTP execution. |
 | `EveEsi.Net.Middleware` | Standard middleware and an in-memory cache store. |
 | `EveEsi.Net.Caching.Distributed` | Cache store over `IDistributedCache`. |

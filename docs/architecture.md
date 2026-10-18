@@ -239,14 +239,31 @@ services.AddEveEsi(o =>
 `AddEveEsi()` configures the typed client's `HttpClient` through `AddHttpClient<EsiHttpClient>(...)`. That is the only
 place the ESI headers are set; no service or client constructor touches them:
 - `BaseAddress`: `https://esi.evetech.net/` (`EsiOptions.BaseAddress` to override).
-- `User-Agent`: built from the consumer's values plus the library's own product token:
-  `MyApp/1.2 (admin@example.com) EveEsi.Net/0.1.0`. CCP asks for this so they can contact the app's operator.
+- `User-Agent`: the consumer's application and contact, then the library's product token and the compatibility date
+  it speaks: `MyApp/1.2 (admin@example.com) EveEsi.Net/0.1.0 (compatibility-date 2026-08-18)`. CCP asks for this so
+  they can contact the app's operator; the library part tells them which client and spec the traffic comes from. The
+  version is the package version without build metadata.
 - `X-Compatibility-Date`: **not configurable**. A generated constant, `EsiSpec.CompatibilityDate`, taken from the spec
   the library was generated from. A library version speaks exactly one compatibility date.
 - `X-Tenant`: `EsiOptions.Tenant`, default `tranquility`.
 
-A missing `ApplicationName` or `Contact` fails inside `AddEveEsi()` (`InvalidOperationException`), at startup rather
-than on the first call.
+The configure delegate runs once, inside `AddEveEsi()`, and the options are validated there, so a misconfiguration
+fails at startup rather than on the first call (`InvalidOperationException`):
+- `ApplicationName` or `Contact` missing;
+- `ApplicationName` not a User-Agent product token (`Name` or `Name/Version`, no spaces);
+- `Contact` containing parentheses or control characters (it's sent as a comment, so it could otherwise inject text);
+- a relative `BaseAddress` or an empty `Tenant`;
+- a second `AddEveEsi()` on the same collection.
+
+What it registers:
+- `AddHttpClient<EsiHttpClient>` with the address and headers above. Apps can add handlers (proxies, logging) through
+  `IHttpClientFactory` as usual.
+- The route table (`EsiRoutes.All`) and the global middleware as singletons. `o.Use<T>()` registers `T` as a singleton
+  (`TryAdd`, so an app's own registration wins) and resolves it when the global middleware is first needed.
+- `IEsiClientFactory` and every generated service as transient (`TryAdd`).
+
+`AddEveEsi` lives in the `Microsoft.Extensions.DependencyInjection` namespace, as `IServiceCollection` extensions
+conventionally do; `EsiOptions` is in `EveEsi.Net`.
 
 `Authorization: Bearer <token>` is the one per-request header the client adds itself, from `context.AccessToken` at
 send time. Default headers apply only when the request doesn't set the same header, so middleware **can** override

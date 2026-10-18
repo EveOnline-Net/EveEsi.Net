@@ -181,7 +181,8 @@ and look up than nested per-tag route objects; the per-tag constants keep names 
 
 ### 30. Registration owns the HTTP setup; the consumer identifies their app; the compatibility date is fixed
 `AddEveEsi(o => …)` requires `ApplicationName` and `Contact` and builds the `User-Agent` from them plus the library's
-product token (`MyApp/1.2 (admin@example.com) EveEsi.Net/0.1.0`). It configures the typed client's `HttpClient`
+product token and the compatibility date it speaks
+(`MyApp/1.2 (admin@example.com) EveEsi.Net/0.1.0 (compatibility-date 2026-08-18)`). It configures the typed client's `HttpClient`
 (`BaseAddress`, `User-Agent`, `X-Compatibility-Date`, `X-Tenant`) through `AddHttpClient<EsiHttpClient>`. Nothing else
 sets these headers; `EsiHttpClient` only sends. `X-Compatibility-Date` is the generated `EsiSpec.CompatibilityDate`
 and isn't configurable.
