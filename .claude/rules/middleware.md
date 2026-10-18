@@ -49,8 +49,8 @@ Full design: [docs/architecture.md](../../docs/architecture.md).
 - `X-Compatibility-Date`, `X-Tenant`, `User-Agent` and `BaseAddress` are configured once by the service registration
   (`AddEveEsi()` → `AddHttpClient<EsiHttpClient>`), never in a constructor and never per request. Middleware may
   override them per call.
-- `User-Agent` identifies the **consumer's** app: built from `EsiOptions.ApplicationName` + `Contact`, plus the
-  library's product token. `X-Compatibility-Date` is the generated `EsiSpec.CompatibilityDate`, not an option.
+- `User-Agent` identifies the **consumer's** app: built from `EsiOptions.ApplicationName` + `Contact`, then the
+  library's product token and compatibility date (`EveEsi.Net/0.1.0 (compatibility-date 2026-08-18)`). `X-Compatibility-Date` is the generated `EsiSpec.CompatibilityDate`, not an option.
 - `Authorization: Bearer` is added per request from `context.AccessToken` at send time.
 - Sends through the typed `EsiHttpClient` (an `HttpClient` from `IHttpClientFactory`). Never `new HttpClient()`.
   Anything holding it (the factory) is transient; never capture it in a singleton.
