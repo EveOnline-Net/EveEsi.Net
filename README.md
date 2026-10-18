@@ -41,11 +41,11 @@ else
 }
 ```
 
-**Read next:** the [usage guide](https://github.com/EveOnline-Net/NewEdenKit.ESI/blob/main/docs/usage.md) covers
+**Read next:** the [usage guide](https://github.com/NewEdenKit/NewEdenKit.ESI/blob/main/docs/usage.md) covers
 finding the method for an endpoint, tokens and scopes, error handling, page and cursor pagination, request bodies,
 caching, middleware, unions and enums, testing, and common mistakes. Every example in it is compiled in CI.
 
-**For AI coding assistants:** start from [`llms.txt`](https://github.com/EveOnline-Net/NewEdenKit.ESI/blob/main/llms.txt)
+**For AI coding assistants:** start from [`llms.txt`](https://github.com/NewEdenKit/NewEdenKit.ESI/blob/main/llms.txt)
 and the usage guide. Each service method's XML docs give the ESI method, path and required scope.
 
 ## Packages
@@ -68,10 +68,10 @@ dotnet build
 dotnet test
 ```
 
-See [architecture](https://github.com/EveOnline-Net/NewEdenKit.ESI/blob/main/docs/architecture.md) for the design and
-[contributing](https://github.com/EveOnline-Net/NewEdenKit.ESI/blob/main/docs/contributing.md) for the workflow.
+See [architecture](https://github.com/NewEdenKit/NewEdenKit.ESI/blob/main/docs/architecture.md) for the design and
+[contributing](https://github.com/NewEdenKit/NewEdenKit.ESI/blob/main/docs/contributing.md) for the workflow.
 
 ## License
 
-[GPL-3.0-or-later](https://github.com/EveOnline-Net/NewEdenKit.ESI/blob/main/LICENSE). Applications that use this library
+[GPL-3.0-or-later](https://github.com/NewEdenKit/NewEdenKit.ESI/blob/main/LICENSE). Applications that use this library
 must also be GPL-licensed and open source.
