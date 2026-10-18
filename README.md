@@ -1,3 +1,5 @@
+![NewEdenKit.ESI](https://raw.githubusercontent.com/NewEdenKit/NewEdenKit.ESI/main/assets/icon-120.png)
+
 # NewEdenKit.ESI
 
 Typed, middleware-driven .NET client for [EVE Online's ESI API](https://esi.evetech.net).
