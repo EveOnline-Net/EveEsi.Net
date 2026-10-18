@@ -1,1 +1,169 @@
 #nullable enable
+Microsoft.Extensions.DependencyInjection.EsiCacheStoreExtensions
+NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry
+NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry.EsiCacheEntry(NewEdenKit.ESI.Abstractions.Http.EsiResponse! Response, System.DateTimeOffset ExpiresAt) -> void
+NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry.ExpiresAt.get -> System.DateTimeOffset
+NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry.ExpiresAt.init -> void
+NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry.Response.get -> NewEdenKit.ESI.Abstractions.Http.EsiResponse!
+NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry.Response.init -> void
+NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry.RetainUntil.get -> System.DateTimeOffset?
+NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry.RetainUntil.init -> void
+NewEdenKit.ESI.Abstractions.Caching.IEsiCacheStore
+NewEdenKit.ESI.Abstractions.Caching.IEsiCacheStore.GetAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry?>
+NewEdenKit.ESI.Abstractions.Caching.IEsiCacheStore.RemoveAsync(string! key, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+NewEdenKit.ESI.Abstractions.Caching.IEsiCacheStore.SetAsync(string! key, NewEdenKit.ESI.Abstractions.Caching.EsiCacheEntry! entry, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage.Body.get -> System.ReadOnlyMemory<byte>?
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage.Body.set -> void
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage.EsiRequestMessage(System.Net.Http.HttpMethod! method, string! pathTemplate) -> void
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage.Headers.get -> System.Collections.Generic.IDictionary<string!, string!>!
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage.Method.get -> System.Net.Http.HttpMethod!
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage.PathTemplate.get -> string!
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage.Query.get -> System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string!, string!>>!
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage.RouteValues.get -> System.Collections.Generic.IList<System.Collections.Generic.KeyValuePair<string!, string!>>!
+NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage.ToRelativeUri() -> string!
+NewEdenKit.ESI.Abstractions.Http.EsiResponse
+NewEdenKit.ESI.Abstractions.Http.EsiResponse.Body.get -> System.ReadOnlyMemory<byte>
+NewEdenKit.ESI.Abstractions.Http.EsiResponse.EsiResponse(System.Net.HttpStatusCode statusCode, NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders! headers, System.ReadOnlyMemory<byte> body) -> void
+NewEdenKit.ESI.Abstractions.Http.EsiResponse.Headers.get -> NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders!
+NewEdenKit.ESI.Abstractions.Http.EsiResponse.IsSuccessStatusCode.get -> bool
+NewEdenKit.ESI.Abstractions.Http.EsiResponse.StatusCode.get -> System.Net.HttpStatusCode
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.CacheControl.get -> string?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.ContentLanguage.get -> string?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.Count.get -> int
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.Date.get -> System.DateTimeOffset?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.ErrorLimitRemain.get -> int?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.ErrorLimitReset.get -> System.TimeSpan?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.EsiResponseHeaders(System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<string!, System.Collections.Generic.IEnumerable<string!>!>>! headers) -> void
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.ETag.get -> string?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.Expires.get -> System.DateTimeOffset?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.GetEnumerator() -> System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<string!, System.Collections.Generic.IReadOnlyList<string!>!>>!
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.GetValue(string! name) -> string?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.LastModified.get -> System.DateTimeOffset?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.MaxAge.get -> System.TimeSpan?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.Pages.get -> int?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.RateLimitGroup.get -> string?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.RateLimitLimit.get -> string?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.RateLimitRemaining.get -> long?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.RateLimitUsed.get -> long?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.RequestId.get -> string?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.RetryAfter.get -> System.TimeSpan?
+NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.TryGetValues(string! name, out System.Collections.Generic.IReadOnlyList<string!>? values) -> bool
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext.AccessToken.get -> string?
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext.AccessToken.set -> void
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext.CancellationToken.get -> System.Threading.CancellationToken
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext.EsiContext(NewEdenKit.ESI.Abstractions.Routing.RouteDefinition! route, NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage! request, string? accessToken = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> void
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext.Items.get -> System.Collections.Generic.IDictionary<string!, object?>!
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext.Request.get -> NewEdenKit.ESI.Abstractions.Http.EsiRequestMessage!
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext.Response.get -> NewEdenKit.ESI.Abstractions.Http.EsiResponse?
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext.Response.set -> void
+NewEdenKit.ESI.Abstractions.Middleware.EsiContext.Route.get -> NewEdenKit.ESI.Abstractions.Routing.RouteDefinition!
+NewEdenKit.ESI.Abstractions.Middleware.EsiMiddlewareTargetExtensions
+NewEdenKit.ESI.Abstractions.Middleware.EsiNext
+NewEdenKit.ESI.Abstractions.Middleware.IEsiMiddleware
+NewEdenKit.ESI.Abstractions.Middleware.IEsiMiddleware.InvokeAsync(NewEdenKit.ESI.Abstractions.Middleware.EsiContext! context, NewEdenKit.ESI.Abstractions.Middleware.EsiNext! next) -> System.Threading.Tasks.ValueTask
+NewEdenKit.ESI.Abstractions.Middleware.IEsiMiddlewareTarget<TSelf>
+NewEdenKit.ESI.Abstractions.Middleware.IEsiMiddlewareTarget<TSelf>.Use(NewEdenKit.ESI.Abstractions.Middleware.IEsiMiddleware! middleware) -> TSelf
+NewEdenKit.ESI.Abstractions.Registration.IEsiBuilder
+NewEdenKit.ESI.Abstractions.Registration.IEsiBuilder.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+NewEdenKit.ESI.Abstractions.Registration.IEsiBuilder.Use<TMiddleware>() -> NewEdenKit.ESI.Abstractions.Registration.IEsiBuilder!
+NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder
+NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder.DisableETags() -> NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder!
+NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder.DisableResponseCache() -> NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder!
+NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder.Services.get -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder.UseStore(System.Func<System.IServiceProvider!, NewEdenKit.ESI.Abstractions.Caching.IEsiCacheStore!>! factory) -> NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder!
+NewEdenKit.ESI.Abstractions.Requests.IEsiClientFactory
+NewEdenKit.ESI.Abstractions.Requests.IEsiClientFactory.CreateEsiClient(string! operationId, System.Action<NewEdenKit.ESI.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token, System.Collections.Generic.IReadOnlyList<NewEdenKit.ESI.Abstractions.Middleware.IEsiMiddleware!>? serviceMiddleware) -> NewEdenKit.ESI.Abstractions.Requests.IEsiRequest<NewEdenKit.ESI.Abstractions.Results.EsiNoContent>!
+NewEdenKit.ESI.Abstractions.Requests.IEsiClientFactory.CreateEsiClient<T>(string! operationId, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! responseType, System.Action<NewEdenKit.ESI.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token, System.Collections.Generic.IReadOnlyList<NewEdenKit.ESI.Abstractions.Middleware.IEsiMiddleware!>? serviceMiddleware) -> NewEdenKit.ESI.Abstractions.Requests.IEsiRequest<T>!
+NewEdenKit.ESI.Abstractions.Requests.IEsiParameterValues
+NewEdenKit.ESI.Abstractions.Requests.IEsiParameterValues.Set<T>(string! name, T? value) -> NewEdenKit.ESI.Abstractions.Requests.IEsiParameterValues!
+NewEdenKit.ESI.Abstractions.Requests.IEsiRequest<T>
+NewEdenKit.ESI.Abstractions.Requests.IEsiRequest<T>.ExecuteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<NewEdenKit.ESI.Abstractions.Results.EsiResult<T>!>!
+NewEdenKit.ESI.Abstractions.Requests.IEsiRequest<T>.Route.get -> NewEdenKit.ESI.Abstractions.Routing.RouteDefinition!
+NewEdenKit.ESI.Abstractions.Requests.IEsiRequestParameters
+NewEdenKit.ESI.Abstractions.Requests.IEsiRequestParameters.ApplyPagination(int? page) -> void
+NewEdenKit.ESI.Abstractions.Requests.IEsiRequestParameters.ApplyPagination(NewEdenKit.ESI.Abstractions.Routing.CursorPage? cursor) -> void
+NewEdenKit.ESI.Abstractions.Requests.IEsiRequestParameters.Body<TBody>(TBody value, System.Text.Json.Serialization.Metadata.JsonTypeInfo<TBody>! bodyType) -> void
+NewEdenKit.ESI.Abstractions.Requests.IEsiRequestParameters.Query.get -> NewEdenKit.ESI.Abstractions.Requests.IEsiParameterValues!
+NewEdenKit.ESI.Abstractions.Requests.IEsiRequestParameters.Route.get -> NewEdenKit.ESI.Abstractions.Requests.IEsiParameterValues!
+NewEdenKit.ESI.Abstractions.Requests.IEsiService<TSelf>
+NewEdenKit.ESI.Abstractions.Results.EsiError
+NewEdenKit.ESI.Abstractions.Results.EsiError.Details.get -> System.Collections.Generic.IReadOnlyList<NewEdenKit.ESI.Abstractions.Results.EsiErrorDetail!>!
+NewEdenKit.ESI.Abstractions.Results.EsiError.Details.init -> void
+NewEdenKit.ESI.Abstractions.Results.EsiError.EsiError(NewEdenKit.ESI.Abstractions.Results.EsiErrorKind kind, string! message) -> void
+NewEdenKit.ESI.Abstractions.Results.EsiError.Exception.get -> System.Exception?
+NewEdenKit.ESI.Abstractions.Results.EsiError.Exception.init -> void
+NewEdenKit.ESI.Abstractions.Results.EsiError.Kind.get -> NewEdenKit.ESI.Abstractions.Results.EsiErrorKind
+NewEdenKit.ESI.Abstractions.Results.EsiError.Message.get -> string!
+NewEdenKit.ESI.Abstractions.Results.EsiError.RawBody.get -> string?
+NewEdenKit.ESI.Abstractions.Results.EsiError.RawBody.init -> void
+NewEdenKit.ESI.Abstractions.Results.EsiErrorDetail
+NewEdenKit.ESI.Abstractions.Results.EsiErrorDetail.EsiErrorDetail(string? Location, string? Message, System.Text.Json.JsonElement? Value = null) -> void
+NewEdenKit.ESI.Abstractions.Results.EsiErrorDetail.Location.get -> string?
+NewEdenKit.ESI.Abstractions.Results.EsiErrorDetail.Location.init -> void
+NewEdenKit.ESI.Abstractions.Results.EsiErrorDetail.Message.get -> string?
+NewEdenKit.ESI.Abstractions.Results.EsiErrorDetail.Message.init -> void
+NewEdenKit.ESI.Abstractions.Results.EsiErrorDetail.Value.get -> System.Text.Json.JsonElement?
+NewEdenKit.ESI.Abstractions.Results.EsiErrorDetail.Value.init -> void
+NewEdenKit.ESI.Abstractions.Results.EsiErrorKind
+NewEdenKit.ESI.Abstractions.Results.EsiErrorKind.Deserialization = 2 -> NewEdenKit.ESI.Abstractions.Results.EsiErrorKind
+NewEdenKit.ESI.Abstractions.Results.EsiErrorKind.Http = 0 -> NewEdenKit.ESI.Abstractions.Results.EsiErrorKind
+NewEdenKit.ESI.Abstractions.Results.EsiErrorKind.Transport = 1 -> NewEdenKit.ESI.Abstractions.Results.EsiErrorKind
+NewEdenKit.ESI.Abstractions.Results.EsiNoContent
+NewEdenKit.ESI.Abstractions.Results.EsiNoContent.EsiNoContent() -> void
+NewEdenKit.ESI.Abstractions.Results.EsiResult<T>
+NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.Error.get -> NewEdenKit.ESI.Abstractions.Results.EsiError?
+NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.Headers.get -> NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders!
+NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.IsNotModified.get -> bool
+NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.IsSuccess.get -> bool
+NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.StatusCode.get -> System.Net.HttpStatusCode?
+NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.Value.get -> T?
+NewEdenKit.ESI.Abstractions.Routing.CursorPage
+NewEdenKit.ESI.Abstractions.Routing.CursorPage.After.get -> string?
+NewEdenKit.ESI.Abstractions.Routing.CursorPage.After.init -> void
+NewEdenKit.ESI.Abstractions.Routing.CursorPage.Before.get -> string?
+NewEdenKit.ESI.Abstractions.Routing.CursorPage.Before.init -> void
+NewEdenKit.ESI.Abstractions.Routing.CursorPage.CursorPage() -> void
+NewEdenKit.ESI.Abstractions.Routing.CursorPage.CursorPage(string? Before = null, string? After = null, long? Limit = null) -> void
+NewEdenKit.ESI.Abstractions.Routing.CursorPage.Limit.get -> long?
+NewEdenKit.ESI.Abstractions.Routing.CursorPage.Limit.init -> void
+NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy
+NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy.Group.get -> string!
+NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy.Group.init -> void
+NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy.MaxTokens.get -> long
+NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy.MaxTokens.init -> void
+NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy.RateLimitPolicy(string! Group, long MaxTokens, System.TimeSpan WindowSize) -> void
+NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy.WindowSize.get -> System.TimeSpan
+NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy.WindowSize.init -> void
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints.MaxAge.get -> System.TimeSpan?
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints.MaxAge.init -> void
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints.Mode.get -> NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints.Mode.init -> void
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints.RouteCacheHints(System.TimeSpan? MaxAge, NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode Mode, System.TimeSpan? TombstoneTtl = null) -> void
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints.TombstoneTtl.get -> System.TimeSpan?
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints.TombstoneTtl.init -> void
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode.EventBased = 2 -> NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode.NotCached = 3 -> NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode.TtlBased = 1 -> NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode
+NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode.Unspecified = 0 -> NewEdenKit.ESI.Abstractions.Routing.RouteCacheMode
+NewEdenKit.ESI.Abstractions.Routing.RouteDefinition
+NewEdenKit.ESI.Abstractions.Routing.RouteDefinition.Cache.get -> NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints?
+NewEdenKit.ESI.Abstractions.Routing.RouteDefinition.Method.get -> System.Net.Http.HttpMethod!
+NewEdenKit.ESI.Abstractions.Routing.RouteDefinition.OperationId.get -> string!
+NewEdenKit.ESI.Abstractions.Routing.RouteDefinition.PathTemplate.get -> string!
+NewEdenKit.ESI.Abstractions.Routing.RouteDefinition.RateLimit.get -> NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy?
+NewEdenKit.ESI.Abstractions.Routing.RouteDefinition.RequiresAuthentication.get -> bool
+NewEdenKit.ESI.Abstractions.Routing.RouteDefinition.RouteDefinition(string! operationId, System.Net.Http.HttpMethod! method, string! pathTemplate, string? scope = null, NewEdenKit.ESI.Abstractions.Routing.RouteCacheHints? cache = null, NewEdenKit.ESI.Abstractions.Routing.RateLimitPolicy? rateLimit = null) -> void
+NewEdenKit.ESI.Abstractions.Routing.RouteDefinition.Scope.get -> string?
+override NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.ToString() -> string!
+override NewEdenKit.ESI.Abstractions.Routing.RouteDefinition.ToString() -> string!
+static Microsoft.Extensions.DependencyInjection.EsiCacheStoreExtensions.UseStore<TStore>(this NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder! cache) -> NewEdenKit.ESI.Abstractions.Registration.IEsiCacheBuilder!
+static NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders.Empty.get -> NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders!
+static NewEdenKit.ESI.Abstractions.Middleware.EsiMiddlewareTargetExtensions.Use<TSelf>(this TSelf target, System.Func<NewEdenKit.ESI.Abstractions.Middleware.EsiContext!, NewEdenKit.ESI.Abstractions.Middleware.EsiNext!, System.Threading.Tasks.ValueTask>! middleware) -> TSelf
+static NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.Failure(NewEdenKit.ESI.Abstractions.Results.EsiError! error, System.Net.HttpStatusCode? statusCode = null, NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders? headers = null) -> NewEdenKit.ESI.Abstractions.Results.EsiResult<T>!
+static NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.NotModified(NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders! headers) -> NewEdenKit.ESI.Abstractions.Results.EsiResult<T>!
+static NewEdenKit.ESI.Abstractions.Results.EsiResult<T>.Success(System.Net.HttpStatusCode statusCode, T value, NewEdenKit.ESI.Abstractions.Http.EsiResponseHeaders! headers) -> NewEdenKit.ESI.Abstractions.Results.EsiResult<T>!
