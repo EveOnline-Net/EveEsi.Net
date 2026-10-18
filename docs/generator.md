@@ -232,7 +232,8 @@ public static partial class Operation
   included, since GET and POST on one path would otherwise collide). The generator prints how many are unmapped.
 - Two operations mapping to the same name in one tag class, a mapped name that isn't an identifier, or a mapping for an
   operation ID that no longer exists all fail generation.
-- A tag's class name matches its service (`Operation.Characters` ↔ `ICharacters`).
+- A tag's class name matches its service (`Operation.Characters` ↔ `ICharacters`), and each constant's name is also
+  the service **method** name, so one `operationConstants` entry names both.
 
 ## Route table
 `EsiRoutes.All` is a single static dictionary from operation ID to `RouteDefinition`, keyed by the `Operation.*`
@@ -280,33 +281,62 @@ are **not** emitted as route parameters. The compatibility date becomes a genera
 `X-Compatibility-Date`. It is not a user option.
 
 ## Services
-One `I<Section>` + `<Section>` per section in `EveEsi.Net/Generated/`. Services are request builders that
-derive from `EsiService<I<Tag>>`. Each operation becomes a method that calls the factory and returns `IEsiRequest<T>`:
+`EveEsi.Net/Generated/` holds, per spec tag, a public `I<Tag>.g.cs` interface and an `internal sealed`
+`<Tag>Service.g.cs` implementation deriving from `EsiService<I<Tag>>`, plus `EsiServices.g.cs`, which registers them
+all. Namespace: `EveEsi.Net.Services`. Services are request builders: each operation becomes one method that calls
+the factory and returns `IEsiRequest<T>`:
 
 ```csharp
-public IEsiRequest<IReadOnlyList<CharacterAsset>> GetCharacterAssets(long characterId, string token, int? page = null)
-    => CreateEsiClient<IReadOnlyList<CharacterAsset>>(
-        Operation.Assets.CharacterAssets,
-        EsiJsonContext.Default.IReadOnlyListCharacterAsset,
+/// <inheritdoc />
+public IEsiRequest<IReadOnlyList<MarketsRegionIdOrdersGetItem>> GetMarketsRegionIdOrders(long regionId, GetMarketsRegionIdOrdersOrderType orderType, long? typeId = null, int? page = null) =>
+    CreateEsiClient<IReadOnlyList<MarketsRegionIdOrdersGetItem>>(
+        Operation.Market.GetMarketsRegionIdOrders,
+        EsiJsonContext.Default.ListOfMarketsRegionIdOrdersGetItem,
         p =>
         {
-            p.Route.Set(Parameter.Route.CharacterId, characterId);
+            p.Route.Set(Parameter.Route.RegionId, regionId);
+            p.Query.Set(Parameter.Query.OrderType, GetMarketsRegionIdOrdersOrderTypeConverter.ToWire(orderType));
+            p.Query.Set(Parameter.Query.TypeId, typeId);
             p.ApplyPagination(page);
         },
-        token);
+        null);
 ```
-Signature order: route parameters, required query parameters, body, `string token` (secured only),
-then optional query parameters, then the pagination parameter (`int? page` or `CursorPage? cursor`).
 
-- **Grouping:** one service and one file per spec tag. Never group by URL segment. Each method passes its
-  operation ID as the `Operation.<Tag>.<Name>` constant, never a string literal.
-- **Middleware:** each interface is emitted as `I<Tag> : IEsiService<I<Tag>>`, so it gets both `Use` overloads
-  (instance and async callback) and `Use` returns `I<Tag>`.
+- **Grouping:** one service per spec tag. Never group by URL segment.
+- **Method name:** the operation's `Operation` constant name (from `operationConstants`, else the operation ID).
+  Mapped names leave out the HTTP verb (`CharacterInfo`, not `GetCharacterInfo`), except to tell apart two
+  operations on the same path. The
+  method passes that constant, never a string literal. `Use` is reserved for the middleware API and fails generation.
+- **Signature order:** route parameters (in path order), required query parameters, `body`, `string token` (secured
+  only), optional query parameters, then `int? page` or `CursorPage? cursor`.
+- **Parameter names:** the wire name in camelCase (`character_id` → `characterId`); C# keywords get an `@`. `p`,
+  `token`, `body`, `page` and `cursor` are reserved, and two parameters mapping to the same name fail generation.
+- **Parameter types:** resolved by the model builder like any property (`ModelSet.ParameterTypes`), so they follow the
+  spec's `format`. Only primitives, enums and lists of those can be sent; anything else fails generation.
+  Required parameters are non-nullable; optional ones are nullable, default to `null`, and aren't sent when null. ESI's
+  own default goes in the parameter's XML doc, never into the C# default.
+- **Enums** go on the wire through their converter: `XConverter.ToWire(x)`,
+  `x.HasValue ? XConverter.ToWire(x.Value) : null` or `xs.Select(XConverter.ToWire).ToArray()`. The client never
+  formats an enum itself.
+- **Pagination:** a `page` query parameter gives `int? page`; `before` + `after` + `limit` give `CursorPage? cursor`. A
+  required pagination parameter, or any other combination, fails generation.
+- **Body:** `p.Body(body, EsiJsonContext.Default.<TBody>)`. All ESI bodies are required; an optional body fails
+  generation until it's given an override.
+- **Guards:** required reference arguments (string route values, lists, bodies) get `ArgumentNullException.ThrowIfNull`,
+  so the method has a block body. The token is checked by the factory.
 - **Response type:** the method's return type `IEsiRequest<T>`, the explicit generic in `CreateEsiClient<T>(...)` and
   the `EsiJsonContext.Default.<T>` type info are emitted from the same resolved response type. Always write `T`
-  explicitly; never rely on inference. A 204 or bodiless success response gives `IEsiRequest<EsiNoContent>` and the
+  explicitly; never rely on inference. An endpoint without a response body gives `IEsiRequest<EsiNoContent>` and the
   non-generic `CreateEsiClient(...)`.
-- **Body:** `p.Body(body, EsiJsonContext.Default.<TBody>)`.
+- **Middleware:** each interface is `I<Tag> : IEsiService<I<Tag>>`, so it gets both `Use` overloads (instance and async
+  callback) and `Use` returns `I<Tag>`.
+- **Docs:** the summary comes from the operation's `summary`; the remarks give the method and path, the `description`
+  and the scope; each parameter's doc comes from its `description`.
+- **Usings:** each file imports only the namespaces it uses, including each model tag namespace. So no model may be
+  named like a library type the services see (`Operation`, `Parameter`, `EsiJsonContext`, `I<Tag>`, `<Tag>Service`,
+  …); a clash fails generation.
+- **Registration:** `EsiServices.AddGeneratedServices(IServiceCollection)` is internal and calls
+  `TryAddTransient<I<Tag>, <Tag>Service>()` for every tag; `AddEveEsi()` will call it.
 
 ## Hand-written extensions
 - Every generated type is `partial`. Put additions in a non-`.g.cs` file alongside it.
@@ -322,6 +352,8 @@ then optional query parameters, then the pagination parameter (`int? page` or `C
 dotnet run --project tools/EveEsi.Net.Generator -- --spec openapi.json --out src/
 dotnet format analyzers src/EveEsi.Net.Routes/EveEsi.Net.Routes.csproj --diagnostics RS0016 --severity info --include-generated
 ```
+Generated code goes to `EveEsi.Net.Routes`, `EveEsi.Net.Models` and `EveEsi.Net` (services), so the second step runs
+for all three.
 - The first command writes `*.g.cs` and deletes stale `*.g.cs` in the directories it owns. Exit codes: `0` success,
   `1` bad arguments or missing files, `2` generation failed (the message says what to map in `generator.json`).
 - The second records new public API in `PublicAPI.Unshipped.txt`. The analyzer's fix skips generated code unless
@@ -332,7 +364,8 @@ dotnet format analyzers src/EveEsi.Net.Routes/EveEsi.Net.Routes.csproj --diagnos
 with committed snapshots (`Snapshots/`, excluded from compilation). After an intended output change, regenerate the
 snapshots with `UPDATE_SNAPSHOTS=1 dotnet test tests/EveEsi.Net.Generator.Tests` and review the diff. Every failure
 mode has its own test. `EveEsi.Net.Routes.Tests` checks the committed real output (keys match operation IDs, every
-placeholder is a known route parameter).
+placeholder is a known route parameter). `EveEsi.Net.Tests` drives every generated service method through the real
+factory, route table and HTTP client, and checks that it calls its own operation with every route value filled in.
 
 ## Updating to a new spec
 1. Replace `openapi.json`.

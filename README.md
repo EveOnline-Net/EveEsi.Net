@@ -20,7 +20,7 @@ services.AddEveEsi(o =>
 });
 
 var result = await assets
-    .GetCharacterAssets(characterId, token)
+    .CharacterAssets(characterId, token)
     .ExecuteAsync(ct);
 
 if (result.IsSuccess)

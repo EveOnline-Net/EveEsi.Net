@@ -26,6 +26,7 @@ internal sealed class ModelBuilder(OpenApiSpec spec, GeneratorConfig config)
 
         var responses = new Dictionary<string, TypeRef>(StringComparer.Ordinal);
         var bodies = new Dictionary<string, TypeRef>(StringComparer.Ordinal);
+        var parameterTypes = new Dictionary<string, TypeRef>(StringComparer.Ordinal);
         var parameterEnums = new Dictionary<string, EnumModel>(StringComparer.Ordinal);
         foreach (var op in spec.Operations)
         {
@@ -40,17 +41,19 @@ internal sealed class ModelBuilder(OpenApiSpec spec, GeneratorConfig config)
                 bodies[id] = Resolve(body, $"op:{id}.body", null, Names.Pascal(id), "Body").Type;
             }
 
-            foreach (var parameter in op.Parameters.Where(p => p.Location is "path" or "query" && p.Schema is not null))
+            foreach (var parameter in op.Parameters.Where(p => p.Location is "path" or "query"))
             {
-                var schema = parameter.Schema!.Value;
-                var items = schema.TryGetProperty("items", out var i) ? i : (JsonElement?)null;
-                if (EnumValues(schema) is { } values)
+                var key = $"{id}.{parameter.Name}";
+                var schema = parameter.Schema ?? throw new GenerationException($"{key}: parameter has no schema.");
+                var type = Resolve(schema, $"op:{key}", null, Names.Pascal(parameter.Name), "Parameter").Type;
+                parameterTypes[key] = ValidateParameterType(type, key);
+                if (type is ModelRef { Type: EnumModel scalar })
                 {
-                    parameterEnums[$"{id}.{parameter.Name}"] = _enums.Add(values, $"op:{id}.{parameter.Name}");
+                    parameterEnums[key] = scalar;
                 }
-                else if (items is { } it && EnumValues(it) is { } itemValues)
+                else if (type is ListRef { Item: ModelRef { Type: EnumModel item } })
                 {
-                    parameterEnums[$"{id}.{parameter.Name}"] = _enums.Add(itemValues, $"op:{id}.{parameter.Name}[]");
+                    parameterEnums[key] = item;
                 }
             }
         }
@@ -64,7 +67,17 @@ internal sealed class ModelBuilder(OpenApiSpec spec, GeneratorConfig config)
         var enums = _enums.Finalize(config.Enums);
         ValidateNames(enums);
         AssignNamespaces(responses, bodies, parameterEnums, enums);
-        return new ModelSet([.. _topLevel.OrderBy(t => t.Name, StringComparer.Ordinal)], enums, responses, bodies, parameterEnums);
+        return new ModelSet([.. _topLevel.OrderBy(t => t.Name, StringComparer.Ordinal)], enums, responses, bodies, parameterTypes, parameterEnums);
+    }
+
+    /// <summary>Parameters go on the wire as strings: only primitives, enums and lists of those can be sent.</summary>
+    private static TypeRef ValidateParameterType(TypeRef type, string key)
+    {
+        var scalar = type is ListRef list ? list.Item : type;
+        var supported = scalar is ModelRef { Type: EnumModel } || (scalar is PrimitiveRef primitive && primitive != PrimitiveRef.JsonElement);
+        return supported
+            ? type
+            : throw new GenerationException($"{key}: parameter type {type.Syntax(null)} can't be sent as a route or query value.");
     }
 
     private TypeRef ResolveNamed(string name)

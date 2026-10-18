@@ -1,0 +1,88 @@
+{
+  "openapi": "3.1.0",
+  "components": {
+    "parameters": {
+      "CompatibilityDate": { "in": "header", "name": "X-Compatibility-Date", "required": true, "schema": { "enum": ["2026-08-18"], "type": "string" } },
+      "Tenant": { "in": "header", "name": "X-Tenant", "schema": { "type": "string" } }
+    },
+    "schemas": {
+      "CharacterID": { "format": "int64", "type": "integer" }
+    }
+  },
+  "paths": {
+    "/characters/{character_id}/orders/history": {
+      "get": {
+        "operationId": "GetCharactersCharacterIdOrdersHistory",
+        "summary": "List historical orders by a character",
+        "description": "List cancelled and expired market orders.\n\nThis route is cached for up to 3600 seconds",
+        "tags": ["Market"],
+        "parameters": [
+          { "in": "path", "name": "character_id", "required": true, "description": "The ID of the character", "schema": { "$ref": "#/components/schemas/CharacterID" } },
+          { "in": "query", "name": "page", "schema": { "format": "int32", "type": "integer" } },
+          { "$ref": "#/components/parameters/CompatibilityDate" },
+          { "$ref": "#/components/parameters/Tenant" }
+        ],
+        "security": [{ "OAuth2": ["esi-markets.read_character_orders.v1"] }],
+        "responses": { "200": { "content": { "application/json": { "schema": { "type": "array", "items": { "format": "int64", "type": "integer" } } } } } }
+      }
+    },
+    "/markets/{region_id}/orders": {
+      "get": {
+        "operationId": "GetMarketsRegionIdOrders",
+        "summary": "List orders in a region",
+        "tags": ["Market"],
+        "parameters": [
+          { "in": "query", "name": "order_type", "required": true, "schema": { "default": "all", "description": "Filter buy/sell orders", "enum": ["buy", "sell", "all"], "type": "string" } },
+          { "in": "path", "name": "region_id", "required": true, "schema": { "format": "int64", "type": "integer" } },
+          { "in": "query", "name": "type_id", "schema": { "default": 34, "description": "Return orders only for this type", "format": "int64", "type": "integer" } },
+          { "in": "query", "name": "after", "schema": { "type": "string" } },
+          { "in": "query", "name": "before", "schema": { "type": "string" } },
+          { "in": "query", "name": "limit", "schema": { "format": "int64", "type": "integer" } }
+        ],
+        "responses": { "200": { "content": { "application/json": { "schema": { "type": "object", "required": ["order_id"], "properties": { "order_id": { "format": "int64", "type": "integer" } } } } } } }
+      }
+    },
+    "/characters/{character_id}/search": {
+      "get": {
+        "operationId": "GetCharactersCharacterIdSearch",
+        "summary": "Search on a string",
+        "tags": ["Search"],
+        "parameters": [
+          { "in": "query", "name": "categories", "required": true, "schema": { "items": { "enum": ["agent", "solar_system"], "type": "string" }, "type": "array" } },
+          { "in": "path", "name": "character_id", "required": true, "schema": { "$ref": "#/components/schemas/CharacterID" } },
+          { "in": "query", "name": "search", "required": true, "schema": { "type": "string" } },
+          { "in": "query", "name": "strict", "schema": { "default": false, "type": "boolean" } }
+        ],
+        "security": [{ "OAuth2": ["esi-search.search_structures.v1"] }],
+        "responses": { "200": { "content": { "application/json": { "schema": { "type": "object", "properties": { "agent": { "type": "array", "items": { "format": "int64", "type": "integer" } } } } } } } }
+      }
+    },
+    "/killmails/{killmail_id}/{killmail_hash}": {
+      "get": {
+        "operationId": "GetKillmailsKillmailIdKillmailHash",
+        "summary": "Get a single killmail",
+        "tags": ["Killmails"],
+        "parameters": [
+          { "in": "path", "name": "killmail_hash", "required": true, "schema": { "type": "string" } },
+          { "in": "path", "name": "killmail_id", "required": true, "schema": { "format": "int64", "type": "integer" } }
+        ],
+        "responses": { "200": { "content": { "application/json": { "schema": { "type": "object", "properties": { "killmail_time": { "format": "date-time", "type": "string" } } } } } } }
+      }
+    },
+    "/characters/{character_id}/contacts": {
+      "put": {
+        "operationId": "PutCharactersCharacterIdContacts",
+        "summary": "Edit contacts",
+        "tags": ["Contacts"],
+        "parameters": [
+          { "in": "path", "name": "character_id", "required": true, "schema": { "$ref": "#/components/schemas/CharacterID" } },
+          { "in": "query", "name": "label_ids", "schema": { "items": { "format": "int64", "type": "integer" }, "type": "array" } },
+          { "in": "query", "name": "standing", "required": true, "schema": { "format": "double", "type": "number" } }
+        ],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "array", "items": { "format": "int64", "type": "integer" } } } } },
+        "security": [{ "OAuth2": ["esi-characters.write_contacts.v1"] }],
+        "responses": { "204": { "description": "Contacts updated" } }
+      }
+    }
+  }
+}

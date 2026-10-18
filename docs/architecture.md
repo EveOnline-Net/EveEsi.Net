@@ -77,10 +77,10 @@ A service (`ICharacters`, `IAssets`, …) **only builds requests**. Each method 
 an `IEsiRequest<T>` through `IEsiClientFactory`. It never sends anything or holds results.
 
 ```csharp
-public IEsiRequest<IReadOnlyList<CharacterAsset>> GetCharacterAssets(long characterId, string token, int? page = null)
+public IEsiRequest<IReadOnlyList<CharacterAsset>> CharacterAssets(long characterId, string token, int? page = null)
     => CreateEsiClient<IReadOnlyList<CharacterAsset>>(
         Operation.Assets.CharacterAssets,                         // = "GetCharactersCharacterIdAssets"
-        EsiJsonContext.Default.IReadOnlyListCharacterAsset,
+        EsiJsonContext.Default.ListOfCharacterAsset,
         p =>
         {
             p.Route.Set(Parameter.Route.CharacterId, characterId);
@@ -88,7 +88,7 @@ public IEsiRequest<IReadOnlyList<CharacterAsset>> GetCharacterAssets(long charac
         },
         token);
 
-public IEsiRequest<EsiNoContent> SetAutopilotWaypoint(long destinationId, bool addToBeginning, bool clearOtherWaypoints, string token)
+public IEsiRequest<EsiNoContent> AutopilotWaypoint(long destinationId, bool addToBeginning, bool clearOtherWaypoints, string token)
     => CreateEsiClient(Operation.UserInterface.AutopilotWaypoint, p =>   // no response body: no type info
     {
         p.Query.Set(Parameter.Query.DestinationId, destinationId);
@@ -97,7 +97,8 @@ public IEsiRequest<EsiNoContent> SetAutopilotWaypoint(long destinationId, bool a
     }, token);
 ```
 `CreateEsiClient` here is the `EsiService<TSelf>` base helper: it forwards to `IEsiClientFactory` with the service's
-middleware snapshot.
+middleware snapshot. Services are generated (see [generator.md](generator.md#services)): a public `I<Tag>` interface
+and an `internal sealed` `<Tag>Service` per spec tag, each method named like its `Operation` constant.
 
 ### Building blocks
 - **Response type `T`**: set by the service, not the route. The service method's return type
@@ -118,8 +119,10 @@ middleware snapshot.
 - **`p.ApplyPagination(int? page)`**: page-based routes. **`p.ApplyPagination(CursorPage? cursor)`**: cursor routes.
   `null` means "no pagination parameter sent".
 - **`p.Body(value, EsiJsonContext.Default.X)`**: request body for the 22 POST/PUT operations, serialized with the type info the service passes. The route only says whether a body is allowed or required.
-- **`token`**: `string?`. Required (non-nullable parameter on the service method) for secured endpoints;
-  omitted for public ones.
+- **`token`**: a required `string` parameter on the service method for secured endpoints; absent on public ones.
+  The factory rejects a null, empty or whitespace token for a route with a scope.
+- **Guards:** the service throws `ArgumentNullException` for a null required reference argument (a string route
+  value, a list, a body) before the request is built.
 
 ### Validation
 Which parameters, pagination and body an endpoint takes is enforced by the **generated service signatures**,
@@ -131,7 +134,8 @@ not by the route. The factory only checks what the route knows (programmer error
 - `ApplyPagination(page)` with `page < 1` → `ArgumentOutOfRangeException`.
 
 ### Lifetime and service-level middleware
-- Services are registered as **transient**.
+- Services are registered as **transient**, by the generated `EsiServices.AddGeneratedServices` (`TryAdd`, so an app
+  can register its own implementation first).
 - Generated services derive from the hand-written `EsiService<TSelf>` base class (`EveEsi.Net.Services`) that holds the instance's
   service-level middleware (`characters.Use(...)`) and passes a snapshot of it to the factory with each
   `CreateEsiClient` call. That keeps the service level separate from, and outside, request-level middleware.

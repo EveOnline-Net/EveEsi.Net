@@ -133,10 +133,15 @@ internal sealed record PropertyModel(string Wire, string Name, TypeRef Type, boo
 /// <param name="Nullable">The variant's value may be JSON null (<c>type: [..., "null"]</c>).</param>
 internal sealed record UnionVariant(string Wire, string Name, TypeRef Value, bool Nullable, string? Description);
 
-/// <summary>Everything the models emitter writes, plus the response and body types the services will use.</summary>
+/// <summary>Everything the models emitter writes, plus the response, body and parameter types the services use.</summary>
+/// <param name="ResponseTypes">By operation ID; operations without a response body are absent.</param>
+/// <param name="BodyTypes">By operation ID; operations without a request body are absent.</param>
+/// <param name="ParameterTypes">By <c>operationId.wire_name</c>, for every path and query parameter.</param>
+/// <param name="ParameterEnums">The enum of each enum (or enum list) parameter, by <c>operationId.wire_name</c>.</param>
 internal sealed record ModelSet(
     IReadOnlyList<ModelType> TopLevel,
     IReadOnlyList<EnumModel> Enums,
     IReadOnlyDictionary<string, TypeRef> ResponseTypes,
     IReadOnlyDictionary<string, TypeRef> BodyTypes,
+    IReadOnlyDictionary<string, TypeRef> ParameterTypes,
     IReadOnlyDictionary<string, EnumModel> ParameterEnums);

@@ -7,14 +7,14 @@ rate limiting etc. are **middleware**, applied at three levels: global, service,
 
 ```csharp
 var result = await assets                     // IAssets, resolved as a transient service
-    .GetCharacterAssets(characterId, token)   // token: string, required on secured endpoints
+    .CharacterAssets(characterId, token)      // token: string, required on secured endpoints
     .Use(async (ctx, next) => { /* per-request middleware */ await next(ctx); })
     .ExecuteAsync(ct);                        // EsiResult<T>, never throws on HTTP errors
 
 // Services are request builders. Internally each method is just:
 CreateEsiClient<IReadOnlyList<CharacterAsset>>(
     Operation.Assets.CharacterAssets,                    // const operation ID, key into the EsiRoutes table
-    EsiJsonContext.Default.IReadOnlyListCharacterAsset,  // the service supplies the response type
+    EsiJsonContext.Default.ListOfCharacterAsset,         // the service supplies the response type
     p =>
     {
         p.Route.Set(Parameter.Route.CharacterId, characterId);

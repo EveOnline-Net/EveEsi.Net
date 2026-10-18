@@ -11,6 +11,8 @@
   <ItemGroup>
     <!-- The DI package wires up the internal factory; both always ship with the same version. -->
     <InternalsVisibleTo Include="EveEsi.Net" />
+    <!-- The generated-service tests drive every service method through the real factory and route table. -->
+    <InternalsVisibleTo Include="EveEsi.Net.Tests" />
   </ItemGroup>
 
   <ItemGroup>
