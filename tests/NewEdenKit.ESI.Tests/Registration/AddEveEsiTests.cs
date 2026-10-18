@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
+using NewEdenKit.ESI.Abstractions.Caching;
 using NewEdenKit.ESI.Abstractions.Middleware;
 using NewEdenKit.ESI.Abstractions.Registration;
 using NewEdenKit.ESI.Abstractions.Requests;
@@ -169,6 +171,48 @@ public sealed class AddEveEsiTests : IDisposable
     }
 
     [Fact]
+    public async Task UseStoreOfT_CreatesTheStoreFromTheContainer_AndCachesThroughIt()
+    {
+        const string status = """{"players":31234,"server_version":"2345678","start_time":"2026-10-18T11:00:05Z","vip":false}""";
+        _handler.Respond(HttpStatusCode.OK, status, ("Cache-Control", "public, max-age=30"));
+        var storage = new StoreStorage();
+        var provider = Build(o => Identify(o), esi => esi.EnableCaching(c => c.UseStore<DictionaryStore>()), s => s.AddSingleton(storage));
+        var service = provider.GetRequiredService<IStatus>();
+
+        await service.GetStatus().ExecuteAsync(TestContext.Current.CancellationToken);
+        await service.GetStatus().ExecuteAsync(TestContext.Current.CancellationToken);
+
+        _handler.Requests.ShouldHaveSingleItem();
+        storage.Entries.Keys.ShouldHaveSingleItem().ShouldContain("/status");
+        provider.GetRequiredService<IEsiCacheStore>().ShouldBeSameAs(provider.GetRequiredService<DictionaryStore>());
+    }
+
+    [Fact]
+    public void UseStoreOfT_KeepsTheAppsOwnRegistrationOfTheStore()
+    {
+        var own = new DictionaryStore(new StoreStorage());
+        var provider = Build(
+            o => Identify(o),
+            esi =>
+            {
+                esi.EnableCaching(c => c.UseStore<DictionaryStore>());
+                esi.Services.AddSingleton(_ => own);
+            });
+
+        provider.GetRequiredService<IEsiCacheStore>().ShouldBeSameAs(own);
+    }
+
+    [Fact]
+    public void UseStoreOfT_AfterAnotherStore_Throws()
+    {
+        var builder = new ServiceCollection().AddEveEsi(o => Identify(o));
+
+        Should.Throw<InvalidOperationException>(() => builder.EnableCaching(c => c.AddInMemoryCacheStore().UseStore<DictionaryStore>()))
+            .Message.ShouldContain("already chosen");
+        Should.Throw<ArgumentNullException>(() => ((IEsiCacheBuilder)null!).UseStore<DictionaryStore>());
+    }
+
+    [Fact]
     public void UseOfT_KeepsAMiddlewareTheAppRegisteredFirst()
     {
         var own = new ResolvedMiddleware([]);
@@ -227,6 +271,30 @@ public sealed class AddEveEsiTests : IDisposable
         var provider = services.BuildServiceProvider();
         _providers.Add(provider);
         return provider;
+    }
+
+    private sealed class StoreStorage
+    {
+        public ConcurrentDictionary<string, EsiCacheEntry> Entries { get; } = new();
+    }
+
+    /// <summary>A store with a constructor dependency, which the container has to supply.</summary>
+    private sealed class DictionaryStore(StoreStorage storage) : IEsiCacheStore
+    {
+        public ValueTask<EsiCacheEntry?> GetAsync(string key, CancellationToken cancellationToken) =>
+            ValueTask.FromResult(storage.Entries.TryGetValue(key, out var entry) ? entry : null);
+
+        public ValueTask SetAsync(string key, EsiCacheEntry entry, CancellationToken cancellationToken)
+        {
+            storage.Entries[key] = entry;
+            return ValueTask.CompletedTask;
+        }
+
+        public ValueTask RemoveAsync(string key, CancellationToken cancellationToken)
+        {
+            storage.Entries.TryRemove(key, out _);
+            return ValueTask.CompletedTask;
+        }
     }
 
     private sealed class RecordingMiddleware(List<string> order, string name) : IEsiMiddleware

@@ -57,7 +57,7 @@ internal static class UsageExamples
                 o.ApplicationName = "MyApp/1.2";
                 o.Contact = "admin@example.com";
             })
-            .EnableCaching(c => c.UseStore(sp => new MyCacheStore()));   // registered as a singleton
+            .EnableCaching(c => c.UseStore<MyCacheStore>());   // a singleton; its constructor can take registered services
         #endregion
     }
 

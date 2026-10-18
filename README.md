@@ -58,7 +58,7 @@ and the usage guide. Each service method's XML docs give the ESI method, path an
 | `NewEdenKit.ESI.Abstractions` | Contracts (results, middleware, cache store, builders). Comes with `NewEdenKit.ESI`; reference it alone only to write middleware or a cache store in a separate library. |
 
 Caching ships with in-memory and file stores. To keep the cache somewhere else (Redis, a database, …), implement
-`IEsiCacheStore` in your app and pass it to `EnableCaching(c => c.UseStore(…))`; see the usage guide.
+`IEsiCacheStore` in your app and pass it to `EnableCaching(c => c.UseStore<MyStore>())`; see the usage guide.
 
 ## Contributing
 

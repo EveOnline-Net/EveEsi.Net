@@ -285,7 +285,8 @@ dropped in #40.
 The library ships the in-memory and file stores and nothing else. The planned `NewEdenKit.ESI.Caching.Redis` and
 `NewEdenKit.ESI.Caching.Distributed` packages (#14, #39) are dropped and their placeholder projects removed.
 Applications that want Redis, a database or anything else implement `IEsiCacheStore` (three methods) and plug it in
-with `EnableCaching(c => c.UseStore(sp => …))`.
+with `EnableCaching(c => c.UseStore<TStore>())` (resolved from the container, like `Use<TMiddleware>()`) or
+`c.UseStore(sp => …)`.
 *Why:* how a cache is hosted, connected, bounded and monitored depends on the application's infrastructure, and the
 contract is small enough to implement directly. Each adapter package would be a dependency to version, test against a
 real server and release in step with the client, for little gain over a few lines in the app.
