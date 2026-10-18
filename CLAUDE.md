@@ -35,6 +35,9 @@ CreateEsiClient<IReadOnlyList<CharacterAsset>>(
 - [docs/design-decisions.md](docs/design-decisions.md): decision log with the reasons. Check it before reopening a settled question.
 - [docs/contributing.md](docs/contributing.md): branching, commit/PR conventions, PR checklist, spec update process
 - [docs/releasing.md](docs/releasing.md): versioning (SemVer from 0.1.0, one version for all packages), tag-driven releases
+- [docs/usage.md](docs/usage.md), [README.md](README.md), [llms.txt](llms.txt): for people and AI assistants **using**
+  the library. Their code comes from `tests/EveEsi.Net.Tests/Docs/UsageExamples.cs` (see contributing.md, "Consumer docs");
+  update them when consumer-facing behaviour changes.
 
 Rules in `.claude/rules/` load automatically. Some are scoped to paths via frontmatter.
 

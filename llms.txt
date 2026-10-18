@@ -1,0 +1,56 @@
+# EveEsi.Net
+
+> Typed .NET client for EVE Online's ESI API (https://esi.evetech.net), generated from ESI's OpenAPI spec. One
+> injectable service per ESI tag (IAssets, ICharacter, IMarket, …), one method per ESI operation, every call returns
+> EsiResult<T> and never throws for HTTP errors. Caching, ETags and other cross-cutting behaviour are opt-in
+> middleware. .NET 8/9/10, trim and AOT compatible, Microsoft.Extensions.DependencyInjection.
+
+Quick start (`dotnet add package EveEsi.Net`):
+
+<!-- snippet: register -->
+```csharp
+services.AddEveEsi(o =>
+    {
+        o.ApplicationName = "MyApp/1.2";      // your app, sent in the User-Agent (required)
+        o.Contact = "admin@example.com";      // how CCP can reach you (required)
+    })
+    .EnableCaching();                         // optional: response cache + ETags, in a local folder
+```
+
+<!-- snippet: quickstart -->
+```csharp
+// Inject a service (IAssets, ICharacter, IMarket, …), build the request, execute it.
+var result = await assets.GetCharactersCharacterIdAssets(characterId, accessToken, page: 1).ExecuteAsync(ct);
+if (result.IsSuccess)
+{
+    foreach (var asset in result.Value) { total += asset.Quantity; }
+}
+else
+{
+    // Never throws for HTTP errors: inspect result.StatusCode and result.Error (Kind, Message).
+}
+```
+
+Key facts:
+- Services are in `EveEsi.Net.Services`; models in `EveEsi.Net.Models.<Tag>`; results in `EveEsi.Net.Abstractions.Results`.
+- Method names are ESI operation IDs (`GET /markets/{region_id}/orders` → `IMarket.GetMarketsRegionIdOrders`). Each
+  method's XML docs give its HTTP method, path and required scope.
+- Secured endpoints take the SSO access token as a `string` parameter; obtaining tokens is up to the application.
+- Page-based endpoints take `int? page` (total in `result.Headers.Pages`); cursor-based ones take `CursorPage? cursor`.
+- IDs are `long`. Enums have `Unknown = 0`; unions have an `Unknown` variant. Check `IsSuccess` before `Value`.
+- Never use a raw HttpClient for ESI, and never set User-Agent / X-Compatibility-Date / X-Tenant yourself.
+
+## Docs
+
+- [Usage guide](https://raw.githubusercontent.com/EveOnline-Net/EveEsi.Net/main/docs/usage.md): registration, finding
+  the method for an endpoint, calls and tokens, results and errors, pagination, bodies, caching, middleware, types,
+  testing, and common mistakes. Every example in it is compiled in CI.
+- [README](https://raw.githubusercontent.com/EveOnline-Net/EveEsi.Net/main/README.md): overview and packages.
+
+## Optional
+
+- [Architecture](https://raw.githubusercontent.com/EveOnline-Net/EveEsi.Net/main/docs/architecture.md): how requests
+  flow through the factory, middleware pipeline and HTTP client; middleware levels; the standard middleware.
+- [Design decisions](https://raw.githubusercontent.com/EveOnline-Net/EveEsi.Net/main/docs/design-decisions.md): why
+  the API looks the way it does.
+- [ESI documentation](https://developers.eveonline.com/api-explorer): CCP's own endpoint reference.
