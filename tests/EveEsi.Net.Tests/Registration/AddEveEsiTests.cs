@@ -1,5 +1,7 @@
+using System.Net;
 using EveEsi.Net.Abstractions.Middleware;
 using EveEsi.Net.Abstractions.Requests;
+using EveEsi.Net.Middleware.Caching;
 using EveEsi.Net.Registration;
 using EveEsi.Net.Routes;
 using EveEsi.Net.Services;
@@ -127,6 +129,25 @@ public sealed class AddEveEsiTests : IDisposable
             .ExecuteAsync(TestContext.Current.CancellationToken);
 
         order.ShouldBe(["instance", "callback", "resolved", "service"]);
+    }
+
+    [Fact]
+    public async Task ETagMiddleware_FromDI_TurnsANotModifiedIntoTheStoredValue()
+    {
+        const string status = """{"players":31234,"server_version":"2345678","start_time":"2026-10-18T11:00:05Z","vip":false}""";
+        _handler.Respond(HttpStatusCode.OK, status, ("ETag", "\"abc\""), ("Cache-Control", "public, max-age=30"))
+            .Respond(HttpStatusCode.NotModified, null, ("ETag", "\"abc\""));
+        var service = Build(o => Identify(o).Use<ETagMiddleware>(), services => services.AddEsiInMemoryCacheStore())
+            .GetRequiredService<IStatus>();
+
+        var first = await service.GetStatus().ExecuteAsync(TestContext.Current.CancellationToken);
+        var second = await service.GetStatus().ExecuteAsync(TestContext.Current.CancellationToken);
+
+        _handler.Requests[1].Headers["If-None-Match"].ShouldBe("\"abc\"");
+        second.IsSuccess.ShouldBeTrue($"{second.StatusCode} {second.Error?.Kind} {second.Error?.Message}");
+        first.IsSuccess.ShouldBeTrue();
+        second.Value.ShouldBe(first.Value);
+        second.Value!.Players.ShouldBe(31234);
     }
 
     [Fact]

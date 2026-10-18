@@ -59,6 +59,7 @@ Full design: [docs/architecture.md](../../docs/architecture.md).
 
 ## Cache stores
 - `IEsiCacheStore` implementations store raw responses (body + relevant headers + expiry).
-- In-memory store lives in `EveEsi.Net.Middleware`. Anything with a third-party dependency goes in an `EveEsi.Net.Caching.<Name>` project.
-- Cache keys include method, resolved URL, tenant and a hash of the token subject for authed routes
-  (never the raw token).
+- In-memory and file stores live in `EveEsi.Net.Middleware`. Anything with a third-party dependency goes in an `EveEsi.Net.Caching.<Name>` project.
+- Cache keys come from `EsiCacheKey.Create(context)`: method, path and query, `X-Tenant` / `Accept-Language`
+  overrides, and for authed routes a SHA-256 hash of the token's `sub` claim (never the raw token). Custom caching
+  middleware uses the same key so it shares entries with `CacheMiddleware` and `ETagMiddleware`.

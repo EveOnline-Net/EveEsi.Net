@@ -42,6 +42,9 @@ public sealed class EsiResponseHeaders : IEnumerable<KeyValuePair<string, IReadO
     /// <summary><c>ETag</c>, including its quotes, as ESI sent it.</summary>
     public string? ETag => GetValue("ETag");
 
+    /// <summary><c>Date</c>: when ESI produced the response, by ESI's clock.</summary>
+    public DateTimeOffset? Date => GetHttpDate("Date");
+
     /// <summary><c>Expires</c>.</summary>
     public DateTimeOffset? Expires => GetHttpDate("Expires");
 

@@ -214,15 +214,31 @@ later doesn't affect clients that already exist.
 
 ### Standard middleware (EveEsi.Net.Middleware)
 All opt-in. The core client sends a call without any of them.
-- `ETagMiddleware`: sends `If-None-Match` from the cache store; on `304`, returns the stored body.
-- `CacheMiddleware`: serves from `IEsiCacheStore` until expiry, using route cache hints and `Expires`/`Cache-Control`.
+- `ETagMiddleware`: sends `If-None-Match` from the cache store; on `304`, returns the stored body with ESI's fresh
+  headers (as a 200, so the caller gets the value) and refreshes the entry. Entries with an ETag are kept past their
+  expiry so they can be revalidated. A request that already has `If-None-Match` is left alone.
+- `CacheMiddleware`: serves a fresh entry without calling ESI, and stores 200s for as long as they're fresh:
+  `Cache-Control: max-age`, else `Expires` measured against ESI's `Date` (so local clock skew doesn't matter), else the
+  route's `x-cache-age`. Not-cached routes and `no-store`/`no-cache` responses are never stored.
+
+  Both are GET only, share entries through `EsiCacheKey` and work in either order; a call writes its entry once.
+  `EsiCacheKey` covers the method, path and query (each page is its own entry), any `X-Tenant` or `Accept-Language`
+  override, and on secured routes a SHA-256 hash of the token's `sub` claim (never the token), so entries survive token
+  refreshes and public routes are shared between callers.
 - `ScopeCheckMiddleware`: decodes the access token's `scp` claim (without validating it) and compares it
   against `RouteDefinition.Scope`. Fails before sending.
 - `LanguageMiddleware`: sets `Accept-Language`.
 - `ErrorLimitMiddleware` / `RateLimitMiddleware`: read ESI error-limit and rate-limit headers and back off (route carries `x-rate-limit` group).
 - `RetryMiddleware`: retries transient failures (5xx, 420/429 with backoff).
 
-The in-memory `IEsiCacheStore` ships here. Other stores ship as `EveEsi.Net.Caching.*` packages.
+The in-memory `IEsiCacheStore` ships here (`services.AddEsiInMemoryCacheStore(o => o.MaxEntries = …)`): bounded by
+`MaxEntries` (expired entries go first, then those due soonest) and `DefaultRetention` (how long past expiry an entry
+without its own `RetainUntil` is kept). `FileEsiCacheStore` (`services.AddEsiFileCacheStore("cache/esi")`) keeps entries in a local folder across
+restarts and between processes on one machine: one file per entry named by a hash of its key, written to a temporary
+file and renamed into place, with the file's last-write time set to when it may be dropped so sweeps (every
+`SweepInterval`, on writes) need only the folder listing. Unreadable files are misses. Stores with third-party
+dependencies ship as `EveEsi.Net.Caching.*` packages. Both middleware take an
+optional `TimeProvider`, resolved from DI when registered.
 
 ### What is *not* middleware: service registration
 The consumer registers the library once, identifying **their** application. The consumer is the user agent, not the library:
