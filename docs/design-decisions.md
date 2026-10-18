@@ -211,3 +211,14 @@ root `EveEsi.Net.Models`. Request and response types are *not* split into separa
 `EsiRoutes.<Tag>` and the services, and it cuts autocomplete from ~390 types to a few dozen per tag. Requests are only
 13 types with no overlap with responses; a separate namespace would mostly be empty and would split shared enums.
 *Trade-off:* a type moves namespace if a spec change makes it shared, which is a breaking change (see #23).
+
+### 34. Generated services: methods named like their operation constants, internal implementations
+Each tag gets a public `I<Tag>` interface and an `internal sealed` `<Tag>Service`. Each method has the same name as
+its `Operation.<Tag>` constant, and parameters follow a fixed order: route, required query, body, token, optional query,
+pagination. Optional parameters are nullable with a `null` default and aren't sent; ESI's default is documented, not
+copied into C#. Registration uses `TryAddTransient`.
+Mapped names leave out the HTTP verb (`characters.CharacterInfo(...)`, not `GetCharacterInfo`): to a consumer the verb is a
+transport detail. Only where two operations share a path does the name say which is which.
+*Why:* one `generator.json` entry names both the constant and the method, so they can't drift apart. Consumers depend
+on the interface, which can be mocked, so the implementation can change freely. A `null` default lets ESI apply its own
+default, which can change without a library release. `TryAdd` lets an app or a test replace one service.

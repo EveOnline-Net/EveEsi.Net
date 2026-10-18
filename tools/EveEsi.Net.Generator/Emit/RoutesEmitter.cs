@@ -15,14 +15,13 @@ internal static partial class RoutesEmitter
     public const string Directory = "EveEsi.Net.Routes/Generated";
     private const string Namespace = "EveEsi.Net.Routes";
 
-    // Handled by ApplyPagination, so they never appear in the Parameter catalogue.
-    private static readonly HashSet<string> PaginationParameters = new(StringComparer.Ordinal) { "page", "before", "after", "limit" };
+    /// <summary>Handled by <c>ApplyPagination</c>, so they never appear in the Parameter catalogue.</summary>
+    public static readonly IReadOnlySet<string> PaginationParameters = new HashSet<string>(StringComparer.Ordinal) { "page", "before", "after", "limit" };
 
-    public static IReadOnlyList<GeneratedFile> Emit(OpenApiSpec spec, GeneratorConfig config, string header, ICollection<string> notes)
+    public static IReadOnlyList<GeneratedFile> Emit(OpenApiSpec spec, IReadOnlyList<OperationName> operations, string header)
     {
         var routeParameters = ParameterNames(spec, "path");
         var queryParameters = ParameterNames(spec, "query");
-        var operations = OperationNames(spec, config, notes);
 
         return
         [
@@ -199,7 +198,7 @@ internal static partial class RoutesEmitter
     private static string PathTemplate(SpecOperation op, IReadOnlyDictionary<string, string> routeParameters)
     {
         var declared = op.Parameters.Where(p => p.Location == "path").Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
-        var placeholders = Placeholder().Matches(op.Path).Select(m => m.Groups[1].Value).ToList();
+        var placeholders = Placeholders(op.Path);
         if (!declared.SetEquals(placeholders))
         {
             throw new GenerationException(
@@ -221,8 +220,8 @@ internal static partial class RoutesEmitter
     private static string Window(SpecWindow window) =>
         $"TimeSpan.From{window.Unit}({window.Amount.ToString(CultureInfo.InvariantCulture)})";
 
-    /// <summary>Wire name → constant name for every non-pagination parameter in one location.</summary>
-    private static Dictionary<string, string> ParameterNames(OpenApiSpec spec, string location)
+    /// <summary>Wire name → <c>Parameter.Route</c> / <c>Parameter.Query</c> constant name, for every non-pagination parameter in one location.</summary>
+    public static Dictionary<string, string> ParameterNames(OpenApiSpec spec, string location)
     {
         var names = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var parameter in spec.Operations.SelectMany(o => o.Parameters).Where(p => p.Location == location))
@@ -245,7 +244,11 @@ internal static partial class RoutesEmitter
         return names;
     }
 
-    private static List<OperationName> OperationNames(OpenApiSpec spec, GeneratorConfig config, ICollection<string> notes)
+    /// <summary>
+    /// Every operation's tag class and constant name (<c>Operation.&lt;TagClass&gt;.&lt;Constant&gt;</c>), from
+    /// <c>generator.json</c> operationConstants or the operation ID. The services use the same names for their methods.
+    /// </summary>
+    public static List<OperationName> OperationNames(OpenApiSpec spec, GeneratorConfig config, ICollection<string> notes)
     {
         var known = spec.Operations.Select(o => o.OperationId).ToHashSet(StringComparer.Ordinal);
         var stale = config.OperationConstants.Keys.Where(k => !known.Contains(k)).Order(StringComparer.Ordinal).ToArray();
@@ -311,8 +314,12 @@ internal static partial class RoutesEmitter
         return writer.Line($"namespace {Namespace};").Line();
     }
 
+    /// <summary>The wire names of a path's placeholders, in path order.</summary>
+    public static List<string> Placeholders(string path) => [.. Placeholder().Matches(path).Select(m => m.Groups[1].Value)];
+
     [GeneratedRegex(@"\{([^{}]*)\}")]
     private static partial Regex Placeholder();
-
-    private sealed record OperationName(SpecOperation Operation, string TagClass, string Constant);
 }
+
+/// <summary>An operation with its <c>Operation.&lt;TagClass&gt;.&lt;Constant&gt;</c> name.</summary>
+internal sealed record OperationName(SpecOperation Operation, string TagClass, string Constant);

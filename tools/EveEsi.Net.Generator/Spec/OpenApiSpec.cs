@@ -108,6 +108,7 @@ internal sealed class OpenApiSpec
             ResponseSchema = ReadResponseSchema(operation, operationId),
             BodySchema = ReadBody(operation, operationId, out var bodyRequired),
             BodyRequired = bodyRequired,
+            Description = OptionalString(operation, "description"),
         };
     }
 
@@ -183,9 +184,12 @@ internal sealed class OpenApiSpec
             var location = RequiredString(parameter, "in", operationId);
             var name = RequiredString(parameter, "name", operationId);
             var required = parameter.TryGetProperty("required", out var r) && r.GetBoolean();
+            var schema = parameter.TryGetProperty("schema", out var s) ? s : (JsonElement?)null;
             parameters.Add(new SpecParameter(name, location, required)
             {
-                Schema = parameter.TryGetProperty("schema", out var schema) ? schema : null,
+                Schema = schema,
+                Description = OptionalString(parameter, "description") ?? (schema is { } sc ? OptionalString(sc, "description") : null),
+                Default = schema is { } d && d.TryGetProperty("default", out var value) ? WireText(value) : null,
             });
         }
 
@@ -295,6 +299,9 @@ internal sealed class OpenApiSpec
             ? seconds
             : throw new GenerationException($"{operationId}: '{name}' must be a non-negative whole number of seconds.");
     }
+
+    private static string WireText(JsonElement value) =>
+        value.ValueKind == JsonValueKind.String ? value.GetString()! : value.GetRawText();
 
     private static string? OptionalString(JsonElement element, string name) =>
         element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;

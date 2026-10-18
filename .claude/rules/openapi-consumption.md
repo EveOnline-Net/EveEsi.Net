@@ -21,7 +21,8 @@ Full design: [docs/generator.md](../../docs/generator.md).
 ## Spec → code mapping
 - **Tag** → service (`I<Tag>`) and `Operation.<Tag>` class. **`operationId`** → `const string` in `Operation.<Tag>.<Name>`
   (e.g. `Operation.Character.CharacterInfo = "GetCharactersDetail"`), the key in the single `EsiRoutes.All` table.
-  Services pass the constant, never a string literal.
+  Services pass the constant, never a string literal. The service **method** has the constant's name.
+  Implementations are `internal sealed <Tag>Service`; `EsiServices.AddGeneratedServices` registers them.
 - **Path/query params** → typed method params, camelCase (`character_id` → `characterId`), and a `const string` name in
   `Parameter.Route` / `Parameter.Query` (also used as the template placeholder and in `.Query(...)` on the route). Pagination params (`page`, `before`, `after`, `limit`) are excluded;
   they become `int? page` / `CursorPage? cursor` and go through `ApplyPagination`.
