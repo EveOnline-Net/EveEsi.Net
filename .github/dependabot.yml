@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      microsoft-extensions:
+        patterns: ["Microsoft.Extensions.*"]
+    ignore:
+      # Each target framework pins its own Microsoft.Extensions line (Directory.Packages.props): only patches within a
+      # line, never 8.x -> 10.x. A new line comes with a new target framework.
+      - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
