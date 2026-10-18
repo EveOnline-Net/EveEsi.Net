@@ -24,7 +24,7 @@ paths:
 - No reflection-based serialization or `Activator`. Everything must work trimmed/AOT.
 
 ## Code
-- File-scoped namespaces matching the folder: `EveEsi.Net.<Project>.<Folder>`.
+- File-scoped namespaces matching the folder: `NewEdenKit.ESI.<Project>.<Folder>`.
 - One public type per file (generated files may group nested types).
 - Use primary constructors for DI-injected services.
 - Prefer `record` / `sealed record` for data, `readonly record struct` for small value types (`CursorPage`).

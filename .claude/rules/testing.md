@@ -6,7 +6,7 @@ paths:
 # Testing
 
 - xUnit + Shouldly + NSubstitute. No other assertion or mocking libraries.
-- One test project per `src` project: `tests/EveEsi.Net.<Project>.Tests`.
+- One test project per `src` project: `tests/NewEdenKit.ESI.<Project>.Tests`.
 - Test names: `Method_Scenario_ExpectedResult`.
 - Arrange/act/assert, one behaviour per test. Use `[Theory]` for input variations.
 - **HTTP:** use a hand-written `FakeHttpMessageHandler` that returns canned responses and records requests.

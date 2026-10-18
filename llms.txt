@@ -1,11 +1,11 @@
-# EveEsi.Net
+# NewEdenKit.ESI
 
 > Typed .NET client for EVE Online's ESI API (https://esi.evetech.net), generated from ESI's OpenAPI spec. One
 > injectable service per ESI tag (IAssets, ICharacter, IMarket, …), one method per ESI operation, every call returns
 > EsiResult<T> and never throws for HTTP errors. Caching, ETags and other cross-cutting behaviour are opt-in
 > middleware. .NET 8/9/10, trim and AOT compatible, Microsoft.Extensions.DependencyInjection.
 
-Quick start (`dotnet add package EveEsi.Net`):
+Quick start (`dotnet add package NewEdenKit.ESI`):
 
 <!-- snippet: register -->
 ```csharp
@@ -32,7 +32,7 @@ else
 ```
 
 Key facts:
-- Services are in `EveEsi.Net.Services`; models in `EveEsi.Net.Models.<Tag>`; results in `EveEsi.Net.Abstractions.Results`.
+- Services are in `NewEdenKit.ESI.Services`; models in `NewEdenKit.ESI.Models.<Tag>`; results in `NewEdenKit.ESI.Abstractions.Results`.
 - Method names are ESI operation IDs (`GET /markets/{region_id}/orders` → `IMarket.GetMarketsRegionIdOrders`). Each
   method's XML docs give its HTTP method, path and required scope.
 - Secured endpoints take the SSO access token as a `string` parameter; obtaining tokens is up to the application.
@@ -42,15 +42,15 @@ Key facts:
 
 ## Docs
 
-- [Usage guide](https://raw.githubusercontent.com/EveOnline-Net/EveEsi.Net/main/docs/usage.md): registration, finding
+- [Usage guide](https://raw.githubusercontent.com/EveOnline-Net/NewEdenKit.ESI/main/docs/usage.md): registration, finding
   the method for an endpoint, calls and tokens, results and errors, pagination, bodies, caching, middleware, types,
   testing, and common mistakes. Every example in it is compiled in CI.
-- [README](https://raw.githubusercontent.com/EveOnline-Net/EveEsi.Net/main/README.md): overview and packages.
+- [README](https://raw.githubusercontent.com/EveOnline-Net/NewEdenKit.ESI/main/README.md): overview and packages.
 
 ## Optional
 
-- [Architecture](https://raw.githubusercontent.com/EveOnline-Net/EveEsi.Net/main/docs/architecture.md): how requests
+- [Architecture](https://raw.githubusercontent.com/EveOnline-Net/NewEdenKit.ESI/main/docs/architecture.md): how requests
   flow through the factory, middleware pipeline and HTTP client; middleware levels; the standard middleware.
-- [Design decisions](https://raw.githubusercontent.com/EveOnline-Net/EveEsi.Net/main/docs/design-decisions.md): why
+- [Design decisions](https://raw.githubusercontent.com/EveOnline-Net/NewEdenKit.ESI/main/docs/design-decisions.md): why
   the API looks the way it does.
 - [ESI documentation](https://developers.eveonline.com/api-explorer): CCP's own endpoint reference.

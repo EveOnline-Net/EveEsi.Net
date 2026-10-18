@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/NewEdenKit.ESI.Routes/NewEdenKit.ESI.Routes.csproj" />
+  </ItemGroup>
+
+</Project>

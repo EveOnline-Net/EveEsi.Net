@@ -5,8 +5,8 @@ Settled decisions and their reasons. Add new entries at the bottom. To change on
 
 ---
 
-### 1. Public NuGet package named `EveEsi.Net`
-Root namespace and package prefix are `EveEsi.Net`. Sub-packages are named `EveEsi.Net.<Area>`.
+### 1. Public NuGet package named `NewEdenKit.ESI`
+Root namespace and package prefix are `NewEdenKit.ESI`. Sub-packages are named `NewEdenKit.ESI.<Area>`.
 
 ### 2. Target net8.0, net9.0, net10.0
 Covers the current LTS and STS releases. Because net8 is included, nothing can depend on .NET 9+ only APIs
@@ -50,7 +50,7 @@ Exceptions are thrown only for cancellation and programmer errors.
 
 ### 11. Generate the repetitive parts with our own generator; commit the output
 DTOs, enums, unions, converters, route definitions and services are generated from `openapi.json`
-by `tools/EveEsi.Net.Generator`. The core (client, pipeline, middleware, abstractions) is hand-written.
+by `tools/NewEdenKit.ESI.Generator`. The core (client, pipeline, middleware, abstractions) is hand-written.
 *Why:* 233 operations and 349 schemas change with each compatibility date. Off-the-shelf generators
 (NSwag, Refit, Kiota) impose their own client shape and bypass our pipeline. Committing the output makes
 spec changes reviewable and keeps the build free of the generator.
@@ -65,12 +65,12 @@ The spec's unions use a wrapper-key shape with no discriminator, so `[JsonPolymo
 Each union gets an `Unknown` variant.
 
 ### 14. `IEsiCacheStore` is required; cache adapters are separate packages
-In-memory store ships in `EveEsi.Net.Middleware`. Adapters with third-party dependencies ship as
-`EveEsi.Net.Caching.Distributed`, `EveEsi.Net.Caching.Redis`, …
+In-memory store ships in `NewEdenKit.ESI.Middleware`. Adapters with third-party dependencies ship as
+`NewEdenKit.ESI.Caching.Distributed`, `NewEdenKit.ESI.Caching.Redis`, …
 *Why:* the core package doesn't pull in Redis or other infrastructure dependencies.
 *Update:* the store is chosen inside `.EnableCaching(c => c.AddInMemoryCacheStore())` or
 `c.AddFileCacheStore(directory)` (#36, #37); without a choice it defaults to a file store. The file store has no
-dependencies, so it ships in `EveEsi.Net.Middleware` too. Middleware added with `Use<CacheMiddleware>()` outside
+dependencies, so it ships in `NewEdenKit.ESI.Middleware` too. Middleware added with `Use<CacheMiddleware>()` outside
 `EnableCaching` needs the app to register a store itself.
 
 ### 15. System.Text.Json with a source-generated context only
@@ -186,7 +186,7 @@ and look up than nested per-tag route objects; the per-tag constants keep names 
 ### 30. Registration owns the HTTP setup; the consumer identifies their app; the compatibility date is fixed
 `AddEveEsi(o => …)` requires `ApplicationName` and `Contact` and builds the `User-Agent` from them plus the library's
 product token and the compatibility date it speaks
-(`MyApp/1.2 (admin@example.com) EveEsi.Net/0.1.0 (compatibility-date 2026-08-18)`). It configures the typed client's `HttpClient`
+(`MyApp/1.2 (admin@example.com) NewEdenKit.ESI/0.1.0 (compatibility-date 2026-08-18)`). It configures the typed client's `HttpClient`
 (`BaseAddress`, `User-Agent`, `X-Compatibility-Date`, `X-Tenant`) through `AddHttpClient<EsiHttpClient>`. Nothing else
 sets these headers; `EsiHttpClient` only sends. `X-Compatibility-Date` is the generated `EsiSpec.CompatibilityDate`
 and isn't configurable.
@@ -210,8 +210,8 @@ Generated services reach it through `InternalsVisibleTo`. Making it public would
 later without breaking anyone.
 
 ### 33. Model namespaces follow spec tags
-Types used by exactly one tag's operations live in `EveEsi.Net.Models.<Tag>`; shared and unused types stay in the
-root `EveEsi.Net.Models`. Request and response types are *not* split into separate namespaces.
+Types used by exactly one tag's operations live in `NewEdenKit.ESI.Models.<Tag>`; shared and unused types stay in the
+root `NewEdenKit.ESI.Models`. Request and response types are *not* split into separate namespaces.
 *Why:* 208 of 211 object schemas belong to a single tag, so the split is clean and mirrors `Operation.<Tag>`,
 `EsiRoutes.<Tag>` and the services, and it cuts autocomplete from ~390 types to a few dozen per tag. Requests are only
 13 types with no overlap with responses; a separate namespace would mostly be empty and would split shared enums.
@@ -259,3 +259,14 @@ store. Store methods are no longer on `IEsiBuilder`.
 single line and keeps the store choice next to the thing that uses it. Defaulting to the file store means caching
 survives restarts out of the box. The folder is per application because the cache key doesn't include the configured
 tenant or base address, which are per application.
+
+### 38. The project is NewEdenKit.ESI
+The project, its packages, namespaces and repository are named `NewEdenKit.ESI` (it was `EveEsi.Net`), under the
+NewEdenKit organization. `ESI` is upper case in package IDs and namespaces, as the project name is written. Type names
+keep their `Esi` prefix (`EsiOptions`, `EsiResult<T>`, `IEsiBuilder`) and `AddEveEsi()` keeps its name: both describe
+EVE's ESI, not the brand. The extension classes lost the old brand (`EsiServiceCollectionExtensions`,
+`EsiBuilderExtensions`).
+*Why:* the library is the ESI part of a wider NewEdenKit family. Renaming before the first release costs nothing; after
+it, every package ID would change on nuget.org.
+*Trade-off:* `NewEdenKit.ESI` doesn't follow .NET's guideline of PascalCasing acronyms longer than two letters
+(`System.Xml`); chosen deliberately to match the project's name.

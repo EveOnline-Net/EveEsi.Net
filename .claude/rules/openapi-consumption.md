@@ -3,9 +3,9 @@ paths:
   - "openapi.json"
   - "generator.json"
   - "tools/**"
-  - "src/EveEsi.Net.Models/**"
-  - "src/EveEsi.Net.Routes/**"
-  - "src/EveEsi.Net/Generated/**"
+  - "src/NewEdenKit.ESI.Models/**"
+  - "src/NewEdenKit.ESI.Routes/**"
+  - "src/NewEdenKit.ESI/Generated/**"
 ---
 
 # Working with the OpenAPI spec
@@ -54,5 +54,5 @@ Full design: [docs/generator.md](../../docs/generator.md).
 ## Changing generated output
 - Never edit `*.g.cs`. Change the generator or `generator.json` and regenerate.
 - Bad names → add a mapping in `generator.json`, don't add a convention special case.
-- A schema the generator can't handle → `overrides` entry + hand-written type in `EveEsi.Net.Models/Custom/`.
+- A schema the generator can't handle → `overrides` entry + hand-written type in `NewEdenKit.ESI.Models/Custom/`.
 - Generator failures on new spec versions are intended. Resolve them in config, never by loosening checks.

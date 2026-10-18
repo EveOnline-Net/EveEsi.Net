@@ -1,10 +1,10 @@
 # Code generator
 
-`tools/EveEsi.Net.Generator` is a console tool that turns `openapi.json` into C#.
+`tools/NewEdenKit.ESI.Generator` is a console tool that turns `openapi.json` into C#.
 You run it by hand when the spec changes. It isn't part of the build and doesn't ship.
 
 ```
-dotnet run --project tools/EveEsi.Net.Generator -- --spec openapi.json --out src/
+dotnet run --project tools/NewEdenKit.ESI.Generator -- --spec openapi.json --out src/
 ```
 
 Its output (`*.g.cs`) is **committed**, so spec changes show up as reviewable diffs and consumers can step into readable code.
@@ -68,10 +68,10 @@ ESI IDs are 64-bit. In the current spec, all 24 ID alias schemas (`CharacterID`,
 
 ### Namespaces follow tags
 - A top-level type (record, union or enum) used only by one tag's operations lives in
-  `EveEsi.Net.Models.<Tag>` (`EveEsi.Net.Models.Assets`, `EveEsi.Net.Models.Character`, …), in
+  `NewEdenKit.ESI.Models.<Tag>` (`NewEdenKit.ESI.Models.Assets`, `NewEdenKit.ESI.Models.Character`, …), in
   `Generated/<Tag>/<Name>.g.cs`. "Used" follows responses, request bodies and query-parameter enums, through nested
   types, lists, maps and union variants.
-- Types used by several tags, or by none, stay in the root `EveEsi.Net.Models` (`Generated/<Name>.g.cs`): today
+- Types used by several tags, or by none, stay in the root `NewEdenKit.ESI.Models` (`Generated/<Name>.g.cs`): today
   `Cursor`, `ErrorResponse`, `ErrorDetail` and a handful of shared enums. Root types are visible from every tag
   namespace without a `using`.
 - Nested types live in their parent's namespace.
@@ -175,15 +175,15 @@ public abstract partial record PriceModel
 - If a `oneOf` doesn't follow the wrapper-key shape, generation fails.
 
 ## JSON context
-`EsiJsonContext` (`EveEsi.Net.Models/Generated/EsiJsonContext.g.cs`) registers every generated type, every list and
+`EsiJsonContext` (`NewEdenKit.ESI.Models/Generated/EsiJsonContext.g.cs`) registers every generated type, every list and
 map used by them, and every response and body type, each with an explicit `TypeInfoPropertyName` derived from its
 nesting path (`CharactersDetail.PositionModel` → `CharactersDetailPositionModel`, `IReadOnlyList<X>` → `ListOfX`).
 Explicit names are required because many nested types share simple names. The context is **internal**: generated
-services in `EveEsi.Net` use it through `InternalsVisibleTo`, and keeping it internal keeps ~1,500 source-generated
+services in `NewEdenKit.ESI` use it through `InternalsVisibleTo`, and keeping it internal keeps ~1,500 source-generated
 members out of the public API.
 
 ## Parameters
-`EveEsi.Net.Routes/Generated/Parameter.g.cs` is a catalogue of wire-name constants, one per distinct
+`NewEdenKit.ESI.Routes/Generated/Parameter.g.cs` is a catalogue of wire-name constants, one per distinct
 (location, wire name) in the spec (77 today):
 
 ```csharp
@@ -211,7 +211,7 @@ public static partial class Parameter
 - Pagination parameters (`page`, `before`, `after`, `limit`) are **not** in the catalogue. `ApplyPagination` handles them.
 
 ## Operation IDs
-`EveEsi.Net.Routes/Generated/Operation.g.cs` is a catalogue of operation IDs as `const string`s, one nested class per
+`NewEdenKit.ESI.Routes/Generated/Operation.g.cs` is a catalogue of operation IDs as `const string`s, one nested class per
 spec **tag**, so nothing refers to an operation by a raw string:
 
 ```csharp
@@ -277,13 +277,13 @@ parameters, pagination and body are expressed in the service signature; roles ar
 Routes carry no types: response and body types are emitted into the **service** (below).
 Shared header parameters (`IfNoneMatch`, `AcceptLanguage`, `CompatibilityDate`, `Tenant`, `IfModifiedSince`)
 are **not** emitted as route parameters. The compatibility date becomes a generated constant,
-`EsiSpec.CompatibilityDate` in `EveEsi.Net.Routes/Generated/EsiSpec.g.cs`, which `AddEveEsi()` sends as
+`EsiSpec.CompatibilityDate` in `NewEdenKit.ESI.Routes/Generated/EsiSpec.g.cs`, which `AddEveEsi()` sends as
 `X-Compatibility-Date`. It is not a user option.
 
 ## Services
-`EveEsi.Net/Generated/` holds, per spec tag, a public `I<Tag>.g.cs` interface and an `internal sealed`
+`NewEdenKit.ESI/Generated/` holds, per spec tag, a public `I<Tag>.g.cs` interface and an `internal sealed`
 `<Tag>Service.g.cs` implementation deriving from `EsiService<I<Tag>>`, plus `EsiServices.g.cs`, which registers them
-all. Namespace: `EveEsi.Net.Services`. Services are request builders: each operation becomes one method that calls
+all. Namespace: `NewEdenKit.ESI.Services`. Services are request builders: each operation becomes one method that calls
 the factory and returns `IEsiRequest<T>`:
 
 ```csharp
@@ -349,10 +349,10 @@ public IEsiRequest<IReadOnlyList<MarketsRegionIdOrdersGetItem>> GetMarketsRegion
 
 ## Running it
 ```
-dotnet run --project tools/EveEsi.Net.Generator -- --spec openapi.json --out src/
-dotnet format analyzers src/EveEsi.Net.Routes/EveEsi.Net.Routes.csproj --diagnostics RS0016 --severity info --include-generated
+dotnet run --project tools/NewEdenKit.ESI.Generator -- --spec openapi.json --out src/
+dotnet format analyzers src/NewEdenKit.ESI.Routes/NewEdenKit.ESI.Routes.csproj --diagnostics RS0016 --severity info --include-generated
 ```
-Generated code goes to `EveEsi.Net.Routes`, `EveEsi.Net.Models` and `EveEsi.Net` (services), so the second step runs
+Generated code goes to `NewEdenKit.ESI.Routes`, `NewEdenKit.ESI.Models` and `NewEdenKit.ESI` (services), so the second step runs
 for all three.
 - The first command writes `*.g.cs` and deletes stale `*.g.cs` in the directories it owns. Exit codes: `0` success,
   `1` bad arguments or missing files, `2` generation failed (the message says what to map in `generator.json`).
@@ -360,11 +360,11 @@ for all three.
   `--include-generated` is passed. Repeat it for each project with generated code.
 
 ## Tests
-`tests/EveEsi.Net.Generator.Tests` runs the generator on small fixture specs (`Fixtures/`) and compares the output
+`tests/NewEdenKit.ESI.Generator.Tests` runs the generator on small fixture specs (`Fixtures/`) and compares the output
 with committed snapshots (`Snapshots/`, excluded from compilation). After an intended output change, regenerate the
-snapshots with `UPDATE_SNAPSHOTS=1 dotnet test tests/EveEsi.Net.Generator.Tests` and review the diff. Every failure
-mode has its own test. `EveEsi.Net.Routes.Tests` checks the committed real output (keys match operation IDs, every
-placeholder is a known route parameter). `EveEsi.Net.Tests` drives every generated service method through the real
+snapshots with `UPDATE_SNAPSHOTS=1 dotnet test tests/NewEdenKit.ESI.Generator.Tests` and review the diff. Every failure
+mode has its own test. `NewEdenKit.ESI.Routes.Tests` checks the committed real output (keys match operation IDs, every
+placeholder is a known route parameter). `NewEdenKit.ESI.Tests` drives every generated service method through the real
 factory, route table and HTTP client, and checks that it calls its own operation with every route value filled in.
 
 ## Updating to a new spec

@@ -1,7 +1,7 @@
-# Using EveEsi.Net
+# Using NewEdenKit.ESI
 
-How to call EVE Online's ESI API from an application with EveEsi.Net. Written for developers and for AI coding
-assistants: every example below is compiled and checked in CI (`tests/EveEsi.Net.Tests/Docs/UsageExamples.cs`),
+How to call EVE Online's ESI API from an application with NewEdenKit.ESI. Written for developers and for AI coding
+assistants: every example below is compiled and checked in CI (`tests/NewEdenKit.ESI.Tests/Docs/UsageExamples.cs`),
 so it matches the current API.
 
 ## Contents
@@ -15,15 +15,15 @@ so it matches the current API.
 8. [Caching](#caching)
 9. [Middleware](#middleware)
 10. [Types](#types)
-11. [Testing code that uses EveEsi.Net](#testing-code-that-uses-eveesinet)
+11. [Testing code that uses NewEdenKit.ESI](#testing-code-that-uses-newedenkitesi)
 12. [Rules and common mistakes](#rules-and-common-mistakes)
 
 ## Packages
 | Package | Install it when |
 |---|---|
-| `EveEsi.Net` | Always. Services, models, `AddEveEsi()`. Brings in everything below except the caching stores packages. |
-| `EveEsi.Net.Middleware` | Comes with `EveEsi.Net`. `EnableCaching()`, `CacheMiddleware`, `ETagMiddleware`, in-memory and file stores. |
-| `EveEsi.Net.Abstractions` | Only for writing your own middleware or cache store in a separate library. |
+| `NewEdenKit.ESI` | Always. Services, models, `AddEveEsi()`. Brings in everything below except the caching stores packages. |
+| `NewEdenKit.ESI.Middleware` | Comes with `NewEdenKit.ESI`. `EnableCaching()`, `CacheMiddleware`, `ETagMiddleware`, in-memory and file stores. |
+| `NewEdenKit.ESI.Abstractions` | Only for writing your own middleware or cache store in a separate library. |
 
 Targets .NET 8, 9 and 10. Trim and AOT compatible. Uses `Microsoft.Extensions.DependencyInjection`.
 
@@ -59,12 +59,12 @@ services.AddEveEsi(o =>
 
 - `ApplicationName` is a User-Agent product token: `Name` or `Name/Version`, no spaces.
 - `Contact` is an email address, website, EVE character or Discord handle, without parentheses.
-- The library sends `User-Agent: MyApp/1.2 (admin@example.com) EveEsi.Net/<version> (compatibility-date <date>)`,
+- The library sends `User-Agent: MyApp/1.2 (admin@example.com) NewEdenKit.ESI/<version> (compatibility-date <date>)`,
   `X-Compatibility-Date` and `X-Tenant` on every call. Don't set them yourself.
 - Call `AddEveEsi` once per service collection; a second call throws.
 
 ## Find the method for an endpoint
-- There is one service interface per ESI tag, in `EveEsi.Net.Services`: `IAlliance`, `IAssets`, `ICharacter`,
+- There is one service interface per ESI tag, in `NewEdenKit.ESI.Services`: `IAlliance`, `IAssets`, `ICharacter`,
   `IContracts`, `IMarket`, `IUniverse`, `IWallet`, … Inject the interface; services are transient.
 - Each ESI operation is one method, **named after its ESI `operationId`**: `GET /characters/{character_id}/assets` is
   `IAssets.GetCharactersCharacterIdAssets`, `GET /markets/{region_id}/orders` is `IMarket.GetMarketsRegionIdOrders`.
@@ -73,8 +73,8 @@ services.AddEveEsi(o =>
   IntelliSense) for the path to find the method.
 - Parameters, in order: path values, required query values, the request body, `string token` (secured endpoints
   only), optional query values (`null` = not sent), then `int? page` or `CursorPage? cursor`.
-- Response models live in `EveEsi.Net.Models.<Tag>` (e.g. `EveEsi.Net.Models.Assets`); shared types such as `Cursor`
-  are in `EveEsi.Net.Models`.
+- Response models live in `NewEdenKit.ESI.Models.<Tag>` (e.g. `NewEdenKit.ESI.Models.Assets`); shared types such as `Cursor`
+  are in `NewEdenKit.ESI.Models`.
 
 ## Make a call
 A service method only **builds** a request (`IEsiRequest<T>`); nothing is sent until `ExecuteAsync`.
@@ -287,7 +287,7 @@ public static string Owner(SovereigntySystemsSolarsystem system) => system.Claim
 };
 ```
 
-## Testing code that uses EveEsi.Net
+## Testing code that uses NewEdenKit.ESI
 Depend on the service interfaces and mock them. `EsiResult<T>.Success`, `.Failure` and `.NotModified` create
 results:
 

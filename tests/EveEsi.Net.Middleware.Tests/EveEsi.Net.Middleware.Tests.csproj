@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="../../src/EveEsi.Net.Middleware/EveEsi.Net.Middleware.csproj" />
-  </ItemGroup>
-
-</Project>

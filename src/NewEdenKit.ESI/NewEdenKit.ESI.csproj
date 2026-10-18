@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Typed, middleware-driven client for EVE Online's ESI API.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../NewEdenKit.ESI.Abstractions/NewEdenKit.ESI.Abstractions.csproj" />
+    <ProjectReference Include="../NewEdenKit.ESI.Models/NewEdenKit.ESI.Models.csproj" />
+    <ProjectReference Include="../NewEdenKit.ESI.Routes/NewEdenKit.ESI.Routes.csproj" />
+    <ProjectReference Include="../NewEdenKit.ESI.Client/NewEdenKit.ESI.Client.csproj" />
+    <ProjectReference Include="../NewEdenKit.ESI.Middleware/NewEdenKit.ESI.Middleware.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+  </ItemGroup>
+
+</Project>
