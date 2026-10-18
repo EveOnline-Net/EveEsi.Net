@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>ESI endpoint and parameter catalogues for NewEdenKit.ESI.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../NewEdenKit.ESI.Abstractions/NewEdenKit.ESI.Abstractions.csproj" />
+    <ProjectReference Include="../NewEdenKit.ESI.Models/NewEdenKit.ESI.Models.csproj" />
+  </ItemGroup>
+
+</Project>

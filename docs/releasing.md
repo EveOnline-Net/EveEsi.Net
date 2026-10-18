@@ -1,7 +1,7 @@
 # Releasing
 
 ## Principles
-- **One version for every package.** All `EveEsi.Net*` packages (core and `Caching.*`) are always released
+- **One version for every package.** All `NewEdenKit.ESI*` packages (core and `Caching.*`) are always released
   together with the same version.
 - **Releases are driven by tags.** Pushing a `vX.Y.Z` tag on `main` is the release. Nothing else publishes to nuget.org.
 - **Versions come from git** via [MinVer](https://github.com/adamralph/minver). No version numbers are
@@ -65,7 +65,7 @@ and are never published.
    - builds and tests every target
    - packs all packages with the version from the tag
    - publishes `.nupkg` + `.snupkg` to nuget.org using **NuGet Trusted Publishing** (OIDC, no stored API key). The
-     nuget.org trusted-publishing policy must name `EveOnline-Net/EveEsi.Net`, `release.yml` and the `nuget`
+     nuget.org trusted-publishing policy must name `EveOnline-Net/NewEdenKit.ESI`, `release.yml` and the `nuget`
      environment.
    - creates a GitHub Release with generated notes (from squash-merged PR titles)
 6. After the release, set `PackageValidationBaselineVersion` to the new version (in `Directory.Build.props`).
@@ -76,7 +76,7 @@ The release notes always state the ESI compatibility date the release targets.
 All packable projects have, set in `Directory.Build.props`:
 - `PackageId` = project name, shared `Authors`
 - `PackageLicenseExpression` = `GPL-3.0-or-later` (full text in `LICENSE`)
-- `PackageProjectUrl` / `RepositoryUrl` = `https://github.com/EveOnline-Net/EveEsi.Net`, `RepositoryType` = `git`
+- `PackageProjectUrl` / `RepositoryUrl` = `https://github.com/EveOnline-Net/NewEdenKit.ESI`, `RepositoryType` = `git`
 - `PackageReadmeFile`, `PackageIcon`, `PackageTags` (`eve-online;esi;eve;api-client`)
 - SourceLink, `ContinuousIntegrationBuild` in CI, deterministic builds
 - `IncludeSymbols` + `SymbolPackageFormat=snupkg`

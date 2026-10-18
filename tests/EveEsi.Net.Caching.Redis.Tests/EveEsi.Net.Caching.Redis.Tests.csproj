@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="../../src/EveEsi.Net.Caching.Redis/EveEsi.Net.Caching.Redis.csproj" />
-  </ItemGroup>
-
-</Project>

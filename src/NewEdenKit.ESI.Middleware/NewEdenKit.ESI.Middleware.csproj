@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Standard opt-in middleware for NewEdenKit.ESI: ETags, caching, scope checks, language, rate limits, retries.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../NewEdenKit.ESI.Abstractions/NewEdenKit.ESI.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- For AddEsiInMemoryCacheStore(). -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+</Project>

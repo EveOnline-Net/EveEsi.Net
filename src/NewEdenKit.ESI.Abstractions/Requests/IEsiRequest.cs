@@ -1,0 +1,32 @@
+using NewEdenKit.ESI.Abstractions.Middleware;
+using NewEdenKit.ESI.Abstractions.Results;
+using NewEdenKit.ESI.Abstractions.Routing;
+
+namespace NewEdenKit.ESI.Abstractions.Requests;
+
+/// <summary>
+/// A built, validated ESI call, ready to run. Add request-level middleware with <c>Use</c>, then call
+/// <see cref="ExecuteAsync"/>.
+/// </summary>
+/// <typeparam name="T">The response type.</typeparam>
+/// <example>
+/// <code>
+/// // Service methods build requests; nothing is sent until ExecuteAsync.
+/// var result = await status.GetStatus()
+///     .Use(async (context, next) =&gt; { context.Request.Headers["Accept-Language"] = "de"; await next(context); })
+///     .ExecuteAsync(ct);
+/// </code>
+/// </example>
+public interface IEsiRequest<T> : IEsiMiddlewareTarget<IEsiRequest<T>>
+{
+    /// <summary>The endpoint this request calls.</summary>
+    RouteDefinition Route { get; }
+
+    /// <summary>
+    /// Sends the request through the pipeline (global → service → request middleware → HTTP) and decodes the response.
+    /// </summary>
+    /// <param name="cancellationToken">Cancels the call.</param>
+    /// <returns>The result. HTTP errors and transport failures are failed results, not exceptions.</returns>
+    /// <exception cref="OperationCanceledException"><paramref name="cancellationToken"/> was cancelled.</exception>
+    Task<EsiResult<T>> ExecuteAsync(CancellationToken cancellationToken = default);
+}

@@ -1,7 +1,7 @@
-# EveEsi.Net
+# NewEdenKit.ESI
 
 Public NuGet library for calling EVE Online's ESI API (`https://esi.evetech.net`).
-Repository: https://github.com/EveOnline-Net/EveEsi.Net (default branch `main`). License: GPL-3.0-or-later.
+Repository: https://github.com/EveOnline-Net/NewEdenKit.ESI (default branch `main`). License: GPL-3.0-or-later.
 Stateless: it only builds, sends and decodes ESI calls. Caching, ETags, scope checks,
 rate limiting etc. are **middleware**, applied at three levels: global, service, request.
 
@@ -36,7 +36,7 @@ CreateEsiClient<IReadOnlyList<CharacterAsset>>(
 - [docs/contributing.md](docs/contributing.md): branching, commit/PR conventions, PR checklist, spec update process
 - [docs/releasing.md](docs/releasing.md): versioning (SemVer from 0.1.0, one version for all packages), tag-driven releases
 - [docs/usage.md](docs/usage.md), [README.md](README.md), [llms.txt](llms.txt): for people and AI assistants **using**
-  the library. Their code comes from `tests/EveEsi.Net.Tests/Docs/UsageExamples.cs` (see contributing.md, "Consumer docs");
+  the library. Their code comes from `tests/NewEdenKit.ESI.Tests/Docs/UsageExamples.cs` (see contributing.md, "Consumer docs");
   update them when consumer-facing behaviour changes.
 
 Rules in `.claude/rules/` load automatically. Some are scoped to paths via frontmatter.
@@ -50,7 +50,7 @@ Query it with targeted scripts or grep (by path, `operationId`, or schema name).
 - Build: `dotnet build`
 - Test: `dotnet test`
 - Format: `dotnet format`
-- Regenerate code from spec: `dotnet run --project tools/EveEsi.Net.Generator -- --spec openapi.json --out src/`,
+- Regenerate code from spec: `dotnet run --project tools/NewEdenKit.ESI.Generator -- --spec openapi.json --out src/`,
   then record API: `dotnet format analyzers <project> --diagnostics RS0016 --severity info --include-generated`
 
 ## Hard rules

@@ -1,7 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="../../src/EveEsi.Net.Caching.Distributed/EveEsi.Net.Caching.Distributed.csproj" />
-  </ItemGroup>
-
-</Project>

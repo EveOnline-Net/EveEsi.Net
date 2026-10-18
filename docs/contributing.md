@@ -1,6 +1,6 @@
 # Contributing
 
-EveEsi.Net is hosted on GitHub at <https://github.com/EveOnline-Net/EveEsi.Net>, in the `EveOnline-Net` organization.
+NewEdenKit.ESI is hosted on GitHub at <https://github.com/EveOnline-Net/NewEdenKit.ESI>, in the `EveOnline-Net` organization.
 Contributions come in through pull requests against `main`.
 
 **License:** the project is GPL-3.0-or-later (see `LICENSE`). By opening a PR, you agree that your
@@ -70,10 +70,10 @@ The reviewer also checks:
 `README.md` (also the NuGet package page), `docs/usage.md` and `llms.txt` are written for people and AI assistants
 **using** the library. Their code blocks are not written by hand:
 - Each block marked `<!-- snippet: name -->` is a copy of a `#region snippet: name` in
-  `tests/EveEsi.Net.Tests/Docs/UsageExamples.cs`, so every example compiles. `UsageGuideTests` fails when a block
+  `tests/NewEdenKit.ESI.Tests/Docs/UsageExamples.cs`, so every example compiles. `UsageGuideTests` fails when a block
   and its region differ, and runs several examples against a fake ESI to check they do what the guide says.
 - To change an example, edit the region, then copy it into the docs with
-  `UPDATE_USAGE_GUIDE=1 dotnet test tests/EveEsi.Net.Tests -f net10.0 --filter Docs_Show` and review the diff.
+  `UPDATE_USAGE_GUIDE=1 dotnet test tests/NewEdenKit.ESI.Tests -f net10.0 --filter Docs_Show` and review the diff.
 - A new snippet needs a region in `UsageExamples.cs` and a marker with an empty `csharp` block in the doc.
 - Links in `README.md` are absolute, because nuget.org shows it outside the repository.
 - Entry points (`AddEveEsi`, `EnableCaching`, `EsiResult<T>`, `IEsiRequest<T>`) carry `<example>` XML docs, which
@@ -86,7 +86,7 @@ The spec isn't updated automatically. When ESI changes, anyone can open a spec P
 1. Branch `spec/<new-compat-date>` from `main`.
 2. Replace `openapi.json` with the new spec from ESI.
 3. Run the generator, then record the public API changes (see [generator.md](generator.md#running-it)):
-   `dotnet run --project tools/EveEsi.Net.Generator -- --spec openapi.json --out src/`
+   `dotnet run --project tools/NewEdenKit.ESI.Generator -- --spec openapi.json --out src/`
 4. If generation fails, fix it in `generator.json` (names, enum members, overrides). Never by editing output.
 5. Build and test. Update `PublicAPI.Unshipped.txt` for the API changes.
 6. Open the PR with the spec, `generator.json` and the regenerated code **together**. In the description, list:

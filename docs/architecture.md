@@ -10,28 +10,28 @@
 ## Solution layout
 
 ```
-EveEsi.Net.slnx
+NewEdenKit.ESI.slnx
 Directory.Build.props        shared settings: TFMs, nullable, warnings-as-errors, AOT/trim flags, docs
 Directory.Packages.props     central package versions
 generator.json               generator config (naming, enums, unions, overrides)
 openapi.json                 pinned ESI spec (do not read whole; query it)
 
 src/
-  EveEsi.Net.Abstractions/   contracts shared by everything (hand-written)
-  EveEsi.Net.Models/         DTOs, enums, unions, converters, JsonSerializerContext (generated + partials)
-  EveEsi.Net.Routes/         Operation (operation ID constants), EsiRoutes table, Parameter catalogue (all generated)
-  EveEsi.Net.Client/         client factory, request parameters, pipeline runner, HTTP execution (hand-written)
-  EveEsi.Net.Middleware/     standard middleware + in-memory IEsiCacheStore (hand-written)
-  EveEsi.Net/                section services ICharacters… (generated) + AddEveEsi() DI extensions
-  EveEsi.Net.Caching.Distributed/   IEsiCacheStore over IDistributedCache    (separate package)
-  EveEsi.Net.Caching.Redis/         IEsiCacheStore over StackExchange.Redis  (separate package)
+  NewEdenKit.ESI.Abstractions/   contracts shared by everything (hand-written)
+  NewEdenKit.ESI.Models/         DTOs, enums, unions, converters, JsonSerializerContext (generated + partials)
+  NewEdenKit.ESI.Routes/         Operation (operation ID constants), EsiRoutes table, Parameter catalogue (all generated)
+  NewEdenKit.ESI.Client/         client factory, request parameters, pipeline runner, HTTP execution (hand-written)
+  NewEdenKit.ESI.Middleware/     standard middleware + in-memory IEsiCacheStore (hand-written)
+  NewEdenKit.ESI/                section services ICharacters… (generated) + AddEveEsi() DI extensions
+  NewEdenKit.ESI.Caching.Distributed/   IEsiCacheStore over IDistributedCache    (separate package)
+  NewEdenKit.ESI.Caching.Redis/         IEsiCacheStore over StackExchange.Redis  (separate package)
 
 tools/
-  EveEsi.Net.Generator/      spec → code console tool (not shipped)
+  NewEdenKit.ESI.Generator/      spec → code console tool (not shipped)
 
 tests/
-  EveEsi.Net.<Project>.Tests/    one test project per src project
-  EveEsi.Net.Generator.Tests/    snapshot tests for generator output
+  NewEdenKit.ESI.<Project>.Tests/    one test project per src project
+  NewEdenKit.ESI.Generator.Tests/    snapshot tests for generator output
 ```
 
 ### Dependency rules
@@ -42,15 +42,15 @@ Models        ← (no project deps)
 Routes        → Abstractions, Models
 Client        → Abstractions
 Middleware    → Abstractions
-EveEsi.Net    → Abstractions, Models, Routes, Client, Middleware
+NewEdenKit.ESI    → Abstractions, Models, Routes, Client, Middleware
 Caching.*     → Abstractions
 ```
-- Nothing references `EveEsi.Net` (the top package) except tests and consumers.
+- Nothing references `NewEdenKit.ESI` (the top package) except tests and consumers.
 - `Client` and `Middleware` never reference `Models` or `Routes`. They work with `RouteDefinition`
   metadata and raw responses only.
 - Adapters with third-party dependencies (Redis, distributed cache, …) always go in their own `Caching.*` package.
 
-## Key abstractions (EveEsi.Net.Abstractions)
+## Key abstractions (NewEdenKit.ESI.Abstractions)
 
 | Type | Purpose |
 |---|---|
@@ -59,7 +59,7 @@ Caching.*     → Abstractions
 | `CursorPage` | Cursor pagination input: `Before`, `After` (strings), `Limit` (`long?`). |
 | `IEsiClientFactory` | Creates a per-request `IEsiRequest<T>` from an operation ID (looked up in the route table), the response's `JsonTypeInfo<T>` (omitted for no-content endpoints, giving `IEsiRequest<EsiNoContent>`), a parameter configurator, an optional token and the calling service's middleware snapshot. |
 | `IEsiRequestParameters` | What the configurator lambda receives: `Route`, `Query`, `Body`, `ApplyPagination(...)`. A `null` query value means "not sent". |
-| `IEsiRequest<T>` | The built, ready-to-run request: `.Use(...)`, `.ExecuteAsync(ct)`. The only public request type; the implementation is `internal sealed` in `EveEsi.Net.Client`. Service methods and the factory always return the interface. |
+| `IEsiRequest<T>` | The built, ready-to-run request: `.Use(...)`, `.ExecuteAsync(ct)`. The only public request type; the implementation is `internal sealed` in `NewEdenKit.ESI.Client`. Service methods and the factory always return the interface. |
 | `EsiContext` | Mutable state passed through the pipeline: route, outgoing `EsiRequestMessage`, access token (`string?`, settable), `EsiResponse` (once there is one), `Items` bag, `CancellationToken`. |
 | `EsiRequestMessage` | The outgoing request middleware edits: method, path template, route values and query values as string key/value pairs (a query name repeats per array item), headers, body bytes. `ToRelativeUri()` builds the escaped path + query. The client builds a fresh `HttpRequestMessage` from it on every send, so retries are safe. |
 | `EsiResponse` | **Raw** response: status, `EsiResponseHeaders`, body bytes. Middleware sees and can replace this. Deserialization happens after the pipeline. |
@@ -136,7 +136,7 @@ not by the route. The factory only checks what the route knows (programmer error
 ### Lifetime and service-level middleware
 - Services are registered as **transient**, by the generated `EsiServices.AddGeneratedServices` (`TryAdd`, so an app
   can register its own implementation first).
-- Generated services derive from the hand-written `EsiService<TSelf>` base class (`EveEsi.Net.Services`) that holds the instance's
+- Generated services derive from the hand-written `EsiService<TSelf>` base class (`NewEdenKit.ESI.Services`) that holds the instance's
   service-level middleware (`characters.Use(...)`) and passes a snapshot of it to the factory with each
   `CreateEsiClient` call. That keeps the service level separate from, and outside, request-level middleware.
 - Shared headers (`If-None-Match`, `Accept-Language`, `X-Compatibility-Date`, `X-Tenant`, `If-Modified-Since`)
@@ -212,7 +212,7 @@ Within a level, middleware runs in registration order.
 A client takes a snapshot of its service's middleware when it's created, so calling `characters.Use(...)`
 later doesn't affect clients that already exist.
 
-### Standard middleware (EveEsi.Net.Middleware)
+### Standard middleware (NewEdenKit.ESI.Middleware)
 All opt-in. The core client sends a call without any of them.
 - `ETagMiddleware`: sends `If-None-Match` from the cache store; on `304`, returns the stored body with ESI's fresh
   headers (as a 200, so the caller gets the value) and refreshes the entry. Entries with an ETag are kept past their
@@ -234,7 +234,7 @@ All opt-in. The core client sends a call without any of them.
 Turn both on with `.EnableCaching(c => …)` on the builder (below). It adds `CacheMiddleware` then `ETagMiddleware` at
 that point in the global chain (`c.DisableResponseCache()` / `c.DisableETags()` leave one out) and registers the store
 chosen in `c`. With no store chosen it uses a `FileEsiCacheStore` in `FileEsiCacheStoreOptions.DefaultDirectory`
-(`EveEsi.Net/<entry assembly>/cache` in the user's local application data). Choosing two stores, calling it twice or
+(`NewEdenKit.ESI/<entry assembly>/cache` in the user's local application data). Choosing two stores, calling it twice or
 turning both middleware off fails at startup; an `IEsiCacheStore` the app registered itself wins. `Use<CacheMiddleware>()`
 still works for a custom order, with the app registering the store.
 
@@ -244,7 +244,7 @@ without its own `RetainUntil` is kept). `FileEsiCacheStore` (`c.AddFileCacheStor
 restarts and between processes on one machine: one file per entry named by a hash of its key, written to a temporary
 file and renamed into place, with the file's last-write time set to when it may be dropped so sweeps (every
 `SweepInterval`, on writes) need only the folder listing. Unreadable files are misses. Stores with third-party
-dependencies ship as `EveEsi.Net.Caching.*` packages. Both middleware take an
+dependencies ship as `NewEdenKit.ESI.Caching.*` packages. Both middleware take an
 optional `TimeProvider`, resolved from DI when registered.
 
 ### What is *not* middleware: service registration
@@ -264,10 +264,10 @@ services.AddEveEsi(o =>
 `AddEveEsi()` returns an **`IEsiBuilder`** (in Abstractions), so everything that belongs to the ESI client is
 registered in one chain. `EsiOptions` holds only configuration (identity, base address, tenant). The builder is the
 global middleware target (`Use(instance)`, `Use(callback)`, `Use<T>()`), and each package adds its own extensions to
-it: `EveEsi.Net.Middleware` adds `EnableCaching`, whose `IEsiCacheBuilder` (also in Abstractions) takes
-`AddInMemoryCacheStore` / `AddFileCacheStore`; the `EveEsi.Net.Caching.*` packages add their stores to that builder the
+it: `NewEdenKit.ESI.Middleware` adds `EnableCaching`, whose `IEsiCacheBuilder` (also in Abstractions) takes
+`AddInMemoryCacheStore` / `AddFileCacheStore`; the `NewEdenKit.ESI.Caching.*` packages add their stores to that builder the
 same way, through `IEsiCacheBuilder.UseStore`. `ConfigureHttpClient` exposes the typed client's `IHttpClientBuilder` (named
-`EveEsi.Net`) for message handlers, a proxy or a timeout; ESI-aware behaviour (retries, caching, rate limits) belongs in
+`NewEdenKit.ESI`) for message handlers, a proxy or a timeout; ESI-aware behaviour (retries, caching, rate limits) belongs in
 middleware instead. Add everything before the service provider is built: the global middleware list is read when it's
 first resolved.
 
@@ -275,7 +275,7 @@ first resolved.
 place the ESI headers are set; no service or client constructor touches them:
 - `BaseAddress`: `https://esi.evetech.net/` (`EsiOptions.BaseAddress` to override).
 - `User-Agent`: the consumer's application and contact, then the library's product token and the compatibility date
-  it speaks: `MyApp/1.2 (admin@example.com) EveEsi.Net/0.1.0 (compatibility-date 2026-08-18)`. CCP asks for this so
+  it speaks: `MyApp/1.2 (admin@example.com) NewEdenKit.ESI/0.1.0 (compatibility-date 2026-08-18)`. CCP asks for this so
   they can contact the app's operator; the library part tells them which client and spec the traffic comes from. The
   version is the package version without build metadata.
 - `X-Compatibility-Date`: **not configurable**. A generated constant, `EsiSpec.CompatibilityDate`, taken from the spec
@@ -291,22 +291,22 @@ fails at startup rather than on the first call (`InvalidOperationException`):
 - a second `AddEveEsi()` on the same collection.
 
 What it registers:
-- `AddHttpClient<EsiHttpClient>("EveEsi.Net", …)` with the address and headers above.
+- `AddHttpClient<EsiHttpClient>("NewEdenKit.ESI", …)` with the address and headers above.
 - The route table (`EsiRoutes.All`) and the global middleware as singletons. `.Use<T>()` registers `T` as a singleton
   (`TryAdd`, so an app's own registration wins) and resolves it when the global middleware is first needed.
 - `IEsiClientFactory` and every generated service as transient (`TryAdd`).
 
 `AddEveEsi` and the builder extensions live in the `Microsoft.Extensions.DependencyInjection` namespace, as
-registration extensions conventionally do; `EsiOptions` is in `EveEsi.Net` and `IEsiBuilder` in
-`EveEsi.Net.Abstractions.Registration`.
+registration extensions conventionally do; `EsiOptions` is in `NewEdenKit.ESI` and `IEsiBuilder` in
+`NewEdenKit.ESI.Abstractions.Registration`.
 
 `Authorization: Bearer <token>` is the one per-request header the client adds itself, from `context.AccessToken` at
 send time. Default headers apply only when the request doesn't set the same header, so middleware **can** override
 them via `context.Request.Headers` (e.g. a different `X-Tenant` for one call).
 
-### Client internals (EveEsi.Net.Client)
-`EveEsi.Net.Client` has no public types. The factory, request, pipeline, decoder, route table and typed HTTP client are
-`internal sealed`; `EveEsi.Net` wires them up through `InternalsVisibleTo`.
+### Client internals (NewEdenKit.ESI.Client)
+`NewEdenKit.ESI.Client` has no public types. The factory, request, pipeline, decoder, route table and typed HTTP client are
+`internal sealed`; `NewEdenKit.ESI` wires them up through `InternalsVisibleTo`.
 - **`EsiHttpClient`** is a typed client (`AddHttpClient<EsiHttpClient>`). It is the end of every pipeline: it builds a
   fresh `HttpRequestMessage` from the `EsiContext` (relative URI, middleware headers, body, bearer token), sends it and
   stores the raw `EsiResponse` on the context. It configures nothing itself.

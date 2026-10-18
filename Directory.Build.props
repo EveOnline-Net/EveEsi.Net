@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <!-- The generator is run with `dotnet run`, which needs a single target framework. -->
-  <PropertyGroup Condition="'$(IsToolProject)' == 'true' Or '$(MSBuildProjectName)' == 'EveEsi.Net.Generator.Tests'">
+  <PropertyGroup Condition="'$(IsToolProject)' == 'true' Or '$(MSBuildProjectName)' == 'NewEdenKit.ESI.Generator.Tests'">
     <TargetFrameworks>net10.0</TargetFrameworks>
   </PropertyGroup>
 
@@ -36,8 +36,8 @@
     <Authors>SimplyUnnamed</Authors>
     <Description>Typed, middleware-driven client for EVE Online's ESI API.</Description>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/EveOnline-Net/EveEsi.Net</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/EveOnline-Net/EveEsi.Net</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/EveOnline-Net/NewEdenKit.ESI</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/EveOnline-Net/NewEdenKit.ESI</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>eve-online;esi;eve;api-client</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>

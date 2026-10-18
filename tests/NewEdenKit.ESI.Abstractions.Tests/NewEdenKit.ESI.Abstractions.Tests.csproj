@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/NewEdenKit.ESI.Abstractions/NewEdenKit.ESI.Abstractions.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,9 +1,9 @@
 ---
 paths:
-  - "src/EveEsi.Net.Abstractions/**"
-  - "src/EveEsi.Net.Client/**"
-  - "src/EveEsi.Net.Middleware/**"
-  - "src/EveEsi.Net.Caching.*/**"
+  - "src/NewEdenKit.ESI.Abstractions/**"
+  - "src/NewEdenKit.ESI.Client/**"
+  - "src/NewEdenKit.ESI.Middleware/**"
+  - "src/NewEdenKit.ESI.Caching.*/**"
 ---
 
 # Client, pipeline and middleware
@@ -50,7 +50,7 @@ Full design: [docs/architecture.md](../../docs/architecture.md).
   (`AddEveEsi()` → `AddHttpClient<EsiHttpClient>`), never in a constructor and never per request. Middleware may
   override them per call.
 - `User-Agent` identifies the **consumer's** app: built from `EsiOptions.ApplicationName` + `Contact`, then the
-  library's product token and compatibility date (`EveEsi.Net/0.1.0 (compatibility-date 2026-08-18)`). `X-Compatibility-Date` is the generated `EsiSpec.CompatibilityDate`, not an option.
+  library's product token and compatibility date (`NewEdenKit.ESI/0.1.0 (compatibility-date 2026-08-18)`). `X-Compatibility-Date` is the generated `EsiSpec.CompatibilityDate`, not an option.
 - `Authorization: Bearer` is added per request from `context.AccessToken` at send time.
 - Sends through the typed `EsiHttpClient` (an `HttpClient` from `IHttpClientFactory`). Never `new HttpClient()`.
   Anything holding it (the factory) is transient; never capture it in a singleton.
@@ -59,7 +59,7 @@ Full design: [docs/architecture.md](../../docs/architecture.md).
 
 ## Cache stores
 - `IEsiCacheStore` implementations store raw responses (body + relevant headers + expiry).
-- In-memory and file stores live in `EveEsi.Net.Middleware`. Anything with a third-party dependency goes in an `EveEsi.Net.Caching.<Name>` project.
+- In-memory and file stores live in `NewEdenKit.ESI.Middleware`. Anything with a third-party dependency goes in an `NewEdenKit.ESI.Caching.<Name>` project.
 - Cache keys come from `EsiCacheKey.Create(context)`: method, path and query, `X-Tenant` / `Accept-Language`
   overrides, and for authed routes a SHA-256 hash of the token's `sub` claim (never the raw token). Custom caching
   middleware uses the same key so it shares entries with `CacheMiddleware` and `ETagMiddleware`.
