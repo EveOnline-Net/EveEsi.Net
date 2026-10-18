@@ -1,0 +1,4 @@
+[
+  { "duration": 90, "is_corporation": false, "issued": "2026-08-01T12:00:00Z", "location_id": 60003760, "order_id": 6500000000, "price": 5.25, "range": "10", "region_id": 10000002, "type_id": 34, "volume_remain": 1000, "volume_total": 2000 },
+  { "duration": 90, "is_corporation": false, "issued": "2026-08-01T12:00:00Z", "location_id": 1035466617946, "order_id": 6500000001, "price": 4.75, "range": "solarsystem", "region_id": 10000002, "type_id": 34, "volume_remain": 5, "volume_total": 5 }
+]

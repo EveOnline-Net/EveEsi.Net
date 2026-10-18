@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace EveEsi.Net.Generator.Spec;
 
 /// <summary>One spec operation, with the facts the generator maps.</summary>
@@ -10,10 +12,22 @@ internal sealed record SpecOperation(
     IReadOnlyList<SpecParameter> Parameters,
     string? Scope,
     SpecCache? Cache,
-    SpecRateLimit? RateLimit);
+    SpecRateLimit? RateLimit)
+{
+    /// <summary>The JSON schema of the success response, or <see langword="null"/> for endpoints without a body.</summary>
+    public JsonElement? ResponseSchema { get; init; }
+
+    /// <summary>The JSON schema of the request body, if the endpoint takes one.</summary>
+    public JsonElement? BodySchema { get; init; }
+
+    public bool BodyRequired { get; init; }
+}
 
 /// <summary>A parameter after <c>$ref</c> resolution. <see cref="Location"/> is <c>path</c>, <c>query</c> or <c>header</c>.</summary>
-internal sealed record SpecParameter(string Name, string Location, bool Required);
+internal sealed record SpecParameter(string Name, string Location, bool Required)
+{
+    public JsonElement? Schema { get; init; }
+}
 
 internal enum CacheMode
 {

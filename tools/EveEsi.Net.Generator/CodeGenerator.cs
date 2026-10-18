@@ -1,5 +1,6 @@
 using EveEsi.Net.Generator.Config;
 using EveEsi.Net.Generator.Emit;
+using EveEsi.Net.Generator.Models;
 using EveEsi.Net.Generator.Spec;
 
 namespace EveEsi.Net.Generator;
@@ -8,7 +9,7 @@ namespace EveEsi.Net.Generator;
 internal static class CodeGenerator
 {
     /// <summary>Directories (relative to <c>--out</c>) the generator owns: stale <c>*.g.cs</c> files there are deleted.</summary>
-    public static readonly IReadOnlyList<string> OwnedDirectories = [RoutesEmitter.Directory];
+    public static readonly IReadOnlyList<string> OwnedDirectories = [RoutesEmitter.Directory, ModelsEmitter.Directory];
 
     /// <exception cref="GenerationException">Something in the spec or config can't be mapped without guessing.</exception>
     public static GenerationResult Generate(OpenApiSpec spec, GeneratorConfig config)
@@ -23,9 +24,15 @@ internal static class CodeGenerator
             """;
 
         var notes = new List<string>();
-        var files = RoutesEmitter.Emit(spec, config, header, notes);
-        return new GenerationResult(files, notes);
+        var models = new ModelBuilder(spec, config).Build();
+        var files = RoutesEmitter.Emit(spec, config, header, notes).Concat(ModelsEmitter.Emit(models, header)).ToList();
+        notes.Add($"{models.Enums.Count} enums ({models.Enums.Count(e => !config.Enums.Values.Any(c => c.Match.Any(e.Paths.Contains)))} with default names), "
+            + $"{models.TopLevel.Count} top-level models.");
+        return new GenerationResult(files, notes) { Models = models };
     }
 }
 
-internal sealed record GenerationResult(IReadOnlyList<GeneratedFile> Files, IReadOnlyList<string> Notes);
+internal sealed record GenerationResult(IReadOnlyList<GeneratedFile> Files, IReadOnlyList<string> Notes)
+{
+    public ModelSet? Models { get; init; }
+}

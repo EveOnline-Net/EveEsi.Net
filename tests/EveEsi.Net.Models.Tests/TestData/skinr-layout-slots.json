@@ -1,0 +1,4 @@
+[
+  { "id": 1, "configuration": { "nanocoating": { "id": 67890 } } },
+  { "id": 2, "configuration": { "decal": { "id": 12345, "scale": 0.5 } } }
+]

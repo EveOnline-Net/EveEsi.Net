@@ -188,3 +188,26 @@ and isn't configurable.
 *Why:* the user agent is the consumer's application, not the library; CCP needs to reach whoever runs it. A library
 version is generated from one spec, so sending any other compatibility date would mismatch the generated types.
 Keeping header setup in registration leaves the HTTP client a plain sender and fails fast on missing identity.
+
+### 31. Generated models: read-only records, nested types, attributed enums
+Response and body models are `sealed partial record`s with `{ get; init; }` properties. Inline objects and unions are
+**nested types** of the record that uses them, named property + `Model` (array items + `Item`, map values + `Value`);
+named schemas are top-level. Every enum member carries `[EnumMember(Value = "<wire>")]` and every enum has a
+`[JsonConverter]` to its generated switch-based converter.
+*Why:* nesting keeps each response's shape in one place and avoids hundreds of loosely named top-level types; the
+suffix is required because C# forbids a nested type and a property with the same name. Read-only models can't be
+mutated after deserialization. `EnumMember` is the standard way to show a wire value; the converter still uses a
+`switch` so it stays AOT safe.
+
+### 32. `EsiJsonContext` is internal
+Generated services reach it through `InternalsVisibleTo`. Making it public would add ~1,500 source-generated members
+(whose nullability the public-API analyzer can't track) that churn with every model change. It can be made public
+later without breaking anyone.
+
+### 33. Model namespaces follow spec tags
+Types used by exactly one tag's operations live in `EveEsi.Net.Models.<Tag>`; shared and unused types stay in the
+root `EveEsi.Net.Models`. Request and response types are *not* split into separate namespaces.
+*Why:* 208 of 211 object schemas belong to a single tag, so the split is clean and mirrors `Operation.<Tag>`,
+`EsiRoutes.<Tag>` and the services, and it cuts autocomplete from ~390 types to a few dozen per tag. Requests are only
+13 types with no overlap with responses; a separate namespace would mostly be empty and would split shared enums.
+*Trade-off:* a type moves namespace if a spec change makes it shared, which is a breaking change (see #23).

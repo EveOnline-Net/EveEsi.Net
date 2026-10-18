@@ -1,0 +1,4 @@
+[
+  { "amount": -100000.0, "balance": 500000000000.0, "date": "2026-08-01T12:00:00Z", "description": "Market escrow", "id": 21000000000, "ref_type": "market_escrow" },
+  { "date": "2026-08-01T12:05:00Z", "description": "Something new", "id": 21000000001, "ref_type": "brand_new_ref_type_from_ccp" }
+]

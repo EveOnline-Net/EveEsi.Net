@@ -1,8 +1,57 @@
 {
   "operations": {},
   "operationConstants": {},
-  "schemas": {},
-  "enums": {},
+  "schemas": {
+    "Error": "ErrorResponse",
+    "KillmailsKillmailIdKillmailHashGet.victim.items[].items[]": "ContainedItem",
+    "Route": "RouteResponse",
+    "Status": "ServerStatus"
+  },
+  "enums": {
+    "MailLabelColor": {
+      "match": [
+        "CharactersCharacterIdMailLabelsGet.labels[].color"
+      ],
+      "members": {
+        "#0000fe": "Color0000FE",
+        "#006634": "Color006634",
+        "#0099ff": "Color0099FF",
+        "#00ff33": "Color00FF33",
+        "#01ffff": "Color01FFFF",
+        "#349800": "Color349800",
+        "#660066": "Color660066",
+        "#666666": "Color666666",
+        "#999999": "Color999999",
+        "#99ffff": "Color99FFFF",
+        "#9a0000": "Color9A0000",
+        "#ccff9a": "ColorCCFF9A",
+        "#e6e6e6": "ColorE6E6E6",
+        "#fe0000": "ColorFE0000",
+        "#ff6600": "ColorFF6600",
+        "#ffff01": "ColorFFFF01",
+        "#ffffcd": "ColorFFFFCD",
+        "#ffffff": "ColorFFFFFF"
+      }
+    },
+    "OrderRange": {
+      "match": [
+        "CharactersCharacterIdOrdersGet[].range",
+        "MarketsRegionIdOrdersGet[].range"
+      ],
+      "members": {
+        "1": "Jumps1",
+        "2": "Jumps2",
+        "3": "Jumps3",
+        "4": "Jumps4",
+        "5": "Jumps5",
+        "10": "Jumps10",
+        "20": "Jumps20",
+        "30": "Jumps30",
+        "40": "Jumps40",
+        "solarsystem": "SolarSystem"
+      }
+    }
+  },
   "unions": {},
   "overrides": {}
 }

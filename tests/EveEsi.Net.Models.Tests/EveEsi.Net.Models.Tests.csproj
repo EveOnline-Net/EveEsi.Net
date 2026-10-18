@@ -4,4 +4,8 @@
     <ProjectReference Include="../../src/EveEsi.Net.Models/EveEsi.Net.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="TestData/**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

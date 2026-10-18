@@ -1,4 +1,5 @@
 using EveEsi.Net.Generator.Config;
+using EveEsi.Net.Generator.Emit;
 using EveEsi.Net.Generator.Spec;
 
 namespace EveEsi.Net.Generator.Tests;
@@ -12,7 +13,7 @@ public sealed class RoutesEmitterTests
     {
         var result = Generate(Snapshot.Fixture("routes.openapi.json"), Config);
 
-        Snapshot.Match("Routes", result.Files);
+        Snapshot.Match("Routes", result.Files, RoutesEmitter.Directory);
     }
 
     [Fact]
@@ -29,7 +30,7 @@ public sealed class RoutesEmitterTests
     {
         var result = Generate(Snapshot.Fixture("routes.openapi.json"), Config);
 
-        result.Notes.ShouldHaveSingleItem().ShouldStartWith("4 of 5 operation constants");
+        result.Notes.ShouldContain(n => n.StartsWith("4 of 5 operation constants", StringComparison.Ordinal));
     }
 
     [Fact]

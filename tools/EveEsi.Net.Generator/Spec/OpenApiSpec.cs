@@ -7,10 +7,11 @@ internal sealed class OpenApiSpec
 {
     private static readonly string[] HttpMethods = ["get", "post", "put", "delete", "patch"];
 
-    private OpenApiSpec(string compatibilityDate, IReadOnlyList<SpecOperation> operations)
+    private OpenApiSpec(string compatibilityDate, IReadOnlyList<SpecOperation> operations, IReadOnlyDictionary<string, JsonElement> schemas)
     {
         CompatibilityDate = compatibilityDate;
         Operations = operations;
+        Schemas = schemas;
     }
 
     /// <summary>The single compatibility date the spec is pinned to.</summary>
@@ -19,17 +20,20 @@ internal sealed class OpenApiSpec
     /// <summary>Every operation, ordered by operation ID.</summary>
     public IReadOnlyList<SpecOperation> Operations { get; }
 
+    /// <summary><c>components/schemas</c>, by name. Elements are detached from the parsed document.</summary>
+    public IReadOnlyDictionary<string, JsonElement> Schemas { get; }
+
     public static OpenApiSpec Load(string path)
     {
         using var stream = File.OpenRead(path);
         using var document = JsonDocument.Parse(stream);
-        return Read(document.RootElement);
+        return Read(document.RootElement.Clone());
     }
 
     public static OpenApiSpec Parse(string json)
     {
         using var document = JsonDocument.Parse(json);
-        return Read(document.RootElement);
+        return Read(document.RootElement.Clone());
     }
 
     private static OpenApiSpec Read(JsonElement root)
@@ -56,9 +60,14 @@ internal sealed class OpenApiSpec
             throw new GenerationException($"Operation ID '{duplicate.Key}' is used more than once.");
         }
 
+        var schemas = components.TryGetProperty("schemas", out var schemaElement)
+            ? schemaElement.EnumerateObject().ToDictionary(s => s.Name, s => s.Value, StringComparer.Ordinal)
+            : [];
+
         return new OpenApiSpec(
             ReadCompatibilityDate(components),
-            [.. operations.OrderBy(o => o.OperationId, StringComparer.Ordinal)]);
+            [.. operations.OrderBy(o => o.OperationId, StringComparer.Ordinal)],
+            schemas);
     }
 
     private static string ReadCompatibilityDate(JsonElement components)
@@ -94,7 +103,65 @@ internal sealed class OpenApiSpec
             ReadParameters(operation, components, operationId),
             ReadScope(operation, operationId),
             ReadCache(operation, operationId),
-            ReadRateLimit(operation, operationId));
+            ReadRateLimit(operation, operationId))
+        {
+            ResponseSchema = ReadResponseSchema(operation, operationId),
+            BodySchema = ReadBody(operation, operationId, out var bodyRequired),
+            BodyRequired = bodyRequired,
+        };
+    }
+
+    /// <summary>The JSON schema of the first 2xx response that has a body, or <see langword="null"/> if none does.</summary>
+    private static JsonElement? ReadResponseSchema(JsonElement operation, string operationId)
+    {
+        if (!operation.TryGetProperty("responses", out var responses))
+        {
+            return null;
+        }
+
+        var successes = responses.EnumerateObject()
+            .Where(r => r.Name.StartsWith('2'))
+            .OrderBy(r => r.Name, StringComparer.Ordinal);
+
+        foreach (var response in successes)
+        {
+            if (!response.Value.TryGetProperty("content", out var content))
+            {
+                continue;
+            }
+
+            if (!content.TryGetProperty("application/json", out var json))
+            {
+                throw new GenerationException($"{operationId}: {response.Name} response isn't application/json.");
+            }
+
+            var schema = json.GetProperty("schema");
+            if (schema.ValueKind == JsonValueKind.Object && !schema.EnumerateObject().Any())
+            {
+                continue; // `{}`: an empty 204 alongside a real 200.
+            }
+
+            return schema;
+        }
+
+        return null;
+    }
+
+    private static JsonElement? ReadBody(JsonElement operation, string operationId, out bool required)
+    {
+        required = false;
+        if (!operation.TryGetProperty("requestBody", out var body))
+        {
+            return null;
+        }
+
+        if (!body.TryGetProperty("content", out var content) || !content.TryGetProperty("application/json", out var json))
+        {
+            throw new GenerationException($"{operationId}: request body isn't application/json.");
+        }
+
+        required = body.TryGetProperty("required", out var r) && r.GetBoolean();
+        return json.GetProperty("schema");
     }
 
     private static List<SpecParameter> ReadParameters(JsonElement operation, JsonElement components, string operationId)
@@ -116,7 +183,10 @@ internal sealed class OpenApiSpec
             var location = RequiredString(parameter, "in", operationId);
             var name = RequiredString(parameter, "name", operationId);
             var required = parameter.TryGetProperty("required", out var r) && r.GetBoolean();
-            parameters.Add(new SpecParameter(name, location, required));
+            parameters.Add(new SpecParameter(name, location, required)
+            {
+                Schema = parameter.TryGetProperty("schema", out var schema) ? schema : null,
+            });
         }
 
         return parameters;
