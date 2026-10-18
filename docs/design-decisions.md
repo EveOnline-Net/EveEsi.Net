@@ -11,6 +11,7 @@ Root namespace and package prefix are `NewEdenKit.ESI`. Sub-packages are named `
 ### 2. Target net8.0, net9.0, net10.0
 Covers the current LTS and STS releases. Because net8 is included, nothing can depend on .NET 9+ only APIs
 (e.g. `[JsonStringEnumMemberName]`) without a polyfill or a generated alternative.
+*Update:* each target depends on the `Microsoft.Extensions.*` line of its own runtime (#41).
 
 ### 3. Stateless library
 The library only makes ESI calls. It holds no tokens, no cache and no counters between calls.
@@ -290,3 +291,13 @@ with `EnableCaching(c => c.UseStore<TStore>())` (resolved from the container, li
 *Why:* how a cache is hosted, connected, bounded and monitored depends on the application's infrastructure, and the
 contract is small enough to implement directly. Each adapter package would be a dependency to version, test against a
 real server and release in step with the client, for little gain over a few lines in the app.
+
+### 41. Dependencies follow the target framework
+Each target framework gets the `Microsoft.Extensions.*` packages of its own runtime line: net8.0 → 8.0.x, net9.0 →
+9.0.x, net10.0 → 10.0.x, each on its latest patch (conditional `PackageVersion` groups in `Directory.Packages.props`).
+The packages carry one dependency group per framework. Dependabot updates patches within a line and never moves a line
+to another major.
+*Why:* with every target on the 8.0.x packages, a net10 app that brought nothing newer itself stayed on them, and
+8.0.x stops getting fixes when .NET 8 leaves support (November 2026). Apps on net10 are on the 10.x packages in
+practice anyway (ASP.NET Core's shared framework, `Microsoft.Extensions.Hosting`), so requiring them costs nothing.
+*Supersedes* "lowest supported line for every target".
