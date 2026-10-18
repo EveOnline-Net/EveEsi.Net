@@ -3,7 +3,6 @@ paths:
   - "src/NewEdenKit.ESI.Abstractions/**"
   - "src/NewEdenKit.ESI.Client/**"
   - "src/NewEdenKit.ESI.Middleware/**"
-  - "src/NewEdenKit.ESI.Caching.*/**"
 ---
 
 # Client, pipeline and middleware
@@ -59,7 +58,9 @@ Full design: [docs/architecture.md](../../docs/architecture.md).
 
 ## Cache stores
 - `IEsiCacheStore` implementations store raw responses (body + relevant headers + expiry).
-- In-memory and file stores live in `NewEdenKit.ESI.Middleware`. Anything with a third-party dependency goes in an `NewEdenKit.ESI.Caching.<Name>` project.
+- In-memory and file stores live in `NewEdenKit.ESI.Middleware`. The library ships no stores with third-party
+  dependencies (Redis, `IDistributedCache`, …): applications implement `IEsiCacheStore` and plug it in with
+  `c.UseStore(…)` (design decision #40).
 - Cache keys come from `EsiCacheKey.Create(context)`: method, path and query, `X-Tenant` / `Accept-Language`
   overrides, and for authed routes a SHA-256 hash of the token's `sub` claim (never the raw token). Custom caching
   middleware uses the same key so it shares entries with `CacheMiddleware` and `ETagMiddleware`.

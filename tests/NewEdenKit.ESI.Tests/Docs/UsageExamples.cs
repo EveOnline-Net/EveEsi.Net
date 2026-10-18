@@ -1,6 +1,8 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using Microsoft.Extensions.DependencyInjection;
+using NewEdenKit.ESI.Abstractions.Caching;
 using NewEdenKit.ESI.Abstractions.Http;
 using NewEdenKit.ESI.Abstractions.Middleware;
 using NewEdenKit.ESI.Abstractions.Requests;
@@ -44,6 +46,18 @@ internal static class UsageExamples
             .EnableCaching(c => c.AddInMemoryCacheStore(store => store.MaxEntries = 50_000))
             .Use<AcceptLanguageMiddleware>()          // global middleware, runs for every call
             .ConfigureHttpClient(http => http.SetHandlerLifetime(TimeSpan.FromMinutes(5)));
+        #endregion
+    }
+
+    public static void RegisterCustomStore(IServiceCollection services)
+    {
+        #region snippet: register-custom-store
+        services.AddEveEsi(o =>
+            {
+                o.ApplicationName = "MyApp/1.2";
+                o.Contact = "admin@example.com";
+            })
+            .EnableCaching(c => c.UseStore(sp => new MyCacheStore()));   // registered as a singleton
         #endregion
     }
 
@@ -220,6 +234,33 @@ public sealed class AcceptLanguageMiddleware : IEsiMiddleware
     {
         context.Request.Headers["Accept-Language"] = "de";
         await next(context);
+    }
+}
+#endregion
+
+#region snippet: custom-store
+/// <summary>
+/// A cache store over your own storage. The dictionary stands in for it: in a real store, write the entry (status,
+/// headers, body, ExpiresAt, RetainUntil) to Redis, a database, … and drop it after RetainUntil (or a retention you
+/// choose past ExpiresAt). Shared by concurrent calls; keys never contain an access token.
+/// </summary>
+public sealed class MyCacheStore : IEsiCacheStore
+{
+    private readonly ConcurrentDictionary<string, EsiCacheEntry> _storage = new();
+
+    public ValueTask<EsiCacheEntry?> GetAsync(string key, CancellationToken cancellationToken) =>
+        ValueTask.FromResult(_storage.TryGetValue(key, out var entry) ? entry : null);
+
+    public ValueTask SetAsync(string key, EsiCacheEntry entry, CancellationToken cancellationToken)
+    {
+        _storage[key] = entry;
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask RemoveAsync(string key, CancellationToken cancellationToken)
+    {
+        _storage.TryRemove(key, out _);
+        return ValueTask.CompletedTask;
     }
 }
 #endregion

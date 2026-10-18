@@ -39,6 +39,8 @@ Key facts:
 - Page-based endpoints take `int? page` (total in `result.Headers.Pages`); cursor-based ones take `CursorPage? cursor`.
 - IDs are `long`. Enums have `Unknown = 0`; unions have an `Unknown` variant. Check `IsSuccess` before `Value`.
 - Never use a raw HttpClient for ESI, and never set User-Agent / X-Compatibility-Date / X-Tenant yourself.
+- Caching: `.EnableCaching()` (file store by default) or `c.AddInMemoryCacheStore()`. There are no Redis or
+  distributed-cache packages: implement `IEsiCacheStore` and pass it with `c.UseStore(sp => new MyStore(...))`.
 
 ## Docs
 

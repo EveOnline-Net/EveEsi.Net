@@ -9,8 +9,6 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/NewEdenKit.ESI.Abstractions/NewEdenKit.ESI.Abstractions.csproj" />
-    <Project Path="src/NewEdenKit.ESI.Caching.Distributed/NewEdenKit.ESI.Caching.Distributed.csproj" />
-    <Project Path="src/NewEdenKit.ESI.Caching.Redis/NewEdenKit.ESI.Caching.Redis.csproj" />
     <Project Path="src/NewEdenKit.ESI.Client/NewEdenKit.ESI.Client.csproj" />
     <Project Path="src/NewEdenKit.ESI.Middleware/NewEdenKit.ESI.Middleware.csproj" />
     <Project Path="src/NewEdenKit.ESI.Models/NewEdenKit.ESI.Models.csproj" />
@@ -19,8 +17,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/NewEdenKit.ESI.Abstractions.Tests/NewEdenKit.ESI.Abstractions.Tests.csproj" />
-    <Project Path="tests/NewEdenKit.ESI.Caching.Distributed.Tests/NewEdenKit.ESI.Caching.Distributed.Tests.csproj" />
-    <Project Path="tests/NewEdenKit.ESI.Caching.Redis.Tests/NewEdenKit.ESI.Caching.Redis.Tests.csproj" />
     <Project Path="tests/NewEdenKit.ESI.Client.Tests/NewEdenKit.ESI.Client.Tests.csproj" />
     <Project Path="tests/NewEdenKit.ESI.Generator.Tests/NewEdenKit.ESI.Generator.Tests.csproj" />
     <Project Path="tests/NewEdenKit.ESI.Middleware.Tests/NewEdenKit.ESI.Middleware.Tests.csproj" />

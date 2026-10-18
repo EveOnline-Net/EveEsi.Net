@@ -218,6 +218,50 @@ data, when no store is chosen) or `c.AddInMemoryCacheStore()`. `c.DisableRespons
 one middleware out. Secured responses are cached per character (a hash of the token's subject), never shared, and the
 raw token is never stored. Only GET requests are cached.
 
+### Your own cache store
+To keep the cache anywhere else (Redis, a database, a cache shared by several instances), implement `IEsiCacheStore`
+and choose it with `UseStore`. A store only keeps raw entries; the middleware decides what is fresh and what to
+revalidate. If your storage is unreachable, return `null` from `GetAsync` and skip the write, so calls go to ESI
+instead of failing.
+
+<!-- snippet: register-custom-store -->
+```csharp
+services.AddEveEsi(o =>
+    {
+        o.ApplicationName = "MyApp/1.2";
+        o.Contact = "admin@example.com";
+    })
+    .EnableCaching(c => c.UseStore(sp => new MyCacheStore()));   // registered as a singleton
+```
+
+<!-- snippet: custom-store -->
+```csharp
+/// <summary>
+/// A cache store over your own storage. The dictionary stands in for it: in a real store, write the entry (status,
+/// headers, body, ExpiresAt, RetainUntil) to Redis, a database, … and drop it after RetainUntil (or a retention you
+/// choose past ExpiresAt). Shared by concurrent calls; keys never contain an access token.
+/// </summary>
+public sealed class MyCacheStore : IEsiCacheStore
+{
+    private readonly ConcurrentDictionary<string, EsiCacheEntry> _storage = new();
+
+    public ValueTask<EsiCacheEntry?> GetAsync(string key, CancellationToken cancellationToken) =>
+        ValueTask.FromResult(_storage.TryGetValue(key, out var entry) ? entry : null);
+
+    public ValueTask SetAsync(string key, EsiCacheEntry entry, CancellationToken cancellationToken)
+    {
+        _storage[key] = entry;
+        return ValueTask.CompletedTask;
+    }
+
+    public ValueTask RemoveAsync(string key, CancellationToken cancellationToken)
+    {
+        _storage.TryRemove(key, out _);
+        return ValueTask.CompletedTask;
+    }
+}
+```
+
 ## Middleware
 Middleware sees every call as an `EsiContext`: `Route` (operation ID, scope, cache hints, rate-limit group), `Request`
 (route and query values, headers, body), `AccessToken`, `Response` after `next`, and `Items` for per-call state. It

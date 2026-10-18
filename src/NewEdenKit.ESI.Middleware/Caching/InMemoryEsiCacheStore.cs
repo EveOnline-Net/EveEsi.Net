@@ -5,8 +5,8 @@ namespace NewEdenKit.ESI.Middleware.Caching;
 
 /// <summary>
 /// An <see cref="IEsiCacheStore"/> in process memory, bounded by <see cref="InMemoryEsiCacheStoreOptions"/>. Safe for
-/// concurrent use. Entries are lost on restart and aren't shared between instances; use an
-/// <c>NewEdenKit.ESI.Caching.*</c> store for that.
+/// concurrent use. Entries are lost on restart and aren't shared between instances; for that, use
+/// <see cref="FileEsiCacheStore"/> or implement <see cref="IEsiCacheStore"/> over your own storage.
 /// </summary>
 public sealed class InMemoryEsiCacheStore : IEsiCacheStore
 {
