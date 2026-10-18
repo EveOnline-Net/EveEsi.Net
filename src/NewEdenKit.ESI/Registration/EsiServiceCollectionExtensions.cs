@@ -31,7 +31,7 @@ public static class EsiServiceCollectionExtensions
     /// <remarks>
     /// The options are validated immediately, so a misconfiguration fails at startup rather than on the first call.
     /// Services and the factory are transient; a service the application registered first is kept. See the usage guide:
-    /// https://github.com/EveOnline-Net/NewEdenKit.ESI/blob/main/docs/usage.md
+    /// https://github.com/NewEdenKit/NewEdenKit.ESI/blob/main/docs/usage.md
     /// </remarks>
     /// <example>
     /// <code>

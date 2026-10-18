@@ -65,7 +65,7 @@ and are never published.
    - builds and tests every target
    - packs all packages with the version from the tag
    - publishes `.nupkg` + `.snupkg` to nuget.org using **NuGet Trusted Publishing** (OIDC, no stored API key). The
-     nuget.org trusted-publishing policy must name `EveOnline-Net/NewEdenKit.ESI`, `release.yml` and the `nuget`
+     nuget.org trusted-publishing policy must name `NewEdenKit/NewEdenKit.ESI`, `release.yml` and the `nuget`
      environment.
    - creates a GitHub Release with generated notes (from squash-merged PR titles)
 6. After the release, set `PackageValidationBaselineVersion` to the new version (in `Directory.Build.props`).
@@ -76,7 +76,7 @@ The release notes always state the ESI compatibility date the release targets.
 All packable projects have, set in `Directory.Build.props`:
 - `PackageId` = project name, shared `Authors`
 - `PackageLicenseExpression` = `GPL-3.0-or-later` (full text in `LICENSE`)
-- `PackageProjectUrl` / `RepositoryUrl` = `https://github.com/EveOnline-Net/NewEdenKit.ESI`, `RepositoryType` = `git`
+- `PackageProjectUrl` / `RepositoryUrl` = `https://github.com/NewEdenKit/NewEdenKit.ESI`, `RepositoryType` = `git`
 - `PackageReadmeFile`, `PackageIcon`, `PackageTags` (`eve-online;esi;eve;api-client`)
 - SourceLink, `ContinuousIntegrationBuild` in CI, deterministic builds
 - `IncludeSymbols` + `SymbolPackageFormat=snupkg`

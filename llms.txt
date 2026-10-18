@@ -42,15 +42,15 @@ Key facts:
 
 ## Docs
 
-- [Usage guide](https://raw.githubusercontent.com/EveOnline-Net/NewEdenKit.ESI/main/docs/usage.md): registration, finding
+- [Usage guide](https://raw.githubusercontent.com/NewEdenKit/NewEdenKit.ESI/main/docs/usage.md): registration, finding
   the method for an endpoint, calls and tokens, results and errors, pagination, bodies, caching, middleware, types,
   testing, and common mistakes. Every example in it is compiled in CI.
-- [README](https://raw.githubusercontent.com/EveOnline-Net/NewEdenKit.ESI/main/README.md): overview and packages.
+- [README](https://raw.githubusercontent.com/NewEdenKit/NewEdenKit.ESI/main/README.md): overview and packages.
 
 ## Optional
 
-- [Architecture](https://raw.githubusercontent.com/EveOnline-Net/NewEdenKit.ESI/main/docs/architecture.md): how requests
+- [Architecture](https://raw.githubusercontent.com/NewEdenKit/NewEdenKit.ESI/main/docs/architecture.md): how requests
   flow through the factory, middleware pipeline and HTTP client; middleware levels; the standard middleware.
-- [Design decisions](https://raw.githubusercontent.com/EveOnline-Net/NewEdenKit.ESI/main/docs/design-decisions.md): why
+- [Design decisions](https://raw.githubusercontent.com/NewEdenKit/NewEdenKit.ESI/main/docs/design-decisions.md): why
   the API looks the way it does.
 - [ESI documentation](https://developers.eveonline.com/api-explorer): CCP's own endpoint reference.
