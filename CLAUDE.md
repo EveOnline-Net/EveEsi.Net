@@ -1,7 +1,7 @@
 # EveEsi.Net
 
 Public NuGet library for calling EVE Online's ESI API (`https://esi.evetech.net`).
-Repository: https://github.com/SimplyUnnamed/EveEsi.Net (default branch `main`). License: GPL-3.0-or-later.
+Repository: https://github.com/EveOnline-Net/EveEsi.Net (default branch `main`). License: GPL-3.0-or-later.
 Stateless: it only builds, sends and decodes ESI calls. Caching, ETags, scope checks,
 rate limiting etc. are **middleware**, applied at three levels: global, service, request.
 

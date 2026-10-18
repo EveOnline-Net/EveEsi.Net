@@ -1,6 +1,6 @@
 # Contributing
 
-EveEsi.Net is hosted on GitHub at <https://github.com/SimplyUnnamed/EveEsi.Net>.
+EveEsi.Net is hosted on GitHub at <https://github.com/EveOnline-Net/EveEsi.Net>, in the `EveOnline-Net` organization.
 Contributions come in through pull requests against `main`.
 
 **License:** the project is GPL-3.0-or-later (see `LICENSE`). By opening a PR, you agree that your
@@ -14,7 +14,14 @@ main ──●──●──●──●──●──●──▶   protected
     feat/…   fix/…   spec/2026-08-18      short-lived branches → PR → squash-merge
 ```
 
-- `main` is protected. No direct pushes; every change goes through a PR with green CI.
+- `main` is protected by the "Protect main" ruleset. No direct pushes, force-pushes or deletion; every change goes
+  through a PR that needs:
+  - a green `build` check on a branch that is up to date with `main`;
+  - **one approval from a code owner**, i.e. a member of `@EveOnline-Net/maintainers` (see `.github/CODEOWNERS`).
+    The approval must come from someone other than whoever pushed last, and a new push dismisses it;
+  - every review thread resolved.
+- Maintainers can bypass the review requirement when merging a PR (never with a direct push). That exists so a
+  maintainer's own PRs can be merged while there's only one maintainer; GitHub records each bypass on the PR.
 - Branch from `main`, keep branches short-lived, and rebase or merge `main` in if they fall behind.
 - Branch names:
 
