@@ -2,7 +2,6 @@ using System.Net;
 using EveEsi.Net.Abstractions.Caching;
 using EveEsi.Net.Middleware.Caching;
 using EveEsi.Net.Middleware.Tests.TestSupport;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace EveEsi.Net.Middleware.Tests.Caching;
 
@@ -102,34 +101,6 @@ public sealed class InMemoryEsiCacheStoreTests
     public void InvalidOptions_Throw(int maxEntries, int retentionMinutes) =>
         Should.Throw<ArgumentOutOfRangeException>(() => new InMemoryEsiCacheStore(
             new InMemoryEsiCacheStoreOptions { MaxEntries = maxEntries, DefaultRetention = TimeSpan.FromMinutes(retentionMinutes) }));
-
-    [Fact]
-    public void AddEsiInMemoryCacheStore_RegistersASingletonUsingTheRegisteredClock()
-    {
-        var services = new ServiceCollection().AddEsiInMemoryCacheStore(o => o.MaxEntries = 5);
-
-        var descriptor = services.ShouldHaveSingleItem();
-        descriptor.ServiceType.ShouldBe(typeof(IEsiCacheStore));
-        descriptor.Lifetime.ShouldBe(ServiceLifetime.Singleton);
-        var provider = Substitute.For<IServiceProvider>();
-        provider.GetService(typeof(TimeProvider)).Returns(_time);
-        descriptor.ImplementationFactory!(provider).ShouldBeOfType<InMemoryEsiCacheStore>();
-    }
-
-    [Fact]
-    public void AddEsiInMemoryCacheStore_KeepsAStoreTheAppRegisteredFirst()
-    {
-        var own = Substitute.For<IEsiCacheStore>();
-        var services = new ServiceCollection().AddSingleton(own);
-
-        services.AddEsiInMemoryCacheStore();
-
-        services.ShouldHaveSingleItem().ImplementationInstance.ShouldBeSameAs(own);
-    }
-
-    [Fact]
-    public void AddEsiInMemoryCacheStore_InvalidOptions_FailImmediately() =>
-        Should.Throw<ArgumentOutOfRangeException>(() => new ServiceCollection().AddEsiInMemoryCacheStore(o => o.MaxEntries = 0));
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 

@@ -1,4 +1,5 @@
 using EveEsi.Net;
+using EveEsi.Net.Abstractions.Registration;
 using EveEsi.Net.Abstractions.Requests;
 using EveEsi.Net.Client.Internal;
 using EveEsi.Net.Registration;
@@ -20,9 +21,9 @@ public static class EveEsiServiceCollectionExtensions
     /// <param name="services">The service collection.</param>
     /// <param name="configure">
     /// Sets <see cref="EsiOptions.ApplicationName"/> and <see cref="EsiOptions.Contact"/> (both required), and optionally
-    /// the base address, tenant and global middleware. It runs once, here.
+    /// the base address and tenant. It runs once, here.
     /// </param>
-    /// <returns>The service collection, for chaining.</returns>
+    /// <returns>A builder for global middleware, a cache store and HTTP client settings.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="services"/> or <paramref name="configure"/> is <see langword="null"/>.</exception>
     /// <exception cref="InvalidOperationException">
     /// A required option is missing or invalid, or <c>AddEveEsi</c> was already called on this collection.
@@ -30,8 +31,14 @@ public static class EveEsiServiceCollectionExtensions
     /// <remarks>
     /// The options are validated immediately, so a misconfiguration fails at startup rather than on the first call.
     /// Services and the factory are transient; a service the application registered first is kept.
+    /// <code>
+    /// services.AddEveEsi(o =&gt; { o.ApplicationName = "MyApp/1.2"; o.Contact = "admin@example.com"; })
+    ///     .AddInMemoryCacheStore()
+    ///     .Use&lt;CacheMiddleware&gt;()
+    ///     .Use&lt;ETagMiddleware&gt;();
+    /// </code>
     /// </remarks>
-    public static IServiceCollection AddEveEsi(this IServiceCollection services, Action<EsiOptions> configure)
+    public static IEsiBuilder AddEveEsi(this IServiceCollection services, Action<EsiOptions> configure)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configure);
@@ -55,10 +62,10 @@ public static class EveEsiServiceCollectionExtensions
 
         var baseAddress = options.BaseAddress;
         var tenant = options.Tenant;
-        var middleware = options.Middleware.ToArray();
+        var builder = new EsiBuilder(services);
 
         services.AddSingleton<EsiRegistration>();
-        services.AddHttpClient<EsiHttpClient>(client =>
+        services.AddHttpClient<EsiHttpClient>(EsiBuilder.HttpClientName, client =>
         {
             client.BaseAddress = baseAddress;
             foreach (var product in userAgent)
@@ -70,11 +77,12 @@ public static class EveEsiServiceCollectionExtensions
             client.DefaultRequestHeaders.Add("X-Tenant", tenant);
         });
 
-        options.RegisterMiddlewareTypes(services);
         services.TryAddSingleton(new EsiRouteTable(EsiRoutes.All));
-        services.TryAddSingleton(provider => new EsiGlobalMiddleware([.. middleware.Select(resolve => resolve(provider))]));
+
+        // Resolved on first use, so middleware added to the builder after this call is included.
+        services.TryAddSingleton(provider => new EsiGlobalMiddleware(builder.Resolve(provider)));
         services.TryAddTransient<IEsiClientFactory, EsiClientFactory>();
         EsiServices.AddGeneratedServices(services);
-        return services;
+        return builder;
     }
 }

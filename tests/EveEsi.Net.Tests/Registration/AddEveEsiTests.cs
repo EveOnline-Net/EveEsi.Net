@@ -1,5 +1,6 @@
 using System.Net;
 using EveEsi.Net.Abstractions.Middleware;
+using EveEsi.Net.Abstractions.Registration;
 using EveEsi.Net.Abstractions.Requests;
 using EveEsi.Net.Middleware.Caching;
 using EveEsi.Net.Registration;
@@ -94,7 +95,7 @@ public sealed class AddEveEsiTests : IDisposable
     [Fact]
     public void AddEveEsi_CalledTwice_Fails()
     {
-        var services = new ServiceCollection().AddEveEsi(o => Identify(o));
+        var services = new ServiceCollection().AddEveEsi(o => Identify(o)).Services;
 
         Should.Throw<InvalidOperationException>(() => services.AddEveEsi(o => Identify(o))).Message.ShouldContain("already been called");
     }
@@ -113,7 +114,8 @@ public sealed class AddEveEsiTests : IDisposable
     {
         var order = new List<string>();
         var provider = Build(
-            o => Identify(o)
+            o => Identify(o),
+            esi => esi
                 .Use(new RecordingMiddleware(order, "instance"))
                 .Use(async (context, next) =>
                 {
@@ -137,7 +139,7 @@ public sealed class AddEveEsiTests : IDisposable
         const string status = """{"players":31234,"server_version":"2345678","start_time":"2026-10-18T11:00:05Z","vip":false}""";
         _handler.Respond(HttpStatusCode.OK, status, ("ETag", "\"abc\""), ("Cache-Control", "public, max-age=30"))
             .Respond(HttpStatusCode.NotModified, null, ("ETag", "\"abc\""));
-        var service = Build(o => Identify(o).Use<ETagMiddleware>(), services => services.AddEsiInMemoryCacheStore())
+        var service = Build(o => Identify(o), esi => esi.EnableCaching(c => c.AddInMemoryCacheStore().DisableResponseCache()))
             .GetRequiredService<IStatus>();
 
         var first = await service.GetStatus().ExecuteAsync(TestContext.Current.CancellationToken);
@@ -151,20 +153,59 @@ public sealed class AddEveEsiTests : IDisposable
     }
 
     [Fact]
+    public async Task EnableCaching_ServesAFreshResponseWithoutCallingEsiAgain()
+    {
+        const string status = """{"players":31234,"server_version":"2345678","start_time":"2026-10-18T11:00:05Z","vip":false}""";
+        _handler.Respond(HttpStatusCode.OK, status, ("ETag", "\"abc\""), ("Cache-Control", "public, max-age=30"));
+        var service = Build(o => Identify(o), esi => esi.EnableCaching(c => c.AddInMemoryCacheStore()))
+            .GetRequiredService<IStatus>();
+
+        await service.GetStatus().ExecuteAsync(TestContext.Current.CancellationToken);
+        var second = await service.GetStatus().ExecuteAsync(TestContext.Current.CancellationToken);
+
+        _handler.Requests.ShouldHaveSingleItem();
+        second.IsSuccess.ShouldBeTrue();
+        second.Value!.Players.ShouldBe(31234);
+    }
+
+    [Fact]
     public void UseOfT_KeepsAMiddlewareTheAppRegisteredFirst()
     {
         var own = new ResolvedMiddleware([]);
         var services = new ServiceCollection().AddSingleton(own);
 
-        services.AddEveEsi(o => Identify(o).Use<ResolvedMiddleware>());
+        services.AddEveEsi(o => Identify(o)).Use<ResolvedMiddleware>();
 
         services.Where(d => d.ServiceType == typeof(ResolvedMiddleware)).ShouldHaveSingleItem().ImplementationInstance.ShouldBeSameAs(own);
     }
 
     [Fact]
-    public void Options_NullArguments_Throw()
+    public void AddEveEsi_ReturnsABuilderOverTheSameServices()
     {
-        Should.Throw<ArgumentNullException>(() => new EsiOptions().Use((IEsiMiddleware)null!));
+        var services = new ServiceCollection();
+
+        services.AddEveEsi(o => Identify(o)).Services.ShouldBeSameAs(services);
+    }
+
+    [Fact]
+    public async Task ConfigureHttpClient_AddsHandlersToTheEsiClient()
+    {
+        var seen = new List<string>();
+        var status = Build(o => Identify(o), esi => esi.ConfigureHttpClient(http => http.AddHttpMessageHandler(() => new RecordingHandler(seen))))
+            .GetRequiredService<IStatus>();
+
+        await status.GetStatus().ExecuteAsync(TestContext.Current.CancellationToken);
+
+        seen.ShouldHaveSingleItem().ShouldStartWith("MyApp/1.2 (admin@example.com) EveEsi.Net/", Case.Sensitive, "the handler sees the ESI client's own headers");
+    }
+
+    [Fact]
+    public void NullArguments_Throw()
+    {
+        var builder = new ServiceCollection().AddEveEsi(o => Identify(o));
+
+        Should.Throw<ArgumentNullException>(() => builder.Use((IEsiMiddleware)null!));
+        Should.Throw<ArgumentNullException>(() => builder.ConfigureHttpClient(null!));
         Should.Throw<ArgumentNullException>(() => new ServiceCollection().AddEveEsi(null!));
         Should.Throw<ArgumentNullException>(() => ((IServiceCollection)null!).AddEveEsi(o => Identify(o)));
     }
@@ -176,11 +217,12 @@ public sealed class AddEveEsiTests : IDisposable
         return options;
     }
 
-    private ServiceProvider Build(Action<EsiOptions> configure, Action<IServiceCollection>? extra = null)
+    private ServiceProvider Build(Action<EsiOptions> configure, Action<IEsiBuilder>? esi = null, Action<IServiceCollection>? extra = null)
     {
         var services = new ServiceCollection();
         extra?.Invoke(services);
-        services.AddEveEsi(configure);
+        var builder = services.AddEveEsi(configure);
+        esi?.Invoke(builder);
         services.ConfigureHttpClientDefaults(b => b.ConfigurePrimaryHttpMessageHandler(() => _handler));
         var provider = services.BuildServiceProvider();
         _providers.Add(provider);
@@ -193,6 +235,15 @@ public sealed class AddEveEsiTests : IDisposable
         {
             order.Add(name);
             return next(context);
+        }
+    }
+
+    private sealed class RecordingHandler(List<string> seen) : DelegatingHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            seen.Add(request.Headers.UserAgent.ToString());
+            return base.SendAsync(request, cancellationToken);
         }
     }
 

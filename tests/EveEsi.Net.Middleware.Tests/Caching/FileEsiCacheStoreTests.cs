@@ -2,7 +2,6 @@ using System.Net;
 using EveEsi.Net.Abstractions.Caching;
 using EveEsi.Net.Middleware.Caching;
 using EveEsi.Net.Middleware.Tests.TestSupport;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace EveEsi.Net.Middleware.Tests.Caching;
 
@@ -166,24 +165,8 @@ public sealed class FileEsiCacheStoreTests : IDisposable
     }
 
     [Fact]
-    public void MissingDirectory_Throws() =>
-        Should.Throw<ArgumentException>(() => new FileEsiCacheStore(new FileEsiCacheStoreOptions()));
-
-    [Fact]
-    public void AddEsiFileCacheStore_RegistersASingletonForTheFolder()
-    {
-        var services = new ServiceCollection().AddEsiFileCacheStore(_directory, o => o.MaxEntries = 5);
-
-        var descriptor = services.ShouldHaveSingleItem();
-        descriptor.ServiceType.ShouldBe(typeof(IEsiCacheStore));
-        descriptor.Lifetime.ShouldBe(ServiceLifetime.Singleton);
-        descriptor.ImplementationFactory!(Substitute.For<IServiceProvider>()).ShouldBeOfType<FileEsiCacheStore>();
-        Directory.Exists(_directory).ShouldBeTrue();
-    }
-
-    [Fact]
-    public void AddEsiFileCacheStore_EmptyDirectory_FailsImmediately() =>
-        Should.Throw<ArgumentException>(() => new ServiceCollection().AddEsiFileCacheStore(" "));
+    public void EmptyDirectory_Throws() =>
+        Should.Throw<ArgumentException>(() => new FileEsiCacheStore(new FileEsiCacheStoreOptions { Directory = " " }));
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 

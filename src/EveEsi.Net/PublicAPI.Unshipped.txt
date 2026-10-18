@@ -10,8 +10,6 @@ EveEsi.Net.EsiOptions.Contact.set -> void
 EveEsi.Net.EsiOptions.EsiOptions() -> void
 EveEsi.Net.EsiOptions.Tenant.get -> string!
 EveEsi.Net.EsiOptions.Tenant.set -> void
-EveEsi.Net.EsiOptions.Use(EveEsi.Net.Abstractions.Middleware.IEsiMiddleware! middleware) -> EveEsi.Net.EsiOptions!
-EveEsi.Net.EsiOptions.Use<TMiddleware>() -> EveEsi.Net.EsiOptions!
 EveEsi.Net.Services.EsiService<TSelf>
 EveEsi.Net.Services.EsiService<TSelf>.CreateEsiClient(string! operationId, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<EveEsi.Net.Abstractions.Results.EsiNoContent>!
 EveEsi.Net.Services.EsiService<TSelf>.CreateEsiClient<T>(string! operationId, System.Text.Json.Serialization.Metadata.JsonTypeInfo<T>! responseType, System.Action<EveEsi.Net.Abstractions.Requests.IEsiRequestParameters!>? configure, string? token) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<T>!
@@ -289,6 +287,8 @@ EveEsi.Net.Services.IWars
 EveEsi.Net.Services.IWars.GetWars(long? maxWarId = null) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<System.Collections.Generic.IReadOnlyList<long>!>!
 EveEsi.Net.Services.IWars.GetWarsWarId(long warId) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<EveEsi.Net.Models.Wars.WarsWarIdGet!>!
 EveEsi.Net.Services.IWars.GetWarsWarIdKillmails(long warId, int? page = null) -> EveEsi.Net.Abstractions.Requests.IEsiRequest<System.Collections.Generic.IReadOnlyList<EveEsi.Net.Models.Wars.WarsWarIdKillmailsGetItem!>!>!
+Microsoft.Extensions.DependencyInjection.EveEsiBuilderExtensions
 Microsoft.Extensions.DependencyInjection.EveEsiServiceCollectionExtensions
-static Microsoft.Extensions.DependencyInjection.EveEsiServiceCollectionExtensions.AddEveEsi(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<EveEsi.Net.EsiOptions!>! configure) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Microsoft.Extensions.DependencyInjection.EveEsiBuilderExtensions.ConfigureHttpClient(this EveEsi.Net.Abstractions.Registration.IEsiBuilder! builder, System.Action<Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!>! configure) -> EveEsi.Net.Abstractions.Registration.IEsiBuilder!
+static Microsoft.Extensions.DependencyInjection.EveEsiServiceCollectionExtensions.AddEveEsi(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<EveEsi.Net.EsiOptions!>! configure) -> EveEsi.Net.Abstractions.Registration.IEsiBuilder!
 static readonly EveEsi.Net.EsiOptions.DefaultBaseAddress -> System.Uri!
