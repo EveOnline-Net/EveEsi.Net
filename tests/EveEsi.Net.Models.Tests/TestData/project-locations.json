@@ -1,0 +1,8 @@
+{
+  "locations": [
+    { "solar_system_id": 30000142 },
+    { "constellation_id": 20000020 },
+    { "region_id": 10000002 },
+    { "wormhole_id": 31000005 }
+  ]
+}

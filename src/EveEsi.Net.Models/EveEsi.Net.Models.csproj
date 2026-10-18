@@ -4,4 +4,9 @@
     <Description>ESI data transfer objects, enums, unions and the source-generated JSON context for EveEsi.Net.</Description>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- Generated services pass EsiJsonContext type info to the factory; the context itself stays internal. -->
+    <InternalsVisibleTo Include="EveEsi.Net" />
+  </ItemGroup>
+
 </Project>

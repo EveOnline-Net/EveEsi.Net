@@ -1,0 +1,4 @@
+[
+  { "configuration": { "export": { "amount": 1000, "solar_system_id": 30000142 } }, "state": { "transit": null } },
+  { "configuration": { "import": { "sources": [] } }, "state": { "transit": true } }
+]

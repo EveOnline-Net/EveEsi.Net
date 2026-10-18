@@ -20,15 +20,29 @@ Every schema (named or inline) is classified as exactly one of:
 
 | Kind | Detected by | Emitted as |
 |---|---|---|
-| object | `type: object` with `properties` | `sealed partial record` with `[JsonPropertyName]` |
-| enum | `type: string` + `enum` | C# `enum` + generated converter (see Enums) |
+| object | `type: object` with `properties` (or no properties at all) | `sealed partial record`, `init`-only properties with `[JsonPropertyName]` |
+| map | `type: object` with only `additionalProperties` | `IReadOnlyDictionary<string, T>` |
+| array | `type: array` | `IReadOnlyList<T>` |
+| enum | `type: string` + `enum` | shared C# `enum` + generated converter (see Enums) |
 | union | `oneOf` (wrapper-key shape, see Unions) | abstract record + nested variants + generated converter |
 | alias | `$ref` to a primitive schema (e.g. `CharacterID`) | the primitive matching the alias's own `format` (`CharacterID` → `long`) |
-| override | listed under `overrides` in `generator.json` | nothing; references the hand-written type |
+| any | no `type` at all | `JsonElement` |
 
-Anything that doesn't classify **fails generation**. The generator never guesses.
+Anything that doesn't classify (`allOf`, `anyOf`, non-string enums, unknown formats, non-wrapper `oneOf`) **fails
+generation**. The generator never guesses.
 
-Nullability: a property is non-nullable only if it is listed in `required` and not typed `[..., "null"]`.
+### Records are read-only, nested and strict
+- Properties are `{ get; init; }`: models are immutable once deserialized.
+- A property is non-nullable (and `required`) only if it is listed in `required` and not typed `[..., "null"]`.
+  Everything else is nullable. A response missing a `required` property fails to deserialize
+  (`EsiErrorKind.Deserialization`), because the spec promised it.
+- **Inline objects become nested types** of the record that contains them, named after the property:
+  `position` → `PositionModel`, array items `skills[]` → `SkillsItem`, map values → `<Name>Value`. Unions follow the
+  same rule. The suffix is always added, because C# can't have a nested type and a property with the same name.
+- **Named schemas** (`components/schemas`) become top-level records. A named array's inline item becomes a top-level
+  `<Name>Item`. An inline request body or response becomes `<OperationId>Body` / `<OperationId>Response`.
+- Clashes fail generation: a property named like its type (`Error.error`), two nested types with the same name,
+  a nested type named like its parent. Fix them with a `schemas` rename in `generator.json`.
 
 ### Numeric and ID types: the spec's `format` is the only source of truth
 ESI IDs are 64-bit. In the current spec, all 24 ID alias schemas (`CharacterID`, `CorporationID`, `TypeID`,
@@ -52,35 +66,83 @@ ESI IDs are 64-bit. In the current spec, all 24 ID alias schemas (`CharacterID`,
   parameters, route definitions and request bodies.
 - The generator fails on an `integer`/`number` format it doesn't recognise.
 
+### Namespaces follow tags
+- A top-level type (record, union or enum) used only by one tag's operations lives in
+  `EveEsi.Net.Models.<Tag>` (`EveEsi.Net.Models.Assets`, `EveEsi.Net.Models.Character`, …), in
+  `Generated/<Tag>/<Name>.g.cs`. "Used" follows responses, request bodies and query-parameter enums, through nested
+  types, lists, maps and union variants.
+- Types used by several tags, or by none, stay in the root `EveEsi.Net.Models` (`Generated/<Name>.g.cs`): today
+  `Cursor`, `ErrorResponse`, `ErrorDetail` and a handful of shared enums. Root types are visible from every tag
+  namespace without a `using`.
+- Nested types live in their parent's namespace.
+- No type may be named like a tag namespace (C# would read the name as the namespace, CS0118); the spec's `Status`
+  is renamed `ServerStatus` in `generator.json`.
+- A type moves namespace if a spec change makes it shared (or unshared). That's a breaking change, and is treated like
+  any other ESI change (decision #23).
+
 ## Naming
 Names come from the spec (`GetCharactersCharacterIdAssets`, `CharactersCharacterIdAssetsGetItem`),
 and those read badly. `generator.json` maps them:
 
 ```json
 {
-  "operations": { "GetCharactersCharacterIdAssets": "GetCharacterAssets" },
   "operationConstants": { "GetCharactersCharacterIdAssets": "CharacterAssets" },
-  "schemas":    { "CharactersCharacterIdAssetsGetItem": "CharacterAsset" },
-  "enums":      { "WalletRefType": { "match": ["<schema path>", "<schema path>"], "members": { } } },
-  "unions":     { "CharactersParagonHubSkinrItem/properties/price": "ParagonPrice" },
-  "overrides":  { "SomeSchema": "EveEsi.Net.Models.Custom.SomeType" }
+  "schemas": {
+    "Error": "ErrorResponse",
+    "KillmailsKillmailIdKillmailHashGet.victim.items[].items[]": "ContainedItem"
+  },
+  "enums": {
+    "MailLabelColor": { "match": ["CharactersCharacterIdMailLabelsGet.labels[].color"], "members": { "#0000fe": "Color0000FE" } }
+  }
 }
 ```
-Anything not mapped falls back to a naming convention, and the generator prints a list of unmapped names so we can tidy them over time.
+- **Schema paths** name where a type was found: the schema name, then `.property`, `[]` for array items, `{}` for map
+  values, `|variant` for union variant values, and `op:<OperationId>.response` / `.body` / `.<parameter>` for
+  operation-level schemas. Error messages print the path to map.
+- `schemas` renames the record or union generated at a path. `enums` names a value set (any one `match` path is
+  enough; all listed paths must share the set) and supplies `members` for values that aren't valid identifiers.
+- Mapping a path that no longer exists fails generation, so stale config can't accumulate.
+- `operations`, `unions` and `overrides` aren't supported yet; non-empty entries fail.
+
+Anything not mapped falls back to the conventions above, and the generator prints how many names are defaulted so we
+can tidy them over time.
 
 ## Enums (decision: C# enum with `Unknown` fallback)
-Facts from the spec: 142 string enums, all inline, 76 distinct value sets. Values include
-`snake_case`, `PascalCase`, hex colours (`#0000fe`), bare digits (`1`, `20`) and codes like `A0IV2`.
-Notification `type` has 254 values and changes often.
+Facts from the spec: 133 string enums (including 4 on query parameters), 71 distinct value sets after
+de-duplication. Values include `snake_case`, `PascalCase`, hex colours (`#0000fe`), bare digits (`1`, `20`) and codes
+like `A0IV2`. Notification `type` has 254 values and changes often.
+
+```csharp
+[JsonConverter(typeof(MailLabelColorConverter))]
+public enum MailLabelColor
+{
+    /// <summary>A value this library version doesn't know.</summary>
+    Unknown = 0,
+
+    /// <summary>#0000fe</summary>
+    [EnumMember(Value = "#0000fe")]
+    Color0000FE,
+}
+
+public sealed class MailLabelColorConverter : JsonConverter<MailLabelColor>
+{
+    // Read/Write, plus FromWire(string?) and ToWire(MailLabelColor) for services and callers.
+}
+```
 
 Rules:
-- **De-duplicate** by value set: identical sets become one type, named in config.
-  Same name with different values counts as a conflict and fails generation.
-- **Member names** are derived (`acceleration_gate_fee` → `AccelerationGateFee`). Values that can't
-  become a C# identifier must be mapped in `members`, or generation fails.
-- Every enum has `Unknown = 0` as its first member.
-- Every enum gets a **generated converter**: a `switch` on the wire string in both directions, AOT safe.
-  Don't use `JsonStringEnumConverter` or `[JsonStringEnumMemberName]`; the latter is .NET 9+ only, and we target net8.
+- **De-duplicate** by value set (order ignored): identical sets become one type, everywhere they occur. The default
+  name comes from the first path (`CharactersCharacterIdWalletJournalGet[].ref_type` →
+  `CharactersCharacterIdWalletJournalGetItemRefType`); `generator.json` renames it.
+- **Member names** are derived (`acceleration_gate_fee` → `AccelerationGateFee`). Values that can't become a C#
+  identifier (`#0000fe`, `10`) must be mapped in `members`, or generation fails. Two values mapping to one name fail.
+- Every member carries **`[EnumMember(Value = "<wire>")]`**, so its wire string is visible on the member itself.
+- Every enum has `Unknown = 0` first. If ESI's own set contains `unknown`/`Unknown`, `Unknown` carries that wire value
+  (it means the same thing as an unrecognised value), and `ToWire(Unknown)` writes it back. Otherwise `Unknown` has no
+  wire value and `ToWire(Unknown)` throws.
+- Every enum has a **`[JsonConverter]`** pointing at its generated converter: a `switch` on the wire string in both
+  directions, so it's AOT safe and needs no reflection (the attribute is for readers and other tools). Don't use
+  `JsonStringEnumConverter` or `[JsonStringEnumMemberName]`; the latter is .NET 9+ only, and we target net8.
 - Unrecognised wire values deserialize to `Unknown`. They never throw.
 
 ## Unions (`oneOf`)
@@ -90,21 +152,35 @@ an object with exactly one property whose name identifies the variant.
 ```json
 { "isk": 1500000.0 }   or   { "plex": 500 }
 ```
-Built-in `[JsonPolymorphic]` needs a discriminator property, so it can't handle these. Emitted shape:
+Built-in `[JsonPolymorphic]` needs a discriminator property, so it can't handle these. Emitted shape (nested in the
+record that uses it, like any inline type):
 
 ```csharp
-[JsonConverter(typeof(ParagonPriceConverter))]
-public abstract partial record ParagonPrice
+[JsonConverter(typeof(CharactersParagonHubSkinrItem.PriceModel.Converter))]
+public abstract partial record PriceModel
 {
-    public sealed record Isk(double Value) : ParagonPrice;
-    public sealed record Plex(long Value) : ParagonPrice;
-    public sealed record Unknown(string Name, JsonElement Raw) : ParagonPrice;
+    private PriceModel() { }                                    // closed: only the variants below
+
+    public sealed partial record Isk(double Value) : PriceModel;
+    public sealed partial record Plex(long Value) : PriceModel;
+    public sealed partial record Unknown(string Name, JsonElement Value) : PriceModel;
+
+    internal sealed class Converter : JsonConverter<PriceModel> { ... }
 }
 ```
-- The converter reads the single property name and switches on it. Writing reverses that.
-- An unrecognised name produces `Unknown` and never throws.
-- If a `oneOf` doesn't follow the wrapper-key shape, generation fails. Handle it with an `override`
-  and a hand-written type and converter in `EveEsi.Net.Models/Custom/`.
+- The converter reads the single property name and switches on it; variant values are read through the options'
+  own type metadata (`EsiJson`), so no reflection. Writing reverses that. More or fewer than one property throws.
+- An unrecognised name produces `Unknown`, keeps the raw value and writes it back unchanged. ESI's own `unknown`
+  variant (in `CorporationsProjectsDetail.configuration`) is handled the same way rather than generated separately.
+- If a `oneOf` doesn't follow the wrapper-key shape, generation fails.
+
+## JSON context
+`EsiJsonContext` (`EveEsi.Net.Models/Generated/EsiJsonContext.g.cs`) registers every generated type, every list and
+map used by them, and every response and body type, each with an explicit `TypeInfoPropertyName` derived from its
+nesting path (`CharactersDetail.PositionModel` → `CharactersDetailPositionModel`, `IReadOnlyList<X>` → `ListOfX`).
+Explicit names are required because many nested types share simple names. The context is **internal**: generated
+services in `EveEsi.Net` use it through `InternalsVisibleTo`, and keeping it internal keeps ~1,500 source-generated
+members out of the public API.
 
 ## Parameters
 `EveEsi.Net.Routes/Generated/Parameter.g.cs` is a catalogue of wire-name constants, one per distinct

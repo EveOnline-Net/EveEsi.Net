@@ -1,0 +1,83 @@
+{
+  "openapi": "3.1.0",
+  "components": {
+    "parameters": {
+      "CompatibilityDate": { "in": "header", "name": "X-Compatibility-Date", "required": true, "schema": { "enum": ["2026-08-18"], "type": "string" } }
+    },
+    "schemas": {
+      "CharacterID": { "format": "int64", "type": "integer" },
+      "CharactersDetail": {
+        "description": "Public information about a character",
+        "type": "object",
+        "required": ["name", "corporation_id", "birthday"],
+        "properties": {
+          "name": { "type": "string", "description": "The character's name" },
+          "corporation_id": { "format": "int64", "type": "integer" },
+          "alliance_id": { "$ref": "#/components/schemas/CharacterID" },
+          "birthday": { "format": "date-time", "type": "string" },
+          "title_id": { "format": "uuid", "type": "string" },
+          "security_status": { "format": "double", "type": "number" },
+          "verified": { "type": ["boolean", "null"] },
+          "gender": { "enum": ["female", "male"], "type": "string" },
+          "position": {
+            "type": "object",
+            "required": ["x"],
+            "properties": { "x": { "format": "double", "type": "number" } }
+          },
+          "skills": {
+            "type": "array",
+            "items": { "type": "object", "properties": { "skill_id": { "format": "int64", "type": "integer" } } }
+          },
+          "labels": { "type": "object", "additionalProperties": { "type": "string" } },
+          "extra": { "description": "Any JSON" }
+        }
+      },
+      "CharactersSkinrGet": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["price"],
+          "properties": {
+            "price": {
+              "description": "Asking price",
+              "oneOf": [
+                { "type": "object", "properties": { "isk": { "format": "double", "type": "number" } } },
+                { "type": "object", "properties": { "plex": { "format": "int64", "type": "integer" } } },
+                { "type": "object", "properties": { "free": { "type": ["boolean", "null"] } } },
+                { "type": "object", "properties": { "unknown": { "type": "object", "properties": { "data": {} } } } }
+              ]
+            },
+            "contract_type": { "enum": ["auction", "unknown"], "type": "string" },
+            "other_gender": { "enum": ["male", "female"], "type": "string" }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/characters/{character_id}": {
+      "get": {
+        "operationId": "GetCharactersDetail",
+        "tags": ["Character"],
+        "parameters": [{ "in": "path", "name": "character_id", "required": true, "schema": { "$ref": "#/components/schemas/CharacterID" } }],
+        "responses": { "200": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CharactersDetail" } } } } }
+      }
+    },
+    "/characters/skinr": {
+      "get": {
+        "operationId": "GetCharactersSkinr",
+        "tags": ["Cosmetics"],
+        "parameters": [{ "in": "query", "name": "order_type", "schema": { "enum": ["buy", "sell"], "type": "string" } }],
+        "responses": { "200": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CharactersSkinrGet" } } } } }
+      }
+    },
+    "/ui/rename": {
+      "post": {
+        "operationId": "PostUiRename",
+        "tags": ["User Interface"],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["name"], "properties": { "name": { "type": "string" } } } } } },
+        "responses": { "204": { "description": "Renamed" } }
+      }
+    }
+  }
+}

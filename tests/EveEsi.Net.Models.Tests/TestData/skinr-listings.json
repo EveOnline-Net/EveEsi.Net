@@ -1,0 +1,10 @@
+{
+  "listings": [
+    { "created": "2026-08-01T12:00:00Z", "expires": "2026-09-01T12:00:00Z", "id": "0e8f7a4c-1b2d-4c3e-9f00-aabbccddeeff", "last_modified": "2026-08-01T12:00:00Z",
+      "price": { "isk": 1500000.5 }, "quantity": 3, "seller_id": 2112625428, "skinr_id": "skinr-abc", "state": "listed", "target": { "corporation_id": 98000001 } },
+    { "created": "2026-08-01T12:00:00Z", "expires": "2026-09-01T12:00:00Z", "id": "1e8f7a4c-1b2d-4c3e-9f00-aabbccddeeff", "last_modified": "2026-08-01T12:00:00Z",
+      "price": { "plex": 500 }, "quantity": 1, "seller_id": 2112625428, "skinr_id": "skinr-def", "state": "listed", "target": { "public": true } },
+    { "created": "2026-08-01T12:00:00Z", "expires": "2026-09-01T12:00:00Z", "id": "2e8f7a4c-1b2d-4c3e-9f00-aabbccddeeff", "last_modified": "2026-08-01T12:00:00Z",
+      "price": { "loyalty_points": { "corporation_id": 1000035, "amount": 10 } }, "quantity": 1, "seller_id": 2112625428, "skinr_id": "skinr-ghi", "state": "listed", "target": { "public": false } }
+  ]
+}

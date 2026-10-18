@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "method": "corporation_item_delivery",
+  "parameters": {
+    "use_corporation_hangar": { "boolean": { "value": true } },
+    "eligible": { "options": { "selected": ["self", "corporation"] } },
+    "added_later_by_ccp": { "slider": { "min": 1, "max": 10 } }
+  }
+}

@@ -42,6 +42,14 @@ foreach (var directory in CodeGenerator.OwnedDirectories.Select(d => Path.Combin
         File.Delete(stale);
         Console.WriteLine($"Deleted {Path.GetRelativePath(outputRoot, stale)}");
     }
+
+    // Deepest first, so a folder emptied by the deletes above goes too.
+    foreach (var empty in Directory.EnumerateDirectories(directory, "*", SearchOption.AllDirectories)
+                 .OrderByDescending(d => d.Length)
+                 .Where(d => !Directory.EnumerateFileSystemEntries(d).Any()))
+    {
+        Directory.Delete(empty);
+    }
 }
 
 var utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
