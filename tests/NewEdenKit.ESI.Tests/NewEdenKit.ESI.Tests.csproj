@@ -2,6 +2,12 @@
 
   <ItemGroup>
     <ProjectReference Include="../../src/NewEdenKit.ESI/NewEdenKit.ESI.csproj" />
+    <!-- Embedded in the NewEdenKit.ESI package (PrivateAssets there), so they don't flow through the project reference;
+         a package consumer gets them from the package. -->
+    <ProjectReference Include="../../src/NewEdenKit.ESI.Models/NewEdenKit.ESI.Models.csproj" />
+    <ProjectReference Include="../../src/NewEdenKit.ESI.Routes/NewEdenKit.ESI.Routes.csproj" />
+    <ProjectReference Include="../../src/NewEdenKit.ESI.Client/NewEdenKit.ESI.Client.csproj" />
+    <ProjectReference Include="../../src/NewEdenKit.ESI.Middleware/NewEdenKit.ESI.Middleware.csproj" />
   </ItemGroup>
 
   <ItemGroup>

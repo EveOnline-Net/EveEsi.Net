@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Shipped inside the NewEdenKit.ESI package, not as a package of its own. -->
+    <IsPackable>false</IsPackable>
     <Description>Standard opt-in middleware for NewEdenKit.ESI: response caching and ETag revalidation (EnableCaching), with in-memory and file cache stores.</Description>
   </PropertyGroup>
 

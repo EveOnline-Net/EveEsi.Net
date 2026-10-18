@@ -270,3 +270,13 @@ EVE's ESI, not the brand. The extension classes lost the old brand (`EsiServiceC
 it, every package ID would change on nuget.org.
 *Trade-off:* `NewEdenKit.ESI` doesn't follow .NET's guideline of PascalCasing acronyms longer than two letters
 (`System.Xml`); chosen deliberately to match the project's name.
+
+### 39. Two packages: NewEdenKit.ESI and NewEdenKit.ESI.Abstractions
+Only `NewEdenKit.ESI` and `NewEdenKit.ESI.Abstractions` are published. Models, Routes, Client and Middleware remain
+their own assemblies and projects, but `NewEdenKit.ESI` references them with `PrivateAssets="all"` and packs their
+DLLs, XML docs and PDBs into its own package. Unimplemented projects (`Caching.*`) aren't packable.
+*Why:* the inner libraries only exist to serve the main one; nobody should install `Routes` or `Client` on their
+own, and one package to install is simpler. Abstractions stays separate so extension packages (cache stores,
+middleware libraries) can depend on the contracts without the whole client (#36).
+*Supersedes* the per-library packages in #14; the `NewEdenKit.ESI.Caching.*` store packages are still planned,
+depending on Abstractions only.

@@ -34,7 +34,7 @@ CreateEsiClient<IReadOnlyList<CharacterAsset>>(
 - [docs/generator.md](docs/generator.md): how the spec becomes code (DTOs, enums, unions, routes, services)
 - [docs/design-decisions.md](docs/design-decisions.md): decision log with the reasons. Check it before reopening a settled question.
 - [docs/contributing.md](docs/contributing.md): branching, commit/PR conventions, PR checklist, spec update process
-- [docs/releasing.md](docs/releasing.md): versioning (SemVer from 0.1.0, one version for all packages), tag-driven releases
+- [docs/releasing.md](docs/releasing.md): versioning (SemVer from 0.1.0, one version for both packages), tag-driven releases
 - [docs/usage.md](docs/usage.md), [README.md](README.md), [llms.txt](llms.txt): for people and AI assistants **using**
   the library. Their code comes from `tests/NewEdenKit.ESI.Tests/Docs/UsageExamples.cs` (see contributing.md, "Consumer docs");
   update them when consumer-facing behaviour changes.

@@ -21,9 +21,11 @@ so it matches the current API.
 ## Packages
 | Package | Install it when |
 |---|---|
-| `NewEdenKit.ESI` | Always. Services, models, `AddEveEsi()`. Brings in everything below except the caching stores packages. |
-| `NewEdenKit.ESI.Middleware` | Comes with `NewEdenKit.ESI`. `EnableCaching()`, `CacheMiddleware`, `ETagMiddleware`, in-memory and file stores. |
-| `NewEdenKit.ESI.Abstractions` | Only for writing your own middleware or cache store in a separate library. |
+| `NewEdenKit.ESI` | Always. Services, models, `AddEveEsi()`, `EnableCaching()`, `CacheMiddleware`, `ETagMiddleware`, in-memory and file stores: one package. |
+| `NewEdenKit.ESI.Abstractions` | Comes with `NewEdenKit.ESI`. Reference it alone only for a library that adds middleware or a cache store. |
+
+The namespaces still follow the internal assemblies (`NewEdenKit.ESI.Services`, `NewEdenKit.ESI.Models.<Tag>`,
+`NewEdenKit.ESI.Middleware.Caching`, `NewEdenKit.ESI.Abstractions.*`), but they all come from those two packages.
 
 Targets .NET 8, 9 and 10. Trim and AOT compatible. Uses `Microsoft.Extensions.DependencyInjection`.
 
